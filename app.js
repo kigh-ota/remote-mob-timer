@@ -48,7 +48,9 @@ function handleTick(sec) {
   const msg = sec;
   console.log('Clients: ' + Object.keys(clients) + ' <- ' + msg);
   for (let clientId in clients) {
-    clients[clientId].write('data: ' + msg + '\n\n');
+    clients[clientId].write('event: tick\n');
+    clients[clientId].write('data: ' + msg + '\n');
+    clients[clientId].write('\n');
   }
 }
 
