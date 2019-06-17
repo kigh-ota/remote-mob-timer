@@ -7,3 +7,10 @@
 - Notification API
 - TODO
   - Push API => give up
+
+## To run
+
+```sh
+$ npm install
+$ npm run start
+```
