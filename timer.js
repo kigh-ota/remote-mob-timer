@@ -1,9 +1,10 @@
 module.exports = class Timer {
-  constructor(opt_handleTick, opt_handleOver) {
+  constructor(opt_handleTick, opt_handleOver, opt_handleStart) {
     this.timeout_ = null;
     this.sec_ = 0;
     this.handleTick_ = opt_handleTick;
     this.handleOver_ = opt_handleOver;
+    this.handleStart_ = opt_handleStart;
   }
 
   getTime() {
@@ -23,6 +24,7 @@ module.exports = class Timer {
       return;
     }
     this.timeout_ = setInterval(() => this.onTick_(), 1000);
+    this.handleStart_(this.sec_);
   }
 
   stop() {

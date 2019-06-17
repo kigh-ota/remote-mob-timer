@@ -16,11 +16,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-const TIMER_SEC = 15 * 60;
+const TIMER_SEC = 25 * 60;
 
-const timer = new Timer(handleTick, handleOver);
-timer.setTime(TIMER_SEC);
-timer.start();
+const timer = new Timer(handleTick, handleOver, handleStart);
 
 // Main Endpoint
 app.get('/', (req, res, next) => {
@@ -49,22 +47,24 @@ app.get('/events', (req, res) => {
 
 function handleOver() {
   console.log('Clients: ' + Object.keys(clients) + ' <- Over');
-  const payload = createPayload('over', 'OVER');
-  for (let clientId in clients) {
-    clients[clientId].write(payload);
-  }
+  sendServerEvent('over', 'OVER');
 }
 
 function handleTick(sec) {
   console.log('Clients: ' + Object.keys(clients) + ' <- Tick');
-  const payload = createPayload('tick', sec);
+  sendServerEvent('tick', sec);
+}
+
+function handleStart(sec) {
+  console.log('Clients: ' + Object.keys(clients) + ' <- Start');
+  sendServerEvent('start', sec);
+}
+
+function sendServerEvent(event, msg) {
+  const payload = `event: ${event}\ndata: ${msg}\n\n`;
   for (let clientId in clients) {
     clients[clientId].write(payload);
   }
-}
-
-function createPayload(event, msg) {
-  return `event: ${event}\ndata: ${msg}\n\n`;
 }
 
 app.post('/reset', (req, res, next) => {
@@ -89,5 +89,8 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+timer.setTime(TIMER_SEC);
+timer.start();
 
 module.exports = app;
