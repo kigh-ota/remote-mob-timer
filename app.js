@@ -16,7 +16,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-const timer = new Timer(handleTick);
+const timer = new Timer(handleTick, handleOver);
 timer.setTime(0, 10);
 timer.start();
 
@@ -33,7 +33,8 @@ let clients = {};
 app.get('/events', (req, res) => {
   req.socket.setTimeout(86400);
   res.writeHead(200, {
-    'Content-Type': 'text/event-stream'
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-store'
   });
   res.write('\n');
   (clientId => {
@@ -44,14 +45,24 @@ app.get('/events', (req, res) => {
   })(++clientId);
 });
 
-function handleTick(sec) {
-  const msg = sec;
-  console.log('Clients: ' + Object.keys(clients) + ' <- ' + msg);
+function handleOver() {
+  console.log('Clients: ' + Object.keys(clients) + ' <- Over');
+  const payload = createPayload('over', 'OVER');
   for (let clientId in clients) {
-    clients[clientId].write('event: tick\n');
-    clients[clientId].write('data: ' + msg + '\n');
-    clients[clientId].write('\n');
+    clients[clientId].write(payload);
   }
+}
+
+function handleTick(sec) {
+  console.log('Clients: ' + Object.keys(clients) + ' <- Tick');
+  const payload = createPayload('tick', sec);
+  for (let clientId in clients) {
+    clients[clientId].write(payload);
+  }
+}
+
+function createPayload(event, msg) {
+  return `event: ${event}\ndata: ${msg}\n\n`;
 }
 
 // catch 404 and forward to error handler

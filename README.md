@@ -4,6 +4,6 @@
 - Prettier
 - Pug
 - Server-Sent Events
+- Notification API
 - TODO
-  - Notification API
   - Push API => give up
