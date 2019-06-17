@@ -23,7 +23,7 @@ timer.start();
 // Main Endpoint
 app.get('/', (req, res, next) => {
   const { min, sec } = timer.getTime();
-  res.render('timer', { min, sec });
+  res.render('index', { min, sec });
 });
 
 // Endpoint for Server-Sent Events
