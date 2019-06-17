@@ -14,8 +14,8 @@ module.exports = class Timer {
     return !!this.timeout_;
   }
 
-  setTime(min, sec) {
-    this.sec_ = min * 60 + sec;
+  setTime(sec) {
+    this.sec_ = sec;
   }
 
   start() {

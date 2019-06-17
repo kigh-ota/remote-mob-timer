@@ -16,8 +16,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+const TIMER_SEC = 15 * 60;
+
 const timer = new Timer(handleTick, handleOver);
-timer.setTime(0, 10);
+timer.setTime(TIMER_SEC);
 timer.start();
 
 // Main Endpoint
@@ -64,6 +66,13 @@ function handleTick(sec) {
 function createPayload(event, msg) {
   return `event: ${event}\ndata: ${msg}\n\n`;
 }
+
+app.post('/reset', (req, res, next) => {
+  timer.stop();
+  timer.setTime(TIMER_SEC);
+  timer.start();
+  res.send('reset');
+});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
