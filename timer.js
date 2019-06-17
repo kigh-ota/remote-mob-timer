@@ -35,16 +35,12 @@ module.exports = class Timer {
 
   onTick_() {
     this.sec_--;
-    if (this.sec_ < 0) {
+    this.handleTick_ && this.handleTick_(this.sec_);
+
+    if (this.sec_ <= 0) {
       this.sec_ = 0;
       this.stop();
-      if (this.handleOver_) {
-        this.handleOver_();
-        return;
-      }
-    }
-    if (this.handleTick_) {
-      this.handleTick_(this.sec_);
+      this.handleOver_ && this.handleOver_();
     }
   }
 };
