@@ -24,12 +24,42 @@ app.use(express.static(path.join(__dirname, 'public')));
 // app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
-const timer = new Timer();
-timer.setTime(4, 33);
+const timer = new Timer(handleTick);
+timer.setTime(0, 10);
+timer.start();
 app.get('/', (req, res, next) => {
   const { min, sec } = timer.getTime();
   res.render('timer', { min, sec });
 });
+
+let clientId = 0;
+let clients = {};
+
+app.get('/events', (req, res) => {
+  req.socket.setTimeout(86400);
+  res.writeHead(200, {
+    // text/event-stream を追加
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    Connection: 'keep-alive'
+  });
+  res.write('\n');
+  (clientId => {
+    clients[clientId] = res;
+    req.on('close', () => {
+      delete clients[clientId];
+    });
+  })(++clientId);
+});
+
+function handleTick(sec) {
+  const msg = sec;
+  console.log('Clients: ' + Object.keys(clients) + ' <- ' + msg);
+  for (let clientId in clients) {
+    // メッセージの送信 \n\nが必要
+    clients[clientId].write('data: ' + msg + '\n\n');
+  }
+}
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
