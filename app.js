@@ -22,8 +22,7 @@ const timer = new Timer(handleTick, handleOver, handleStart);
 
 // Main Endpoint
 app.get('/', (req, res, next) => {
-  const { min, sec } = timer.getTime();
-  res.render('index', { min, sec });
+  res.render('index');
 });
 
 // Endpoint for Server-Sent Events
@@ -46,30 +45,32 @@ app.get('/events', (req, res) => {
 });
 
 function handleOver() {
-  console.log('Clients: ' + Object.keys(clients) + ' <- Over');
   sendServerEvent('over', 'OVER');
 }
 
 function handleTick(sec) {
-  console.log('Clients: ' + Object.keys(clients) + ' <- Tick');
   sendServerEvent('tick', sec);
 }
 
 function handleStart(sec) {
-  console.log('Clients: ' + Object.keys(clients) + ' <- Start');
   sendServerEvent('start', sec);
 }
 
 function sendServerEvent(event, msg) {
+  console.log(`sendServerEvent(): ${event}, ${msg}`);
   const payload = `event: ${event}\ndata: ${msg}\n\n`;
   for (let clientId in clients) {
     clients[clientId].write(payload);
   }
 }
 
+app.get('/time', (req, res, next) => {
+  res.send({ time: timer.getTime() });
+});
+
 app.post('/reset', (req, res, next) => {
   timer.stop();
-  timer.setTime(TIMER_SEC);
+  timer.setTime(req.query.sec ? Number(req.query.sec) : TIMER_SEC);
   timer.start();
   res.send('reset');
 });
@@ -91,6 +92,5 @@ app.use(function(err, req, res, next) {
 });
 
 timer.setTime(TIMER_SEC);
-timer.start();
 
 module.exports = app;
