@@ -3,9 +3,7 @@ window.onload = () => {
   setupServeEventListeners();
   setupButtons();
   fetch('/time')
-    .then(res => {
-      return res.json();
-    })
+    .then(res => res.json())
     .then(json => {
       updateTime(json.time);
     });
@@ -23,6 +21,12 @@ function setupServeEventListeners() {
     updateTime(sec);
     sendNotificationIfPossible(`Timer started (${secondToDisplayTime(sec)})`);
   });
+  evtSource.addEventListener('stop', e => {
+    console.log('stop: ', e.data);
+    const sec = parseInt(e.data);
+    updateTime(sec);
+    sendNotificationIfPossible(`Timer stopped (${secondToDisplayTime(sec)})`);
+  });
   evtSource.addEventListener('over', e => {
     console.log('over: ', e.data);
     sendNotificationIfPossible('Time ended');
@@ -30,16 +34,20 @@ function setupServeEventListeners() {
 }
 
 function setupButtons() {
-  document
-    .getElementsByClassName('start-25-min')[0]
-    .addEventListener('click', e => {
-      fetch(`/reset?sec=${25 * 60}`, { method: 'POST' });
-    });
-  document
-    .getElementsByClassName('start-5-min')[0]
-    .addEventListener('click', e => {
-      fetch(`/reset?sec=${5 * 60}`, { method: 'POST' });
-    });
+  [25, 20, 15, 10, 5].forEach(min => {
+    document
+      .getElementsByClassName(`start-${min}-min`)[0]
+      .addEventListener('click', e => {
+        fetch(`/reset?sec=${min * 60}`, { method: 'POST' });
+      });
+  });
+  document.getElementsByClassName('toggle')[0].addEventListener('click', e => {
+    fetch(`/toggle`, { method: 'POST' })
+      .then(res => res.json())
+      .then(json => {
+        updateTime(json.time);
+      });
+  });
 }
 
 function updateTime(sec) {

@@ -14,11 +14,12 @@ app.set('view engine', 'pug');
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 const TIMER_SEC = 25 * 60;
 
-const timer = new Timer(handleTick, handleOver, handleStart);
+const timer = new Timer(handleTick, handleOver, handleStart, handleStop);
 
 // Main Endpoint
 app.get('/', (req, res, next) => {
@@ -56,6 +57,10 @@ function handleStart(sec) {
   sendServerEvent('start', sec);
 }
 
+function handleStop(sec) {
+  sendServerEvent('stop', sec);
+}
+
 function sendServerEvent(event, msg) {
   console.log(`sendServerEvent(): ${event}, ${msg}`);
   const payload = `event: ${event}\ndata: ${msg}\n\n`;
@@ -73,6 +78,15 @@ app.post('/reset', (req, res, next) => {
   timer.setTime(req.query.sec ? Number(req.query.sec) : TIMER_SEC);
   timer.start();
   res.send('reset');
+});
+
+app.post('/toggle', (req, res, next) => {
+  if (timer.isRunning()) {
+    timer.stop();
+  } else {
+    timer.start();
+  }
+  res.send({ isRunning: timer.isRunning(), time: timer.getTime() });
 });
 
 // catch 404 and forward to error handler
