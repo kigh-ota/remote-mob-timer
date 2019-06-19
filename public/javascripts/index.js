@@ -58,11 +58,12 @@ function updateTime(sec) {
 
 function sendNotificationIfPossible(msg) {
   if (Notification.permission === 'granted') {
-    new Notification('Simple Timer', {
+    const n = new Notification('Simple Timer', {
       body: msg,
       renotify: true,
       tag: 'simple-timer'
     });
+    n.onclick = () => window.focus();
   }
 }
 
