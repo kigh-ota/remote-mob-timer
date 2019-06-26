@@ -3,7 +3,7 @@ var express = require('express');
 var path = require('path');
 var logger = require('morgan');
 
-const Timer = require('./timer');
+const Timer = require('./Timer');
 
 const app = express();
 
