@@ -19,7 +19,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const TIMER_SEC = 25 * 60;
 
-const timer = new Timer(handleTick, handleOver, handleStart, handleStop);
+const timer = new Timer(
+  sec => sendServerEvent('tick', sec),
+  () => sendServerEvent('over', 'OVER'),
+  sec => sendServerEvent('start', sec),
+  sec => sendServerEvent('stop', sec)
+);
 
 // Main Endpoint
 app.get('/', (req, res, next) => {
@@ -44,22 +49,6 @@ app.get('/events', (req, res) => {
     });
   })(++clientId);
 });
-
-function handleOver() {
-  sendServerEvent('over', 'OVER');
-}
-
-function handleTick(sec) {
-  sendServerEvent('tick', sec);
-}
-
-function handleStart(sec) {
-  sendServerEvent('start', sec);
-}
-
-function handleStop(sec) {
-  sendServerEvent('stop', sec);
-}
 
 function sendServerEvent(event, msg) {
   console.log(`sendServerEvent(): ${event}, ${msg}`);
