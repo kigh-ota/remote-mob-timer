@@ -1,4 +1,8 @@
 {
-  "compilerOptions": { "outDir": "dist" },
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "outDir": "dist",
+    "noImplicitAny": true
+  },
   "include": ["src/**/*.ts"]
 }

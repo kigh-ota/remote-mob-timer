@@ -1,10 +1,10 @@
-module.exports = class Timer {
+class Timer {
   private timeout: NodeJS.Timeout | null;
   private remainingSec: number;
   private onTick: (sec: number) => void;
   private onOver: () => void;
 
-  constructor(onTick?, onOver?) {
+  constructor(onTick?: (sec: number) => void, onOver?: () => void) {
     this.timeout = null;
     this.remainingSec = 0;
 
@@ -27,14 +27,14 @@ module.exports = class Timer {
     this.remainingSec = sec;
   }
 
-  start() {
+  public start() {
     if (this.isRunning()) {
       return;
     }
     this.timeout = setInterval(() => this.tick(), 1000);
   }
 
-  stop() {
+  public stop() {
     if (!this.isRunning()) {
       return;
     }
@@ -52,4 +52,6 @@ module.exports = class Timer {
       this.onOver();
     }
   }
-};
+}
+
+export default Timer;
