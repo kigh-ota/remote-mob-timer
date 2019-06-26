@@ -1,9 +1,8 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var logger = require('morgan');
-
-const Timer = require('./timer');
+import createError from 'http-errors';
+import express from 'express';
+import path from 'path';
+import logger from 'morgan';
+import Timer from './Timer';
 
 const app = express();
 
@@ -20,7 +19,7 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 const TIMER_SEC = 25 * 60;
 
 const timer = new Timer(
-  sec => sendServerEvent('tick', sec),
+  (sec: number) => sendServerEvent('tick', sec),
   () => sendServerEvent('over', 'OVER')
 );
 
@@ -32,7 +31,7 @@ app.get('/', (req, res, next) => {
 // Endpoint for Server-Sent Events
 // Ref. https://qiita.com/akameco/items/c54af5af35ef9b500b54
 let clientId = 0;
-let clients = {};
+let clients: { [clientId: number]: any } = {};
 app.get('/events', (req, res) => {
   req.socket.setTimeout(86400);
   res.writeHead(200, {
@@ -48,7 +47,7 @@ app.get('/events', (req, res) => {
   })(++clientId);
 });
 
-function sendServerEvent(event, msg) {
+function sendServerEvent(event: string, msg: any) {
   console.log(`sendServerEvent(): ${event}, ${msg}`);
   const payload = `event: ${event}\ndata: ${msg}\n\n`;
   for (let clientId in clients) {
@@ -85,7 +84,7 @@ app.use(function(req, res, next) {
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(<express.ErrorRequestHandler>function(err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};

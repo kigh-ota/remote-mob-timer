@@ -7,10 +7,11 @@
 - Notification API
 - TODO
   - Push API => give up
+- TypeScript
 
 ## To run
 
 ```sh
-$ npm install
+$ npm install && npm run build
 $ npm run start
 ```
