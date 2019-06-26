@@ -21,9 +21,7 @@ const TIMER_SEC = 25 * 60;
 
 const timer = new Timer(
   sec => sendServerEvent('tick', sec),
-  () => sendServerEvent('over', 'OVER'),
-  sec => sendServerEvent('start', sec),
-  sec => sendServerEvent('stop', sec)
+  () => sendServerEvent('over', 'OVER')
 );
 
 // Main Endpoint
@@ -64,16 +62,19 @@ app.get('/time', (req, res, next) => {
 
 app.post('/reset', (req, res, next) => {
   timer.stop();
-  timer.setTime(req.query.sec ? Number(req.query.sec) : TIMER_SEC);
+  const sec = req.query.sec ? Number(req.query.sec) : TIMER_SEC;
+  timer.setTime(sec);
   timer.start();
-  res.send('reset');
+  sendServerEvent('start', sec), res.send('reset');
 });
 
 app.post('/toggle', (req, res, next) => {
   if (timer.isRunning()) {
     timer.stop();
+    sendServerEvent('stop', timer.getTime());
   } else {
     timer.start();
+    sendServerEvent('start', timer.getTime());
   }
   res.send({ isRunning: timer.isRunning(), time: timer.getTime() });
 });

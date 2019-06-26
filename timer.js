@@ -1,12 +1,10 @@
 module.exports = class Timer {
-  constructor(opt_onTick, opt_onOver, opt_onStart, opt_onStop) {
+  constructor(opt_onTick, opt_onOver) {
     this.timeout_ = null;
     this.remainingSec_ = 0;
 
     this.onTick_ = opt_onTick || (() => {});
     this.onOver_ = opt_onOver || (() => {});
-    this.onStart_ = opt_onStart || (() => {});
-    this.onStop_ = opt_onStop || (() => {});
   }
 
   isRunning() {
@@ -29,16 +27,14 @@ module.exports = class Timer {
       return;
     }
     this.timeout_ = setInterval(() => this.tick_(), 1000);
-    this.onStart_(this.remainingSec_);
   }
 
-  stop(opt_ignoreStopHandler) {
+  stop() {
     if (!this.timeout_) {
       return;
     }
     clearInterval(this.timeout_);
     this.timeout_ = null;
-    opt_ignoreStopHandler || this.onStop_(this.remainingSec_);
   }
 
   tick_() {
@@ -47,7 +43,7 @@ module.exports = class Timer {
 
     if (this.remainingSec_ <= 0) {
       this.remainingSec_ = 0;
-      this.stop(true);
+      this.stop();
       this.onOver_();
     }
   }
