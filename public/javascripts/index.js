@@ -1,16 +1,16 @@
 (() => {
+  let evtSource = null;
+
   window.onload = () => {
     Notification.requestPermission();
-    setupServeEventListeners();
+    setupEventSource();
     setupButtons();
     fetch('/time')
       .then(res => res.json())
-      .then(json => {
-        updateTime(json.time);
-      });
+      .then(json => updateTime(json.time));
   };
 
-  function setupServeEventListeners() {
+  function setupEventSource() {
     const evtSource = new EventSource('/events/');
     evtSource.addEventListener('tick', e => {
       console.log('tick: ', e.data);
@@ -34,6 +34,8 @@
     });
 
     evtSource.onerror = e => console.error(e);
+
+    return evtSource;
   }
 
   function setupButtons() {
