@@ -1,4 +1,4 @@
-# Simple Timer
+# Mob Timer
 
 - Express
 - Prettier

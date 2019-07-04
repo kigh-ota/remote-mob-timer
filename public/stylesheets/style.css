@@ -10,3 +10,9 @@ a {
 .time {
   font-size: xx-large;
 }
+
+button {
+  padding: 5px;
+  margin: 2px;
+  font-size: medium;
+}

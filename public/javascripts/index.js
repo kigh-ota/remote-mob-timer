@@ -3,12 +3,39 @@
 
   window.onload = () => {
     Notification.requestPermission();
-    setupEventSource();
+    evtSource = setupEventSource();
     setupButtons();
     fetch('/time')
       .then(res => res.json())
       .then(json => updateTime(json.time));
   };
+
+  function getReconnectButton() {
+    return document.querySelector('.reconnect');
+  }
+
+  function setupReconnectButton() {
+    const button = getReconnectButton();
+    button.addEventListener('click', handleClickReconnectButton);
+    button.style = 'display: none;'; // FIXME
+  }
+
+  function handleClickReconnectButton() {
+    if (evtSource) {
+      evtSource.close();
+      evtSource = null;
+    }
+    evtSource = setupEventSource();
+  }
+
+  // function updateReconnectButton() {
+  //   const button = getReconnectButton();
+  //   if (!evtSource || evtSource.readyState !== 1) {
+  //     button.style = '';
+  //   } else {
+  //     button.style = 'display: none;';
+  //   }
+  // }
 
   function setupEventSource() {
     const evtSource = new EventSource('/events/');
@@ -33,8 +60,6 @@
       sendNotificationIfPossible('Time ended');
     });
 
-    evtSource.onerror = e => console.error(e);
-
     return evtSource;
   }
 
@@ -55,6 +80,7 @@
             updateTime(json.time);
           });
       });
+    setupReconnectButton();
   }
 
   function updateTime(sec) {
@@ -65,7 +91,7 @@
 
   function sendNotificationIfPossible(msg) {
     if (Notification.permission === 'granted') {
-      const n = new Notification('Simple Timer', {
+      const n = new Notification('Mob Timer', {
         body: msg,
         renotify: true,
         tag: 'mob-timer'
