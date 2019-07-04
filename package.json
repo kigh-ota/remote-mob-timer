@@ -3,8 +3,7 @@
   "version": "1.0.0-alpha.1",
   "private": true,
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w",
+    "build": "tsc -p tsconfig.server.json",
     "start": "node ./bin/www"
   },
   "dependencies": {
