@@ -5,7 +5,7 @@
     Notification.requestPermission();
     evtSource = setupEventSource();
     setupButtons();
-    fetch('/time')
+    fetch('/status')
       .then(res => res.json())
       .then(json => updateTime(json.time));
   };

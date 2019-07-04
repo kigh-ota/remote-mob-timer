@@ -55,8 +55,8 @@ function sendServerEvent(event: IEvent) {
   }
 }
 
-app.get('/time', (req, res, next) => {
-  res.send({ time: timer.getTime() });
+app.get('/status', (req, res, next) => {
+  res.send({ time: timer.getTime(), nClient: Object.keys(clients).length });
 });
 
 app.post('/reset', (req, res, next) => {
