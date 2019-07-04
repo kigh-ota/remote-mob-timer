@@ -1,15 +1,39 @@
 (() => {
   let evtSource = null;
+  let connectionTimeoutWatcher = null;
 
   window.onload = () => {
     Notification.requestPermission();
     evtSource = setupEventSource();
     setupButtons();
     setupNameInput();
+    connectionTimeoutWatcher = new ConnectionTimeoutWatcher(() => {
+      showReconnectButton();
+    });
+    connectionTimeoutWatcher.notifyConnected();
     fetch('/status')
       .then(res => res.json())
       .then(json => updateTime(json.time));
   };
+
+  class ConnectionTimeoutWatcher {
+    constructor(onDisconnected) {
+      this.connected = true;
+      this.onDisconnected_ = onDisconnected;
+      this.timeout_ = null;
+      this.TIMEOUT_SEC = 10;
+    }
+
+    notifyConnected() {
+      if (this.timeout_) {
+        clearTimeout(this.timeout_);
+      }
+      this.timeout_ = setTimeout(() => {
+        this.connected = false;
+        this.onDisconnected_();
+      }, this.TIMEOUT_SEC * 1000);
+    }
+  }
 
   function setupNameInput() {
     const input = getNameInput();
@@ -27,7 +51,6 @@
   function setupReconnectButton() {
     const button = getReconnectButton();
     button.addEventListener('click', handleClickReconnectButton);
-    button.style = 'display: none;'; // FIXME
   }
 
   function handleClickReconnectButton() {
@@ -36,6 +59,14 @@
       evtSource = null;
     }
     evtSource = setupEventSource();
+  }
+
+  function showReconnectButton() {
+    getReconnectButton().style = '';
+  }
+
+  function hideReconnectButton() {
+    getReconnectButton().style = 'display: none;';
   }
 
   // function updateReconnectButton() {
@@ -109,6 +140,7 @@
           });
       });
     setupReconnectButton();
+    hideReconnectButton();
   }
 
   function updateTime(sec) {
