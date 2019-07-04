@@ -33,7 +33,7 @@ app.get('/', (req, res, next) => {
 let clientId = 0;
 let clients: { [clientId: number]: any } = {};
 app.get('/events', (req, res) => {
-  req.socket.setTimeout(86400);
+  req.socket.setTimeout(43200);
   res.writeHead(200, {
     'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-store'
