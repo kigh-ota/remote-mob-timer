@@ -94,6 +94,7 @@
     const common = e => {
       console.log(`${e.type}: ${e.data}`);
       connectionTimeoutWatcher.notifyConnected();
+      updateConnectionStatusAndButton(true);
     };
     evtSource.onmessage = evtSource.addEventListener('tick', e => {
       common(e);
@@ -124,7 +125,6 @@
     });
     evtSource.addEventListener('alive', e => {
       common(e);
-      updateConnectionStatusAndButton(true);
     });
 
     return evtSource;
