@@ -97,16 +97,17 @@
 
   function setupEventSource() {
     const evtSource = new EventSource('/events/');
-    const logEvent = e => {
+    const common = e => {
       console.log(`${e.type}: ${e.data}`);
+      connectionTimeoutWatcher.notifyConnected();
     };
     evtSource.onmessage = evtSource.addEventListener('tick', e => {
-      logEvent(e);
+      common(e);
       const data = JSON.parse(e.data);
       updateTime(parseInt(data.sec));
     });
     evtSource.addEventListener('start', e => {
-      logEvent(e);
+      common(e);
       const data = JSON.parse(e.data);
       const sec = parseInt(data.sec);
       updateTime(sec);
@@ -115,7 +116,7 @@
       );
     });
     evtSource.addEventListener('stop', e => {
-      logEvent(e);
+      common(e);
       const data = JSON.parse(e.data);
       const sec = parseInt(data.sec);
       updateTime(sec);
@@ -124,13 +125,12 @@
       );
     });
     evtSource.addEventListener('over', e => {
-      logEvent(e);
+      common(e);
       sendNotificationIfPossible('Time ended');
     });
     evtSource.addEventListener('alive', e => {
-      logEvent(e);
+      common(e);
       updateConnectionStatusAndButton(true);
-      connectionTimeoutWatcher.notifyConnected();
     });
 
     return evtSource;
