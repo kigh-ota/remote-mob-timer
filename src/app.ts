@@ -111,4 +111,10 @@ app.use(<express.ErrorRequestHandler>function(err, req, res, next) {
 
 timer.setTime(TIMER_SEC);
 
+const SEND_ALIVE_INTERVAL_SEC = 5;
+setInterval(
+  () => sendServerEvent({ type: 'alive', data: {} }),
+  SEND_ALIVE_INTERVAL_SEC * 1000
+);
+
 module.exports = app;

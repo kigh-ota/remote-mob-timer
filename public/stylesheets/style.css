@@ -18,9 +18,13 @@ button {
 }
 
 .name-input-wrapper {
-  margin-top: 10px;
+  margin-top: 20px;
 }
 
-.reconnect-button-wrapper {
-  margin-top: 10px;
+.name-input-wrapper input {
+  font-size: medium;
+}
+
+.connection {
+  margin-top: 20px;
 }

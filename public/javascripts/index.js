@@ -4,17 +4,34 @@
 
   window.onload = () => {
     Notification.requestPermission();
+    setupConnectionTimeoutWatcher();
     evtSource = setupEventSource();
-    setupButtons();
+    setupTimerButtons();
     setupNameInput();
-    connectionTimeoutWatcher = new ConnectionTimeoutWatcher(() => {
-      showReconnectButton();
-    });
-    connectionTimeoutWatcher.notifyConnected();
+    setupReconnectButton();
+    updateConnectionStatusAndButton(true);
     fetch('/status')
       .then(res => res.json())
       .then(json => updateTime(json.time));
   };
+
+  function updateConnectionStatusAndButton(isConnected) {
+    const status = document.querySelector('.connection-status');
+    if (isConnected) {
+      status.textContent = '';
+      hideReconnectButton();
+    } else {
+      status.textContent = 'Disconnected...';
+      showReconnectButton();
+    }
+  }
+
+  function setupConnectionTimeoutWatcher() {
+    connectionTimeoutWatcher = new ConnectionTimeoutWatcher(() => {
+      updateConnectionStatusAndButton(false);
+    });
+    connectionTimeoutWatcher.notifyConnected();
+  }
 
   class ConnectionTimeoutWatcher {
     constructor(onDisconnected) {
@@ -110,6 +127,11 @@
       logEvent(e);
       sendNotificationIfPossible('Time ended');
     });
+    evtSource.addEventListener('alive', e => {
+      logEvent(e);
+      updateConnectionStatusAndButton(true);
+      connectionTimeoutWatcher.notifyConnected();
+    });
 
     return evtSource;
   }
@@ -122,7 +144,7 @@
     return encodeURIComponent(getNameInput().value);
   }
 
-  function setupButtons() {
+  function setupTimerButtons() {
     [25, 20, 15, 10, 5].forEach(min => {
       document
         .getElementsByClassName(`start-${min}-min`)[0]
@@ -139,8 +161,6 @@
             updateTime(json.time);
           });
       });
-    setupReconnectButton();
-    hideReconnectButton();
   }
 
   function updateTime(sec) {
