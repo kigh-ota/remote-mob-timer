@@ -5,10 +5,20 @@
     Notification.requestPermission();
     evtSource = setupEventSource();
     setupButtons();
+    setupNameInput();
     fetch('/status')
       .then(res => res.json())
       .then(json => updateTime(json.time));
   };
+
+  function setupNameInput() {
+    const input = getNameInput();
+    input.addEventListener('change', e => {
+      window.localStorage.setItem('name', e.target.value);
+    });
+    const savedName = window.localStorage.getItem('name');
+    input.value = savedName || '';
+  }
 
   function getReconnectButton() {
     return document.querySelector('.reconnect');
@@ -73,8 +83,12 @@
     return evtSource;
   }
 
+  function getNameInput() {
+    return document.querySelector('input#name-input');
+  }
+
   function getName() {
-    return encodeURIComponent(document.querySelector('input#name-input').value);
+    return encodeURIComponent(getNameInput().value);
   }
 
   function setupButtons() {
