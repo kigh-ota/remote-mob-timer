@@ -19,8 +19,8 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 const TIMER_SEC = 25 * 60;
 
 const timer = new Timer(
-  (sec: number) => sendServerEvent({ type: 'tick', data: sec }),
-  () => sendServerEvent({ type: 'over', data: 'OVER' })
+  (sec: number) => sendServerEvent({ type: 'tick', data: { sec } }),
+  () => sendServerEvent({ type: 'over', data: {} })
 );
 
 // Main Endpoint
@@ -48,8 +48,9 @@ app.get('/events', (req, res) => {
 });
 
 function sendServerEvent(event: IEvent) {
-  console.log(`sendServerEvent(): ${event.type}, ${event.data}`);
-  const payload = `event: ${event.type}\ndata: ${event.data}\n\n`;
+  const dataString = JSON.stringify(event.data);
+  const payload = `event: ${event.type}\ndata: ${dataString}\n\n`;
+  console.log(`sendServerEvent(): ${payload.replace(/\n/g, ' ')}`);
   for (let clientId in clients) {
     clients[clientId].write(payload);
   }
@@ -64,17 +65,26 @@ app.post('/reset', (req, res, next) => {
   const sec = req.query.sec ? Number(req.query.sec) : TIMER_SEC;
   timer.setTime(sec);
   timer.start();
-  sendServerEvent({ type: 'start', data: sec });
+  sendServerEvent({
+    type: 'start',
+    data: { sec, name: decodeURIComponent(req.query.name) }
+  });
   res.send('reset');
 });
 
 app.post('/toggle', (req, res, next) => {
   if (timer.isRunning()) {
     timer.stop();
-    sendServerEvent({ type: 'stop', data: timer.getTime() });
+    sendServerEvent({
+      type: 'stop',
+      data: { sec: timer.getTime(), name: decodeURIComponent(req.query.name) }
+    });
   } else {
     timer.start();
-    sendServerEvent({ type: 'start', data: timer.getTime() });
+    sendServerEvent({
+      type: 'start',
+      data: { sec: timer.getTime(), name: decodeURIComponent(req.query.name) }
+    });
   }
   res.send({ isRunning: timer.isRunning(), time: timer.getTime() });
 });

@@ -16,3 +16,7 @@ button {
   margin: 2px;
   font-size: medium;
 }
+
+.name-input-wrapper {
+  margin-top: 10px;
+}

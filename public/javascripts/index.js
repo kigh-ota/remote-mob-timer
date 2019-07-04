@@ -39,28 +39,42 @@
 
   function setupEventSource() {
     const evtSource = new EventSource('/events/');
-    evtSource.addEventListener('tick', e => {
-      console.log('tick: ', e.data);
-      updateTime(parseInt(e.data));
+    const logEvent = e => {
+      console.log(`${e.type}: ${e.data}`);
+    };
+    evtSource.onmessage = evtSource.addEventListener('tick', e => {
+      logEvent(e);
+      const data = JSON.parse(e.data);
+      updateTime(parseInt(data.sec));
     });
     evtSource.addEventListener('start', e => {
-      console.log('start: ', e.data);
-      const sec = parseInt(e.data);
+      logEvent(e);
+      const data = JSON.parse(e.data);
+      const sec = parseInt(data.sec);
       updateTime(sec);
-      sendNotificationIfPossible(`Timer started (${secondToDisplayTime(sec)})`);
+      sendNotificationIfPossible(
+        `Timer started by ${data.name} (${secondToDisplayTime(sec)})`
+      );
     });
     evtSource.addEventListener('stop', e => {
-      console.log('stop: ', e.data);
-      const sec = parseInt(e.data);
+      logEvent(e);
+      const data = JSON.parse(e.data);
+      const sec = parseInt(data.sec);
       updateTime(sec);
-      sendNotificationIfPossible(`Timer stopped (${secondToDisplayTime(sec)})`);
+      sendNotificationIfPossible(
+        `Timer stopped by ${data.name} (${secondToDisplayTime(sec)})`
+      );
     });
     evtSource.addEventListener('over', e => {
-      console.log('over: ', e.data);
+      logEvent(e);
       sendNotificationIfPossible('Time ended');
     });
 
     return evtSource;
+  }
+
+  function getName() {
+    return encodeURIComponent(document.querySelector('input#name-input').value);
   }
 
   function setupButtons() {
@@ -68,13 +82,13 @@
       document
         .getElementsByClassName(`start-${min}-min`)[0]
         .addEventListener('click', e => {
-          fetch(`/reset?sec=${min * 60}`, { method: 'POST' });
+          fetch(`/reset?sec=${min * 60}&name=${getName()}`, { method: 'POST' });
         });
     });
     document
       .getElementsByClassName('toggle')[0]
       .addEventListener('click', e => {
-        fetch(`/toggle`, { method: 'POST' })
+        fetch(`/toggle?name=${getName()}`, { method: 'POST' })
           .then(res => res.json())
           .then(json => {
             updateTime(json.time);
