@@ -57,7 +57,11 @@ function sendServerEvent(event: IEvent) {
 }
 
 app.get('/status', (req, res, next) => {
-  res.send({ time: timer.getTime(), nClient: Object.keys(clients).length });
+  res.send({
+    time: timer.getTime(),
+    nClient: Object.keys(clients).length,
+    isRunning: timer.isRunning()
+  });
 });
 
 app.post('/reset', (req, res, next) => {
