@@ -61,7 +61,7 @@ function sendNotificationIfPossible(msg) {
     const n = new Notification('Simple Timer', {
       body: msg,
       renotify: true,
-      tag: 'simple-timer'
+      tag: 'mob-timer'
     });
     n.onclick = () => window.focus();
   }
