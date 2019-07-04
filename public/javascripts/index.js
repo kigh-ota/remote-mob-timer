@@ -70,7 +70,10 @@
     button.addEventListener('click', handleClickReconnectButton);
   }
 
-  function handleClickReconnectButton() {
+  function handleClickReconnectButton(e) {
+    e.target.disabled = true;
+    setTimeout(() => (e.target.disabled = false), 5000);
+
     if (evtSource) {
       evtSource.close();
       evtSource = null;
@@ -85,15 +88,6 @@
   function hideReconnectButton() {
     getReconnectButton().style = 'display: none;';
   }
-
-  // function updateReconnectButton() {
-  //   const button = getReconnectButton();
-  //   if (!evtSource || evtSource.readyState !== 1) {
-  //     button.style = '';
-  //   } else {
-  //     button.style = 'display: none;';
-  //   }
-  // }
 
   function setupEventSource() {
     const evtSource = new EventSource('/events/');
