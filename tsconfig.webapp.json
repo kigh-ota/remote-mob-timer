@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "esModuleInterop": true,
-    "outDir": "public/javascripts"
+    "outDir": "public/javascripts",
+    "noImplicitAny": true
   },
   "include": ["src/webapp/**/*.ts"]
 }

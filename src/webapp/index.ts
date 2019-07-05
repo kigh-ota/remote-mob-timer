@@ -1,6 +1,6 @@
 (() => {
-  let evtSource = null;
-  let connectionTimeoutWatcher = null;
+  let evtSource: EventSource | null = null;
+  let connectionTimeoutWatcher: ConnectionTimeoutWatcher | null = null;
 
   window.onload = () => {
     Notification.requestPermission();
@@ -15,7 +15,7 @@
       .then(json => updateTime(json.time));
   };
 
-  function updateConnectionStatusAndButton(isConnected) {
+  function updateConnectionStatusAndButton(isConnected: boolean) {
     const status = document.querySelector('.connection-status');
     if (isConnected) {
       status.textContent = '';
@@ -39,7 +39,7 @@
     private timeout: NodeJS.Timeout | null;
     static readonly TIMEOUT_SEC: number = 10;
 
-    constructor(onDisconnected) {
+    constructor(onDisconnected: Function) {
       this.connected = true;
       this.onDisconnected = onDisconnected;
       this.timeout = null;
@@ -74,9 +74,10 @@
     button.addEventListener('click', handleClickReconnectButton);
   }
 
-  function handleClickReconnectButton(e) {
-    e.target.disabled = true;
-    setTimeout(() => (e.target.disabled = false), 5000);
+  function handleClickReconnectButton(e: Event) {
+    const target = <HTMLButtonElement>e.target;
+    target.disabled = true;
+    setTimeout(() => (target.disabled = false), 5000);
 
     if (evtSource) {
       evtSource.close();
@@ -95,7 +96,7 @@
 
   function setupEventSource() {
     const evtSource = new EventSource('/events/');
-    const common = e => {
+    const common = (e: MessageEvent) => {
       console.log(`${e.type}: ${e.data}`);
       connectionTimeoutWatcher.notifyConnected();
       updateConnectionStatusAndButton(true);
@@ -161,13 +162,13 @@
       });
   }
 
-  function updateTime(sec) {
+  function updateTime(sec: number) {
     document.getElementsByClassName(
       'time'
     )[0].textContent = secondToDisplayTime(sec);
   }
 
-  function sendNotificationIfPossible(msg) {
+  function sendNotificationIfPossible(msg: string) {
     if (Notification.permission === 'granted') {
       const n = new Notification('Mob Timer', {
         body: msg,
@@ -178,7 +179,7 @@
     }
   }
 
-  function secondToDisplayTime(sec) {
+  function secondToDisplayTime(sec: number) {
     return (
       `${Math.floor(sec / 60)}`.padStart(2, '0') +
       ':' +
