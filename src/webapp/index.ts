@@ -34,34 +34,38 @@
   }
 
   class ConnectionTimeoutWatcher {
+    private connected: boolean;
+    private onDisconnected: Function;
+    private timeout: NodeJS.Timeout | null;
+    static readonly TIMEOUT_SEC: number = 10;
+
     constructor(onDisconnected) {
       this.connected = true;
-      this.onDisconnected_ = onDisconnected;
-      this.timeout_ = null;
-      this.TIMEOUT_SEC = 10;
+      this.onDisconnected = onDisconnected;
+      this.timeout = null;
     }
 
     notifyConnected() {
-      if (this.timeout_) {
-        clearTimeout(this.timeout_);
+      if (this.timeout) {
+        clearTimeout(this.timeout);
       }
-      this.timeout_ = setTimeout(() => {
+      this.timeout = setTimeout(() => {
         this.connected = false;
-        this.onDisconnected_();
-      }, this.TIMEOUT_SEC * 1000);
+        this.onDisconnected();
+      }, ConnectionTimeoutWatcher.TIMEOUT_SEC * 1000);
     }
   }
 
   function setupNameInput() {
     const input = getNameInput();
     input.addEventListener('change', e => {
-      window.localStorage.setItem('name', e.target.value);
+      window.localStorage.setItem('name', (<HTMLInputElement>e.target).value);
     });
     const savedName = window.localStorage.getItem('name');
     input.value = savedName || '';
   }
 
-  function getReconnectButton() {
+  function getReconnectButton(): HTMLElement {
     return document.querySelector('.reconnect');
   }
 
@@ -82,11 +86,11 @@
   }
 
   function showReconnectButton() {
-    getReconnectButton().style = '';
+    getReconnectButton().setAttribute('style', '');
   }
 
   function hideReconnectButton() {
-    getReconnectButton().style = 'display: none;';
+    getReconnectButton().setAttribute('style', 'display: none;');
   }
 
   function setupEventSource() {
@@ -96,12 +100,12 @@
       connectionTimeoutWatcher.notifyConnected();
       updateConnectionStatusAndButton(true);
     };
-    evtSource.onmessage = evtSource.addEventListener('tick', e => {
+    evtSource.addEventListener('tick', (e: MessageEvent) => {
       common(e);
       const data = JSON.parse(e.data);
       updateTime(parseInt(data.sec));
     });
-    evtSource.addEventListener('start', e => {
+    evtSource.addEventListener('start', (e: MessageEvent) => {
       common(e);
       const data = JSON.parse(e.data);
       const sec = parseInt(data.sec);
@@ -110,7 +114,7 @@
         `Timer started by ${data.name} (${secondToDisplayTime(sec)})`
       );
     });
-    evtSource.addEventListener('stop', e => {
+    evtSource.addEventListener('stop', (e: MessageEvent) => {
       common(e);
       const data = JSON.parse(e.data);
       const sec = parseInt(data.sec);
@@ -119,18 +123,18 @@
         `Timer stopped by ${data.name} (${secondToDisplayTime(sec)})`
       );
     });
-    evtSource.addEventListener('over', e => {
+    evtSource.addEventListener('over', (e: MessageEvent) => {
       common(e);
       sendNotificationIfPossible('Time ended');
     });
-    evtSource.addEventListener('alive', e => {
+    evtSource.addEventListener('alive', (e: MessageEvent) => {
       common(e);
     });
 
     return evtSource;
   }
 
-  function getNameInput() {
+  function getNameInput(): HTMLInputElement {
     return document.querySelector('input#name-input');
   }
 
