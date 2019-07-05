@@ -28,7 +28,7 @@ class Timer {
   }
 
   public start() {
-    if (this.isRunning()) {
+    if (this.isRunning() || this.remainingSec === 0) {
       return;
     }
     this.timeout = setInterval(() => this.tick(), 1000);

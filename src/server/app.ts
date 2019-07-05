@@ -77,18 +77,20 @@ app.post('/reset', (req, res, next) => {
 });
 
 app.post('/toggle', (req, res, next) => {
-  if (timer.isRunning()) {
-    timer.stop();
-    sendServerEvent({
-      type: 'stop',
-      data: { sec: timer.getTime(), name: decodeURIComponent(req.query.name) }
-    });
-  } else {
-    timer.start();
-    sendServerEvent({
-      type: 'start',
-      data: { sec: timer.getTime(), name: decodeURIComponent(req.query.name) }
-    });
+  if (timer.getTime() > 0) {
+    if (timer.isRunning()) {
+      timer.stop();
+      sendServerEvent({
+        type: 'stop',
+        data: { sec: timer.getTime(), name: decodeURIComponent(req.query.name) }
+      });
+    } else {
+      timer.start();
+      sendServerEvent({
+        type: 'start',
+        data: { sec: timer.getTime(), name: decodeURIComponent(req.query.name) }
+      });
+    }
   }
   res.send({ isRunning: timer.isRunning(), time: timer.getTime() });
 });
