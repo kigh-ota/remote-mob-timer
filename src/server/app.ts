@@ -3,6 +3,7 @@ import express from 'express';
 import path from 'path';
 import logger from 'morgan';
 import Timer from './Timer';
+import IEvent from './IEvent';
 
 const app = express();
 
