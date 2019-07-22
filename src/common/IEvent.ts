@@ -8,5 +8,7 @@ export enum EventType {
   TIMER_STOP = 'stop',
   TIMER_TICK = 'tick',
   TIMER_OVER = 'over',
-  ALIVE = 'alive'
+  ALIVE = 'alive',
+  CLIENT_REGISTERED = 'client:registered',
+  CLIENT_UNREGISTERED = 'client:unregistered'
 }

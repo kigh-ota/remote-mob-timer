@@ -54,15 +54,24 @@ app.get('/events', (req, res) => {
   });
   res.write('\n');
   (clientId => {
+    const clientInfo = { ip: req.ip, userAgent: req.header('User-Agent') };
     clients[clientId] = {
       response: res,
       ip: req.ip,
       userAgent: req.header('User-Agent')
     };
     console.log(`Registered client: id=${clientId}`);
+    eventHistoryStore.add({
+      type: EventType.CLIENT_REGISTERED,
+      data: clientInfo
+    });
     req.on('close', () => {
       delete clients[clientId];
       console.log(`Unregistered client: id=${clientId}`);
+      eventHistoryStore.add({
+        type: EventType.CLIENT_UNREGISTERED,
+        data: clientInfo
+      });
     });
   })(++clientId);
 });
