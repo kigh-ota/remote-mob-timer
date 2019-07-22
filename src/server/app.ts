@@ -5,6 +5,7 @@ import logger from 'morgan';
 import Timer from './Timer';
 import IEvent, { EventType } from '../common/IEvent';
 import EventHistoryStore from './EventHistoryStore';
+import EventFactory from './EventFactory';
 
 const app = express();
 const eventHistoryStore = new EventHistoryStore();
@@ -22,10 +23,9 @@ app.use(express.static(path.join(__dirname, '..', '..', 'public')));
 const TIMER_SEC = 25 * 60;
 
 const timer = new Timer(
-  (sec: number) =>
-    sendServerEvent({ type: EventType.TIMER_TICK, data: { sec } }),
+  (sec: number) => sendServerEvent(EventFactory.tick(sec)),
   () => {
-    const event = { type: EventType.TIMER_OVER, data: {} };
+    const event = EventFactory.over();
     sendServerEvent(event);
     eventHistoryStore.add(event);
   }
@@ -61,17 +61,11 @@ app.get('/events', (req, res) => {
       userAgent: req.header('User-Agent')
     };
     console.log(`Registered client: id=${clientId}`);
-    eventHistoryStore.add({
-      type: EventType.CLIENT_REGISTERED,
-      data: clientInfo
-    });
+    eventHistoryStore.add(EventFactory.clientRegistered(clientInfo));
     req.on('close', () => {
       delete clients[clientId];
       console.log(`Unregistered client: id=${clientId}`);
-      eventHistoryStore.add({
-        type: EventType.CLIENT_UNREGISTERED,
-        data: clientInfo
-      });
+      eventHistoryStore.add(EventFactory.clientUnregistered(clientInfo));
     });
   })(++clientId);
 });
@@ -113,10 +107,7 @@ app.post('/reset', (req, res, next) => {
   const sec = req.query.sec ? Number(req.query.sec) : TIMER_SEC;
   timer.setTime(sec);
   timer.start();
-  const event = {
-    type: EventType.TIMER_START,
-    data: { sec, name: decodeURIComponent(req.query.name) }
-  };
+  const event = EventFactory.start(sec, decodeURIComponent(req.query.name));
   sendServerEvent(event);
   eventHistoryStore.add(event);
   res.send('reset');
@@ -126,18 +117,18 @@ app.post('/toggle', (req, res, next) => {
   if (timer.getTime() > 0) {
     if (timer.isRunning()) {
       timer.stop();
-      const event = {
-        type: EventType.TIMER_STOP,
-        data: { sec: timer.getTime(), name: decodeURIComponent(req.query.name) }
-      };
+      const event = EventFactory.stop(
+        timer.getTime(),
+        decodeURIComponent(req.query.name)
+      );
       sendServerEvent(event);
       eventHistoryStore.add(event);
     } else {
       timer.start();
-      const event = {
-        type: EventType.TIMER_START,
-        data: { sec: timer.getTime(), name: decodeURIComponent(req.query.name) }
-      };
+      const event = EventFactory.start(
+        timer.getTime(),
+        decodeURIComponent(req.query.name)
+      );
       sendServerEvent(event);
       eventHistoryStore.add(event);
     }
@@ -165,7 +156,7 @@ timer.setTime(TIMER_SEC);
 
 const SEND_ALIVE_INTERVAL_SEC = 5;
 setInterval(
-  () => sendServerEvent({ type: EventType.ALIVE, data: {} }),
+  () => sendServerEvent(EventFactory.alive()),
   SEND_ALIVE_INTERVAL_SEC * 1000
 );
 
