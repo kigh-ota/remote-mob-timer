@@ -1,6 +1,7 @@
 export default interface IEvent {
   type: EventType;
   data: any;
+  date: string; // ISO 8601
 }
 
 export enum EventType {

@@ -3,7 +3,7 @@ import express, { Response } from 'express';
 import path from 'path';
 import logger from 'morgan';
 import Timer from './Timer';
-import IEvent, { EventType } from '../common/IEvent';
+import IEvent from '../common/IEvent';
 import EventHistoryStore from './EventHistoryStore';
 import EventFactory from './EventFactory';
 
