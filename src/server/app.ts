@@ -24,7 +24,11 @@ const TIMER_SEC = 25 * 60;
 const timer = new Timer(
   (sec: number) =>
     sendServerEvent({ type: EventType.TIMER_TICK, data: { sec } }),
-  () => sendServerEvent({ type: EventType.TIMER_OVER, data: {} })
+  () => {
+    const event = { type: EventType.TIMER_OVER, data: {} };
+    sendServerEvent(event);
+    eventHistoryStore.add(event);
+  }
 );
 
 // Main Endpoint
@@ -70,8 +74,6 @@ function sendServerEvent(event: IEvent) {
   for (let clientId in clients) {
     clients[clientId].response.write(payload);
   }
-  eventHistoryStore.add(event);
-  console.log('history length', eventHistoryStore.list().length);
 }
 
 app.get('/status', (req, res, next) => {
@@ -81,7 +83,8 @@ app.get('/status', (req, res, next) => {
       nClient: Object.keys(clients).length,
       isRunning: timer.isRunning()
     },
-    clients: clientInfo()
+    clients: clientInfo(),
+    eventHistory: eventHistoryStore.list()
   });
 });
 
@@ -101,10 +104,12 @@ app.post('/reset', (req, res, next) => {
   const sec = req.query.sec ? Number(req.query.sec) : TIMER_SEC;
   timer.setTime(sec);
   timer.start();
-  sendServerEvent({
+  const event = {
     type: EventType.TIMER_START,
     data: { sec, name: decodeURIComponent(req.query.name) }
-  });
+  };
+  sendServerEvent(event);
+  eventHistoryStore.add(event);
   res.send('reset');
 });
 
@@ -112,16 +117,20 @@ app.post('/toggle', (req, res, next) => {
   if (timer.getTime() > 0) {
     if (timer.isRunning()) {
       timer.stop();
-      sendServerEvent({
+      const event = {
         type: EventType.TIMER_STOP,
         data: { sec: timer.getTime(), name: decodeURIComponent(req.query.name) }
-      });
+      };
+      sendServerEvent(event);
+      eventHistoryStore.add(event);
     } else {
       timer.start();
-      sendServerEvent({
+      const event = {
         type: EventType.TIMER_START,
         data: { sec: timer.getTime(), name: decodeURIComponent(req.query.name) }
-      });
+      };
+      sendServerEvent(event);
+      eventHistoryStore.add(event);
     }
   }
   res.send({ isRunning: timer.isRunning(), time: timer.getTime() });
