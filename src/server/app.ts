@@ -3,7 +3,7 @@ import express, { Response } from 'express';
 import path from 'path';
 import logger from 'morgan';
 import Timer from './Timer';
-import IEvent from './IEvent';
+import IEvent, { EventType } from '../common/IEvent';
 
 const app = express();
 
@@ -20,8 +20,9 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 const TIMER_SEC = 25 * 60;
 
 const timer = new Timer(
-  (sec: number) => sendServerEvent({ type: 'tick', data: { sec } }),
-  () => sendServerEvent({ type: 'over', data: {} })
+  (sec: number) =>
+    sendServerEvent({ type: EventType.TIMER_TICK, data: { sec } }),
+  () => sendServerEvent({ type: EventType.TIMER_OVER, data: {} })
 );
 
 // Main Endpoint
@@ -97,7 +98,7 @@ app.post('/reset', (req, res, next) => {
   timer.setTime(sec);
   timer.start();
   sendServerEvent({
-    type: 'start',
+    type: EventType.TIMER_START,
     data: { sec, name: decodeURIComponent(req.query.name) }
   });
   res.send('reset');
@@ -108,13 +109,13 @@ app.post('/toggle', (req, res, next) => {
     if (timer.isRunning()) {
       timer.stop();
       sendServerEvent({
-        type: 'stop',
+        type: EventType.TIMER_STOP,
         data: { sec: timer.getTime(), name: decodeURIComponent(req.query.name) }
       });
     } else {
       timer.start();
       sendServerEvent({
-        type: 'start',
+        type: EventType.TIMER_START,
         data: { sec: timer.getTime(), name: decodeURIComponent(req.query.name) }
       });
     }
@@ -142,7 +143,7 @@ timer.setTime(TIMER_SEC);
 
 const SEND_ALIVE_INTERVAL_SEC = 5;
 setInterval(
-  () => sendServerEvent({ type: 'alive', data: {} }),
+  () => sendServerEvent({ type: EventType.ALIVE, data: {} }),
   SEND_ALIVE_INTERVAL_SEC * 1000
 );
 

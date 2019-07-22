@@ -1,4 +1,4 @@
-import IEvent from './IEvent';
+import IEvent from '../common/IEvent';
 
 class EventHistoryStore {
   public add(event: IEvent) {
