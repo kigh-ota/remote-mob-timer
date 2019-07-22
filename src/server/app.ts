@@ -85,8 +85,8 @@ function sendServerEvent(event: IEvent) {
   }
 }
 
-app.get('/status', (req, res, next) => {
-  res.send({
+app.get('/status.json', (req, res, next) => {
+  res.json({
     timer: {
       time: timer.getTime(),
       nClient: Object.keys(clients).length,

@@ -1,4 +1,3 @@
-import { EventType } from '../common/IEvent';
 (() => {
   class Reconnecter {
     private timeout: NodeJS.Timeout;
@@ -42,7 +41,7 @@ import { EventType } from '../common/IEvent';
     setupTimerButtons();
     setupNameInput();
     updateConnectionStatus(true);
-    fetch('/status')
+    fetch('/status.json')
       .then(res => res.json())
       .then(json => updateTime(json.timer.time));
   };
@@ -104,12 +103,12 @@ import { EventType } from '../common/IEvent';
       connectionTimeoutWatcher.notifyConnected();
       updateConnectionStatus(true);
     };
-    evtSource.addEventListener(EventType.TIMER_TICK, (e: MessageEvent) => {
+    evtSource.addEventListener('tick', (e: MessageEvent) => {
       common(e);
       const data = JSON.parse(e.data);
       updateTime(parseInt(data.sec));
     });
-    evtSource.addEventListener(EventType.TIMER_START, (e: MessageEvent) => {
+    evtSource.addEventListener('start', (e: MessageEvent) => {
       common(e);
       const data = JSON.parse(e.data);
       const sec = parseInt(data.sec);
@@ -118,7 +117,7 @@ import { EventType } from '../common/IEvent';
         `Timer started by ${data.name} (${secondToDisplayTime(sec)})`
       );
     });
-    evtSource.addEventListener(EventType.TIMER_STOP, (e: MessageEvent) => {
+    evtSource.addEventListener('stop', (e: MessageEvent) => {
       common(e);
       const data = JSON.parse(e.data);
       const sec = parseInt(data.sec);
@@ -127,11 +126,11 @@ import { EventType } from '../common/IEvent';
         `Timer stopped by ${data.name} (${secondToDisplayTime(sec)})`
       );
     });
-    evtSource.addEventListener(EventType.TIMER_OVER, (e: MessageEvent) => {
+    evtSource.addEventListener('over', (e: MessageEvent) => {
       common(e);
       sendNotificationIfPossible('Time ended');
     });
-    evtSource.addEventListener(EventType.ALIVE, (e: MessageEvent) => {
+    evtSource.addEventListener('alive', (e: MessageEvent) => {
       common(e);
     });
 
