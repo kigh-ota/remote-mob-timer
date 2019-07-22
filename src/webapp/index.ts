@@ -43,7 +43,10 @@
     updateConnectionStatus(true);
     fetch('/status.json')
       .then(res => res.json())
-      .then(json => updateTime(json.timer.time));
+      .then(json => {
+        updateTime(json.timer.time);
+        updateHistoryList(json.eventHistory.reverse());
+      });
   };
 
   function updateConnectionStatus(isConnected: boolean) {
@@ -168,6 +171,16 @@
     document.getElementsByClassName(
       'time'
     )[0].textContent = secondToDisplayTime(sec);
+  }
+
+  function updateHistoryList(list: object[]) {
+    const listEl = document.getElementsByClassName('history-list')[0];
+    listEl.innerHTML = '';
+    list.forEach(h => {
+      const item = document.createElement('li');
+      item.textContent = JSON.stringify(h);
+      listEl.appendChild(item);
+    });
   }
 
   function sendNotificationIfPossible(msg: string) {
