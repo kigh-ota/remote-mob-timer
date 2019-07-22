@@ -4,8 +4,10 @@ import path from 'path';
 import logger from 'morgan';
 import Timer from './Timer';
 import IEvent, { EventType } from '../common/IEvent';
+import EventHistoryStore from './EventHistoryStore';
 
 const app = express();
+const eventHistoryStore = new EventHistoryStore();
 
 // view engine setup
 app.set('views', path.join(__dirname, '..', 'views'));
@@ -68,6 +70,7 @@ function sendServerEvent(event: IEvent) {
   for (let clientId in clients) {
     clients[clientId].response.write(payload);
   }
+  eventHistoryStore.add(event);
 }
 
 app.get('/status', (req, res, next) => {
