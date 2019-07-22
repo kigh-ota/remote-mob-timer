@@ -1,6 +1,38 @@
 (() => {
+  class Reconnecter {
+    private timeout: NodeJS.Timeout;
+    static readonly REQUEST_INTERVAL_SEC: number = 20;
+
+    constructor() {
+      this.timeout = null;
+    }
+
+    private tryToReconnect() {
+      if (evtSource) {
+        evtSource.close();
+        evtSource = null;
+      }
+      evtSource = setupEventSource();
+    }
+
+    public start() {
+      this.stop();
+      this.timeout = setInterval(
+        () => this.tryToReconnect(),
+        Reconnecter.REQUEST_INTERVAL_SEC * 1000
+      );
+    }
+
+    public stop() {
+      if (this.timeout) {
+        clearInterval(this.timeout);
+      }
+    }
+  }
+
   let evtSource: EventSource | null = null;
   let connectionTimeoutWatcher: ConnectionTimeoutWatcher | null = null;
+  let reconnecter: Reconnecter = new Reconnecter();
 
   window.onload = () => {
     Notification.requestPermission();
@@ -8,27 +40,26 @@
     evtSource = setupEventSource();
     setupTimerButtons();
     setupNameInput();
-    setupReconnectButton();
-    updateConnectionStatusAndButton(true);
+    updateConnectionStatus(true);
     fetch('/status')
       .then(res => res.json())
-      .then(json => updateTime(json.time));
+      .then(json => updateTime(json.timer.time));
   };
 
-  function updateConnectionStatusAndButton(isConnected: boolean) {
+  function updateConnectionStatus(isConnected: boolean) {
     const status = document.querySelector('.connection-status');
     if (isConnected) {
       status.textContent = '';
-      hideReconnectButton();
+      reconnecter.stop();
     } else {
-      status.textContent = 'Disconnected...';
-      showReconnectButton();
+      status.textContent = 'Disconnected. Trying to reconnect...';
+      reconnecter.start();
     }
   }
 
   function setupConnectionTimeoutWatcher() {
     connectionTimeoutWatcher = new ConnectionTimeoutWatcher(() => {
-      updateConnectionStatusAndButton(false);
+      updateConnectionStatus(false);
     });
     connectionTimeoutWatcher.notifyConnected();
   }
@@ -65,41 +96,12 @@
     input.value = savedName || '';
   }
 
-  function getReconnectButton(): HTMLElement {
-    return document.querySelector('.reconnect');
-  }
-
-  function setupReconnectButton() {
-    const button = getReconnectButton();
-    button.addEventListener('click', handleClickReconnectButton);
-  }
-
-  function handleClickReconnectButton(e: Event) {
-    const target = <HTMLButtonElement>e.target;
-    target.disabled = true;
-    setTimeout(() => (target.disabled = false), 5000);
-
-    if (evtSource) {
-      evtSource.close();
-      evtSource = null;
-    }
-    evtSource = setupEventSource();
-  }
-
-  function showReconnectButton() {
-    getReconnectButton().setAttribute('style', '');
-  }
-
-  function hideReconnectButton() {
-    getReconnectButton().setAttribute('style', 'display: none;');
-  }
-
   function setupEventSource() {
     const evtSource = new EventSource('/events/');
     const common = (e: MessageEvent) => {
       console.log(`${e.type}: ${e.data}`);
       connectionTimeoutWatcher.notifyConnected();
-      updateConnectionStatusAndButton(true);
+      updateConnectionStatus(true);
     };
     evtSource.addEventListener('tick', (e: MessageEvent) => {
       common(e);
