@@ -1,5 +1,5 @@
 import createError from 'http-errors';
-import express from 'express';
+import express, { Response } from 'express';
 import path from 'path';
 import logger from 'morgan';
 import Timer from './Timer';
@@ -29,10 +29,16 @@ app.get('/', (req, res, next) => {
   res.render('index');
 });
 
+interface Client {
+  response: Response;
+  ip: string;
+  userAgent: string;
+}
+
 // Endpoint for Server-Sent Events
 // Ref. https://qiita.com/akameco/items/c54af5af35ef9b500b54
 let clientId = 0;
-let clients: { [clientId: number]: any } = {};
+let clients: { [clientId: number]: Client } = {};
 app.get('/events', (req, res) => {
   req.socket.setTimeout(43200);
   res.writeHead(200, {
@@ -41,9 +47,15 @@ app.get('/events', (req, res) => {
   });
   res.write('\n');
   (clientId => {
-    clients[clientId] = res;
+    clients[clientId] = {
+      response: res,
+      ip: req.ip,
+      userAgent: req.header('User-Agent')
+    };
+    console.log(`Registered client: id=${clientId}`);
     req.on('close', () => {
       delete clients[clientId];
+      console.log(`Unregistered client: id=${clientId}`);
     });
   })(++clientId);
 });
@@ -53,17 +65,31 @@ function sendServerEvent(event: IEvent) {
   const payload = `event: ${event.type}\ndata: ${dataString}\n\n`;
   console.log(`sendServerEvent(): ${payload.replace(/\n/g, ' ')}`);
   for (let clientId in clients) {
-    clients[clientId].write(payload);
+    clients[clientId].response.write(payload);
   }
 }
 
 app.get('/status', (req, res, next) => {
   res.send({
-    time: timer.getTime(),
-    nClient: Object.keys(clients).length,
-    isRunning: timer.isRunning()
+    timer: {
+      time: timer.getTime(),
+      nClient: Object.keys(clients).length,
+      isRunning: timer.isRunning()
+    },
+    clients: clientInfo()
   });
 });
+
+function clientInfo() {
+  const clientInfo: { [clientId: number]: any } = {};
+  for (let clientId in clients) {
+    clientInfo[clientId] = {
+      userAgent: clients[clientId].userAgent,
+      ip: clients[clientId].ip
+    };
+  }
+  return clientInfo;
+}
 
 app.post('/reset', (req, res, next) => {
   timer.stop();
