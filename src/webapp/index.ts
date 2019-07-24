@@ -1,27 +1,23 @@
 import animals from './animals';
 import { EventType } from '../common/IEvent';
-import ConnectionTimeoutWatcher from './ConnectionTimeoutWatcher';
-import IntervalTimer from './IntervalTimer';
+import ReconnectingEventSource from './ReconnectingEventSource';
 (() => {
-  let evtSource: EventSource | null = null;
-  let connectionTimeoutWatcher: ConnectionTimeoutWatcher | null = null;
-  const reconnecter = new IntervalTimer(tryToReconnect, 20);
-
-  function tryToReconnect() {
-    if (evtSource) {
-      evtSource.close();
-      evtSource = null;
-    }
-    evtSource = setupEventSource();
-  }
+  let evtSource: ReconnectingEventSource | null = null;
 
   window.onload = () => {
     Notification.requestPermission();
-    setupConnectionTimeoutWatcher();
-    evtSource = setupEventSource();
+    evtSource = new ReconnectingEventSource(
+      () => {
+        document.querySelector('.connection-status').textContent = '';
+      },
+      () => {
+        document.querySelector('.connection-status').textContent =
+          'Disconnected. Trying to reconnect...';
+      }
+    );
+    setupEventHandlers();
     setupTimerButtons();
     setupNameInput();
-    updateConnectionStatus(true);
     fetch('/status.json')
       .then(res => res.json())
       .then(json => {
@@ -30,22 +26,30 @@ import IntervalTimer from './IntervalTimer';
       });
   };
 
-  function updateConnectionStatus(isConnected: boolean) {
-    const status = document.querySelector('.connection-status');
-    if (isConnected) {
-      status.textContent = '';
-      reconnecter.stop();
-    } else {
-      status.textContent = 'Disconnected. Trying to reconnect...';
-      reconnecter.start();
-    }
-  }
-
-  function setupConnectionTimeoutWatcher() {
-    connectionTimeoutWatcher = new ConnectionTimeoutWatcher(() => {
-      updateConnectionStatus(false);
+  function setupEventHandlers() {
+    evtSource.addEventListener(EventType.TIMER_TICK, (e: MessageEvent) => {
+      const data = JSON.parse(e.data);
+      updateTime(parseInt(data.sec));
     });
-    connectionTimeoutWatcher.notifyConnected();
+    evtSource.addEventListener(EventType.TIMER_START, (e: MessageEvent) => {
+      const data = JSON.parse(e.data);
+      const sec = parseInt(data.sec);
+      updateTime(sec);
+      sendNotificationIfPossible(
+        `Timer started by ${data.name} (${secondToDisplayTime(sec)})`
+      );
+    });
+    evtSource.addEventListener(EventType.TIMER_STOP, (e: MessageEvent) => {
+      const data = JSON.parse(e.data);
+      const sec = parseInt(data.sec);
+      updateTime(sec);
+      sendNotificationIfPossible(
+        `Timer stopped by ${data.name} (${secondToDisplayTime(sec)})`
+      );
+    });
+    evtSource.addEventListener(EventType.TIMER_OVER, (e: MessageEvent) => {
+      sendNotificationIfPossible('Time ended');
+    });
   }
 
   function setupNameInput() {
@@ -62,47 +66,6 @@ import IntervalTimer from './IntervalTimer';
   function randomName() {
     const i = Math.floor(Math.random() * Math.floor(animals.length));
     return animals[i];
-  }
-
-  function setupEventSource() {
-    const evtSource = new EventSource('/events/');
-    const common = (e: MessageEvent) => {
-      console.log(`${e.type}: ${e.data}`);
-      connectionTimeoutWatcher.notifyConnected();
-      updateConnectionStatus(true);
-    };
-    evtSource.addEventListener(EventType.TIMER_TICK, (e: MessageEvent) => {
-      common(e);
-      const data = JSON.parse(e.data);
-      updateTime(parseInt(data.sec));
-    });
-    evtSource.addEventListener(EventType.TIMER_START, (e: MessageEvent) => {
-      common(e);
-      const data = JSON.parse(e.data);
-      const sec = parseInt(data.sec);
-      updateTime(sec);
-      sendNotificationIfPossible(
-        `Timer started by ${data.name} (${secondToDisplayTime(sec)})`
-      );
-    });
-    evtSource.addEventListener(EventType.TIMER_STOP, (e: MessageEvent) => {
-      common(e);
-      const data = JSON.parse(e.data);
-      const sec = parseInt(data.sec);
-      updateTime(sec);
-      sendNotificationIfPossible(
-        `Timer stopped by ${data.name} (${secondToDisplayTime(sec)})`
-      );
-    });
-    evtSource.addEventListener(EventType.TIMER_OVER, (e: MessageEvent) => {
-      common(e);
-      sendNotificationIfPossible('Time ended');
-    });
-    evtSource.addEventListener(EventType.ALIVE, (e: MessageEvent) => {
-      common(e);
-    });
-
-    return evtSource;
   }
 
   function getNameInput(): HTMLInputElement {

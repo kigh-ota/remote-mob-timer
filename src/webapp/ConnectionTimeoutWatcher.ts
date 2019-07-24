@@ -8,12 +8,14 @@ export default class ConnectionTimeoutWatcher {
     this.timeout = null;
   }
 
-  notifyConnected() {
+  notify() {
     if (this.timeout) {
       clearTimeout(this.timeout);
     }
+    console.debug('ConnectionTimeoutWatcher: notified');
     this.timeout = setTimeout(() => {
       this.onDisconnected();
+      console.debug('ConnectionTimeoutWatcher: timeout');
     }, ConnectionTimeoutWatcher.TIMEOUT_SEC * 1000);
   }
 }

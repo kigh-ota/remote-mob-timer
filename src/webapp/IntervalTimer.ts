@@ -10,7 +10,10 @@ export default class IntervalTimer {
 
   public start() {
     this.stop();
-    this.timeout = setInterval(this.callback, this.intervalSec * 1000);
+    this.timeout = setInterval(() => {
+      console.debug('IntervalTimer: timeout');
+      this.callback();
+    }, this.intervalSec * 1000);
   }
 
   public stop() {

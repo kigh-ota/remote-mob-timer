@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
+    "sourceMap": true,
     "esModuleInterop": true,
     "module": "commonjs",
+    "target": "es6",
     "outDir": "public/javascripts",
     "noImplicitAny": true
   },
