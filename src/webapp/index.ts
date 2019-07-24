@@ -1,40 +1,19 @@
 import animals from './animals';
 import { EventType } from '../common/IEvent';
+import ConnectionTimeoutWatcher from './ConnectionTimeoutWatcher';
+import IntervalTimer from './IntervalTimer';
 (() => {
-  class Reconnecter {
-    private timeout: NodeJS.Timeout;
-    static readonly REQUEST_INTERVAL_SEC: number = 20;
-
-    constructor() {
-      this.timeout = null;
-    }
-
-    private tryToReconnect() {
-      if (evtSource) {
-        evtSource.close();
-        evtSource = null;
-      }
-      evtSource = setupEventSource();
-    }
-
-    public start() {
-      this.stop();
-      this.timeout = setInterval(
-        () => this.tryToReconnect(),
-        Reconnecter.REQUEST_INTERVAL_SEC * 1000
-      );
-    }
-
-    public stop() {
-      if (this.timeout) {
-        clearInterval(this.timeout);
-      }
-    }
-  }
-
   let evtSource: EventSource | null = null;
   let connectionTimeoutWatcher: ConnectionTimeoutWatcher | null = null;
-  let reconnecter: Reconnecter = new Reconnecter();
+  const reconnecter = new IntervalTimer(tryToReconnect, 20);
+
+  function tryToReconnect() {
+    if (evtSource) {
+      evtSource.close();
+      evtSource = null;
+    }
+    evtSource = setupEventSource();
+  }
 
   window.onload = () => {
     Notification.requestPermission();
@@ -67,29 +46,6 @@ import { EventType } from '../common/IEvent';
       updateConnectionStatus(false);
     });
     connectionTimeoutWatcher.notifyConnected();
-  }
-
-  class ConnectionTimeoutWatcher {
-    private connected: boolean;
-    private onDisconnected: Function;
-    private timeout: NodeJS.Timeout | null;
-    static readonly TIMEOUT_SEC: number = 10;
-
-    constructor(onDisconnected: Function) {
-      this.connected = true;
-      this.onDisconnected = onDisconnected;
-      this.timeout = null;
-    }
-
-    notifyConnected() {
-      if (this.timeout) {
-        clearTimeout(this.timeout);
-      }
-      this.timeout = setTimeout(() => {
-        this.connected = false;
-        this.onDisconnected();
-      }, ConnectionTimeoutWatcher.TIMEOUT_SEC * 1000);
-    }
   }
 
   function setupNameInput() {
