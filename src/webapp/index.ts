@@ -2,6 +2,8 @@ import animals from './animals';
 import { EventType } from '../common/IEvent';
 import ReconnectingEventSource from './ReconnectingEventSource';
 import Notifier from './Notifier';
+import { fromEvent } from 'rxjs';
+
 (() => {
   window.onload = () => {
     const evtSource = new ReconnectingEventSource(
@@ -26,11 +28,11 @@ import Notifier from './Notifier';
   };
 
   function setupEventHandlers(evtSource: EventTarget, notifier: Notifier) {
-    evtSource.addEventListener(EventType.TIMER_TICK, (e: MessageEvent) => {
+    fromEvent(evtSource, EventType.TIMER_TICK).subscribe((e: MessageEvent) => {
       const data = JSON.parse(e.data);
       updateTime(parseInt(data.sec));
     });
-    evtSource.addEventListener(EventType.TIMER_START, (e: MessageEvent) => {
+    fromEvent(evtSource, EventType.TIMER_START).subscribe((e: MessageEvent) => {
       const data = JSON.parse(e.data);
       const sec = parseInt(data.sec);
       updateTime(sec);
@@ -38,7 +40,7 @@ import Notifier from './Notifier';
         `Timer started by ${data.name} (${secondToDisplayTime(sec)})`
       );
     });
-    evtSource.addEventListener(EventType.TIMER_STOP, (e: MessageEvent) => {
+    fromEvent(evtSource, EventType.TIMER_STOP).subscribe((e: MessageEvent) => {
       const data = JSON.parse(e.data);
       const sec = parseInt(data.sec);
       updateTime(sec);
@@ -46,7 +48,7 @@ import Notifier from './Notifier';
         `Timer stopped by ${data.name} (${secondToDisplayTime(sec)})`
       );
     });
-    evtSource.addEventListener(EventType.TIMER_OVER, (e: MessageEvent) => {
+    fromEvent(evtSource, EventType.TIMER_OVER).subscribe((e: MessageEvent) => {
       notifier.send('Time ended');
     });
   }
