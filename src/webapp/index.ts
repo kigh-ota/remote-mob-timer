@@ -1,3 +1,4 @@
+import animals from './animals';
 (() => {
   class Reconnecter {
     private timeout: NodeJS.Timeout;
@@ -96,7 +97,14 @@
       window.localStorage.setItem('name', (<HTMLInputElement>e.target).value);
     });
     const savedName = window.localStorage.getItem('name');
-    input.value = savedName || '';
+    const name = savedName || randomName();
+    input.value = name;
+    window.localStorage.setItem('name', name);
+  }
+
+  function randomName() {
+    const i = Math.floor(Math.random() * Math.floor(animals.length));
+    return animals[i];
   }
 
   function setupEventSource() {
