@@ -1,9 +1,9 @@
 import animals from './animals';
 import { EventType } from '../common/IEvent';
 import ReconnectingEventSource from './ReconnectingEventSource';
+import Notifier from './Notifier';
 (() => {
   window.onload = () => {
-    Notification.requestPermission();
     const evtSource = new ReconnectingEventSource(
       () => {
         document.querySelector('.connection-status').textContent = '';
@@ -13,7 +13,8 @@ import ReconnectingEventSource from './ReconnectingEventSource';
           'Disconnected. Trying to reconnect...';
       }
     );
-    setupEventHandlers(evtSource);
+    const notifier = new Notifier();
+    setupEventHandlers(evtSource, notifier);
     setupTimerButtons();
     setupNameInput();
     fetch('/status.json')
@@ -24,7 +25,7 @@ import ReconnectingEventSource from './ReconnectingEventSource';
       });
   };
 
-  function setupEventHandlers(evtSource: EventTarget) {
+  function setupEventHandlers(evtSource: EventTarget, notifier: Notifier) {
     evtSource.addEventListener(EventType.TIMER_TICK, (e: MessageEvent) => {
       const data = JSON.parse(e.data);
       updateTime(parseInt(data.sec));
@@ -33,7 +34,7 @@ import ReconnectingEventSource from './ReconnectingEventSource';
       const data = JSON.parse(e.data);
       const sec = parseInt(data.sec);
       updateTime(sec);
-      sendNotificationIfPossible(
+      notifier.send(
         `Timer started by ${data.name} (${secondToDisplayTime(sec)})`
       );
     });
@@ -41,12 +42,12 @@ import ReconnectingEventSource from './ReconnectingEventSource';
       const data = JSON.parse(e.data);
       const sec = parseInt(data.sec);
       updateTime(sec);
-      sendNotificationIfPossible(
+      notifier.send(
         `Timer stopped by ${data.name} (${secondToDisplayTime(sec)})`
       );
     });
     evtSource.addEventListener(EventType.TIMER_OVER, (e: MessageEvent) => {
-      sendNotificationIfPossible('Time ended');
+      notifier.send('Time ended');
     });
   }
 
@@ -107,17 +108,6 @@ import ReconnectingEventSource from './ReconnectingEventSource';
       item.textContent = JSON.stringify(h);
       listEl.appendChild(item);
     });
-  }
-
-  function sendNotificationIfPossible(msg: string) {
-    if (Notification.permission === 'granted') {
-      const n = new Notification('Mob Timer', {
-        body: msg,
-        renotify: true,
-        tag: 'mob-timer'
-      });
-      n.onclick = () => window.focus();
-    }
   }
 
   function secondToDisplayTime(sec: number) {
