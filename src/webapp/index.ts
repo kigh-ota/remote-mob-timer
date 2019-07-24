@@ -2,11 +2,9 @@ import animals from './animals';
 import { EventType } from '../common/IEvent';
 import ReconnectingEventSource from './ReconnectingEventSource';
 (() => {
-  let evtSource: ReconnectingEventSource | null = null;
-
   window.onload = () => {
     Notification.requestPermission();
-    evtSource = new ReconnectingEventSource(
+    const evtSource = new ReconnectingEventSource(
       () => {
         document.querySelector('.connection-status').textContent = '';
       },
@@ -15,7 +13,7 @@ import ReconnectingEventSource from './ReconnectingEventSource';
           'Disconnected. Trying to reconnect...';
       }
     );
-    setupEventHandlers();
+    setupEventHandlers(evtSource);
     setupTimerButtons();
     setupNameInput();
     fetch('/status.json')
@@ -26,7 +24,7 @@ import ReconnectingEventSource from './ReconnectingEventSource';
       });
   };
 
-  function setupEventHandlers() {
+  function setupEventHandlers(evtSource: EventTarget) {
     evtSource.addEventListener(EventType.TIMER_TICK, (e: MessageEvent) => {
       const data = JSON.parse(e.data);
       updateTime(parseInt(data.sec));
