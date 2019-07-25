@@ -38,16 +38,10 @@ app.get('/', (req, res, next) => {
   res.render('index');
 });
 
-interface Client {
-  response: Response;
-  ip: string;
-  userAgent: string;
-}
-
 // Endpoint for Server-Sent Events
 // Ref. https://qiita.com/akameco/items/c54af5af35ef9b500b54
 let clientId = 0;
-let clients: { [clientId: number]: Client } = {};
+let clients: { [clientId: number]: ClientInfo & { response: Response } } = {};
 app.get('/events', (req, res) => {
   req.socket.setTimeout(43200);
   res.writeHead(200, {
