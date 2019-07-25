@@ -1,8 +1,9 @@
 import animals from './animals';
-import { EventType } from '../common/IEvent';
+import IEvent, { EventType } from '../common/IEvent';
 import ReconnectingEventSource from './ReconnectingEventSource';
 import Notifier from './Notifier';
 import { fromEvent } from 'rxjs';
+import StatusJson from '../common/StatusJson';
 
 (() => {
   window.onload = () => {
@@ -21,7 +22,7 @@ import { fromEvent } from 'rxjs';
     setupNameInput();
     fetch('/status.json')
       .then(res => res.json())
-      .then(json => {
+      .then((json: StatusJson) => {
         updateTime(json.timer.time);
         updateHistoryList(json.eventHistory.reverse());
       });
@@ -102,7 +103,7 @@ import { fromEvent } from 'rxjs';
     )[0].textContent = secondToDisplayTime(sec);
   }
 
-  function updateHistoryList(list: object[]) {
+  function updateHistoryList(list: IEvent[]) {
     const listEl = document.getElementsByClassName('history-list')[0];
     listEl.innerHTML = '';
     list.forEach(h => {
