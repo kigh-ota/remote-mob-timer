@@ -11,8 +11,9 @@ export default class ReconnectingEventSource extends EventTarget {
   private isConnected: boolean;
 
   constructor(
-    private readonly onConnected: Function,
-    private readonly onDisconnected: Function
+    private readonly url: string,
+    private readonly onConnected?: Function,
+    private readonly onDisconnected?: Function
   ) {
     super();
     this.evtSource = null;
@@ -36,7 +37,7 @@ export default class ReconnectingEventSource extends EventTarget {
       this.allEventsSubscription.unsubscribe();
       this.allEventsSubscription = null;
     }
-    this.evtSource = new EventSource('/events/');
+    this.evtSource = new EventSource(this.url);
     const allEvents = Object.values(EventType).map(eventType =>
       fromEvent(this.evtSource, eventType)
     );
