@@ -1,5 +1,7 @@
 # Mob Timer
 
+[![CircleCI](https://circleci.com/gh/kigh-ota/mob-timer.svg?style=svg)](https://circleci.com/gh/kigh-ota/mob-timer)
+
 - [Express](https://expressjs.com/)
 - [Prettier](https://prettier.io/)
 - [Pug](https://pugjs.org/)
