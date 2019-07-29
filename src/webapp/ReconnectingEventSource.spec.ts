@@ -6,21 +6,25 @@ import ReconnectingEventSource from './ReconnectingEventSource';
 import EventSourceMock from './EventSourceMock';
 
 describe('ReconnectingEventSource', () => {
-  it('test', () => {
+  let originalEventSource: any;
+
+  beforeEach(() => {
+    originalEventSource = (<any>window).EventSource; // FIXME  error TS2339: Property 'EventSource' does not exist on type 'Window'.
     Object.defineProperty(window, 'EventSource', EventSourceMock);
+  });
 
-    // new EventSource('/events/');
-    new ReconnectingEventSource('/events/');
+  afterEach(() => {
+    Object.defineProperty(window, 'EventSource', originalEventSource);
+  });
 
+  it('test', () => {
     const clock = sinon.useFakeTimers();
-    const spy = sinon.spy();
-    const sub = interval(1000).subscribe(spy);
-    expect(spy.callCount).to.equal(0);
+    const disconnectSpy = sinon.spy();
+    new ReconnectingEventSource('/events/', () => {}, disconnectSpy);
+
+    clock.tick(9000);
+    expect(disconnectSpy.callCount).to.equal(0);
     clock.tick(1500);
-    expect(spy.callCount).to.equal(1);
-    clock.tick(2000);
-    expect(spy.callCount).to.equal(3);
-    clock.restore();
-    sub.unsubscribe();
+    expect(disconnectSpy.callCount).to.equal(1);
   });
 });
