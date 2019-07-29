@@ -6,6 +6,8 @@ import Timer from './Timer';
 import IEvent from '../common/IEvent';
 import EventHistoryStore from './EventHistoryStore';
 import EventFactory from './EventFactory';
+import ClientInfo from '../common/ClientInfo';
+import StatusJson from '../common/StatusJson';
 
 const app = express();
 const eventHistoryStore = new EventHistoryStore();
@@ -36,16 +38,10 @@ app.get('/', (req, res, next) => {
   res.render('index');
 });
 
-interface Client {
-  response: Response;
-  ip: string;
-  userAgent: string;
-}
-
 // Endpoint for Server-Sent Events
 // Ref. https://qiita.com/akameco/items/c54af5af35ef9b500b54
 let clientId = 0;
-let clients: { [clientId: number]: Client } = {};
+let clients: { [clientId: number]: ClientInfo & { response: Response } } = {};
 app.get('/events', (req, res) => {
   req.socket.setTimeout(43200);
   res.writeHead(200, {
@@ -80,26 +76,27 @@ function sendServerEvent(event: IEvent) {
 }
 
 app.get('/status.json', (req, res, next) => {
-  res.json({
+  const statusJson: StatusJson = {
     timer: {
       time: timer.getTime(),
       nClient: Object.keys(clients).length,
       isRunning: timer.isRunning()
     },
-    clients: clientInfo(),
+    clients: clientInfoMap(),
     eventHistory: eventHistoryStore.list()
-  });
+  };
+  res.json(statusJson);
 });
 
-function clientInfo() {
-  const clientInfo: { [clientId: number]: any } = {};
+function clientInfoMap(): { [clientId: number]: ClientInfo } {
+  const ret: { [clientId: number]: ClientInfo } = {};
   for (let clientId in clients) {
-    clientInfo[clientId] = {
+    ret[clientId] = {
       userAgent: clients[clientId].userAgent,
       ip: clients[clientId].ip
     };
   }
-  return clientInfo;
+  return ret;
 }
 
 app.post('/reset', (req, res, next) => {

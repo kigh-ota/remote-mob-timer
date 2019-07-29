@@ -1,24 +1,27 @@
+import { Observable, interval, Subscription } from 'rxjs';
+
 export default class IntervalTimer {
-  private timeout: NodeJS.Timeout;
+  private subscription: Subscription | null;
 
   constructor(
     private readonly callback: () => void,
     private readonly intervalSec: number
   ) {
-    this.timeout = null;
+    this.subscription = null;
   }
 
   public start() {
     this.stop();
-    this.timeout = setInterval(() => {
+    this.subscription = interval(this.intervalSec * 1000).subscribe(() => {
       console.debug('IntervalTimer: timeout');
       this.callback();
-    }, this.intervalSec * 1000);
+    });
   }
 
   public stop() {
-    if (this.timeout) {
-      clearInterval(this.timeout);
+    if (this.subscription && !this.subscription.closed) {
+      this.subscription.unsubscribe();
+      this.subscription = null;
     }
   }
 }
