@@ -3,14 +3,11 @@ import { describe, it } from 'mocha';
 import * as sinon from 'sinon';
 import { expect } from 'chai';
 import ReconnectingEventSource from './ReconnectingEventSource';
-
-const EventSource = require('eventsourcemock');
+import EventSourceMock from './EventSourceMock';
 
 describe('ReconnectingEventSource', () => {
   it('test', () => {
-    console.log('FAFAFA');
-
-    window.EventSource = EventSource;
+    Object.defineProperty(window, 'EventSource', EventSourceMock);
 
     // new EventSource('/events/');
     new ReconnectingEventSource('/events/');
