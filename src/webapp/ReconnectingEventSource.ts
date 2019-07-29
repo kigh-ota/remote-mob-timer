@@ -49,7 +49,7 @@ export default class ReconnectingEventSource extends EventTarget {
     );
     this.allEventsSubscription = merge(...allEvents).subscribe(
       (e: MessageEvent) => {
-        console.log(`${e.type}: ${e.data}`);
+        console.debug(`${e.type}: ${e.data}`);
         this.connectionTimeoutWatcher.notify();
         if (!this.isConnected) {
           this.isConnected = true;
