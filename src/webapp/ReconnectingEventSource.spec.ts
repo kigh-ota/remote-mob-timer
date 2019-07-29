@@ -17,10 +17,10 @@ describe('ReconnectingEventSource', () => {
     Object.defineProperty(window, 'EventSource', originalEventSource);
   });
 
-  it('test', () => {
+  it('起動後n秒経過でonDisconnect()が実行される', () => {
     const clock = sinon.useFakeTimers();
     const disconnectSpy = sinon.spy();
-    new ReconnectingEventSource('/events/', () => {}, disconnectSpy);
+    new ReconnectingEventSource('/events/', () => {}, disconnectSpy, 10);
 
     clock.tick(9000);
     expect(disconnectSpy.callCount).to.equal(0);
