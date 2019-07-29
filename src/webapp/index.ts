@@ -16,7 +16,8 @@ import StatusJson from '../common/StatusJson';
         document.querySelector('.connection-status').textContent =
           'Disconnected. Trying to reconnect...';
       },
-      10
+      10,
+      20
     );
     const notifier = new Notifier();
     setupEventHandlers(evtSource, notifier);
