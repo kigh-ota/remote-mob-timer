@@ -8,6 +8,7 @@ import StatusJson from '../common/StatusJson';
 (() => {
   window.onload = () => {
     const evtSource = new ReconnectingEventSource(
+      '/events/',
       () => {
         document.querySelector('.connection-status').textContent = '';
       },
