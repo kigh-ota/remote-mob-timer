@@ -1,9 +1,11 @@
 import { EventType } from '../common/IEvent';
 import IntervalTimer from './IntervalTimer';
 import ConnectionTimeoutWatcher from './ConnectionTimeoutWatcher';
+import { Observable, fromEvent, merge, Subscription } from 'rxjs';
 
 export default class ReconnectingEventSource extends EventTarget {
   private evtSource: EventSource | null;
+  private allEventsSubscription: Subscription | null;
   private reconnecter: IntervalTimer;
   private connectionTimeoutWatcher: ConnectionTimeoutWatcher;
   private isConnected: boolean;
@@ -14,6 +16,7 @@ export default class ReconnectingEventSource extends EventTarget {
   ) {
     super();
     this.evtSource = null;
+    this.allEventsSubscription = null;
     this.connectionTimeoutWatcher = new ConnectionTimeoutWatcher(() => {
       if (this.isConnected) {
         this.isConnected = false;
@@ -22,7 +25,7 @@ export default class ReconnectingEventSource extends EventTarget {
     });
     this.isConnected = true;
     this.connectionTimeoutWatcher.notify();
-    this.reconnecter = new IntervalTimer(this.tryToConnect, 20);
+    this.reconnecter = new IntervalTimer(this.tryToConnect.bind(this), 20);
     this.tryToConnect();
   }
 
@@ -30,22 +33,24 @@ export default class ReconnectingEventSource extends EventTarget {
     if (this.evtSource) {
       this.evtSource.close();
       this.evtSource = null;
+      this.allEventsSubscription.unsubscribe();
+      this.allEventsSubscription = null;
     }
     this.evtSource = new EventSource('/events/');
-    for (const eventType in EventType) {
-      this.evtSource.addEventListener(
-        EventType[eventType],
-        (e: MessageEvent) => {
-          console.log(`${e.type}: ${e.data}`);
-          this.connectionTimeoutWatcher.notify();
-          if (!this.isConnected) {
-            this.isConnected = true;
-            this.handleConnected();
-          }
-          this.dispatchEvent(new MessageEvent(e.type, event));
+    const allEvents = Object.values(EventType).map(eventType =>
+      fromEvent(this.evtSource, eventType)
+    );
+    this.allEventsSubscription = merge(...allEvents).subscribe(
+      (e: MessageEvent) => {
+        console.log(`${e.type}: ${e.data}`);
+        this.connectionTimeoutWatcher.notify();
+        if (!this.isConnected) {
+          this.isConnected = true;
+          this.handleConnected();
         }
-      );
-    }
+        this.dispatchEvent(new MessageEvent(e.type, event));
+      }
+    );
   }
 
   private handleConnected() {
