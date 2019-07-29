@@ -13,7 +13,7 @@ describe('Timer', () => {
     clock.restore();
   });
 
-  it('startしていなければtickしない', () => {
+  it('does not tick unless started', () => {
     const onTickSpy = sinon.spy();
     const timer = new Timer(onTickSpy);
     timer.setTime(10);
@@ -22,7 +22,7 @@ describe('Timer', () => {
     assert.equal(timer.getTime(), 10);
   });
 
-  it('startしていればtickして時間が減る', () => {
+  it('ticks after started', () => {
     const onTickSpy = sinon.spy();
     const timer = new Timer(onTickSpy);
     timer.setTime(10);
@@ -32,7 +32,7 @@ describe('Timer', () => {
     assert.equal(timer.getTime(), 8);
   });
 
-  it('時間が来たらoverする', () => {
+  it('calls over() correctly', () => {
     const onOverSpy = sinon.spy();
     const timer = new Timer(() => {}, onOverSpy);
     timer.setTime(5);
