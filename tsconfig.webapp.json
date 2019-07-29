@@ -3,9 +3,10 @@
     "sourceMap": true,
     "esModuleInterop": true,
     "module": "commonjs",
-    "target": "es6",
+    "target": "es2017",
     "outDir": "public/javascripts",
-    "noImplicitAny": true
+    "noImplicitAny": true,
+    "typeRoots": ["src/webapp/typings", "node_modules/@types"]
   },
   "include": ["src/webapp/**/*.ts"]
 }
