@@ -1,6 +1,6 @@
 export default class ConnectionTimeoutWatcher {
   private onDisconnected: Function;
-  private timeout: NodeJS.Timeout | null;
+  private timeout: number | null;
   static readonly TIMEOUT_SEC: number = 10;
 
   constructor(onDisconnected: Function) {
@@ -10,10 +10,10 @@ export default class ConnectionTimeoutWatcher {
 
   notify() {
     if (this.timeout) {
-      clearTimeout(this.timeout);
+      window.clearTimeout(this.timeout);
     }
     console.debug('ConnectionTimeoutWatcher: notified');
-    this.timeout = setTimeout(() => {
+    this.timeout = window.setTimeout(() => {
       this.onDisconnected();
       console.debug('ConnectionTimeoutWatcher: timeout');
     }, ConnectionTimeoutWatcher.TIMEOUT_SEC * 1000);

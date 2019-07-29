@@ -37,7 +37,7 @@ export default class ReconnectingEventSource extends EventTarget {
       this.allEventsSubscription.unsubscribe();
       this.allEventsSubscription = null;
     }
-    this.evtSource = new EventSource(this.url);
+    this.evtSource = new (<any>window).EventSource(this.url);
     const allEvents = Object.values(EventType).map(eventType =>
       fromEvent(this.evtSource, eventType)
     );
