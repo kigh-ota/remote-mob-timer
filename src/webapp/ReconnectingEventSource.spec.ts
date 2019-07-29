@@ -10,6 +10,7 @@ const URL = '/events/';
 describe('ReconnectingEventSource', () => {
   let clock: sinon.SinonFakeTimers;
   let createEventSourceStub: sinon.SinonStub;
+  let consoleDebugStub: sinon.SinonStub;
 
   beforeEach(() => {
     clock = sinon.useFakeTimers();
@@ -18,22 +19,18 @@ describe('ReconnectingEventSource', () => {
       .callsFake(() => {
         return new EventSourceMock(URL);
       });
+    consoleDebugStub = sinon.stub(console, 'debug');
   });
 
   afterEach(() => {
+    consoleDebugStub.restore();
     createEventSourceStub.restore();
     clock.restore();
   });
 
   it('起動後n秒経過でonDisconnect()が実行される', () => {
     const disconnectSpy = sinon.spy();
-    const sut = new ReconnectingEventSource(
-      URL,
-      () => {},
-      disconnectSpy,
-      10,
-      20
-    );
+    new ReconnectingEventSource(URL, () => {}, disconnectSpy, 10, 20);
 
     clock.tick(9000);
     expect(disconnectSpy.callCount).to.equal(0);
@@ -43,7 +40,7 @@ describe('ReconnectingEventSource', () => {
   });
 
   it('切断後n秒おきに再接続を繰り返し試みる', () => {
-    const sut = new ReconnectingEventSource(URL, () => {}, () => {}, 10, 20);
+    new ReconnectingEventSource(URL, () => {}, () => {}, 10, 20);
     clock.tick(29500);
     expect(createEventSourceStub.callCount).to.equal(1);
 
@@ -57,35 +54,36 @@ describe('ReconnectingEventSource', () => {
     expect(createEventSourceStub.callCount).to.equal(4);
   });
 
-  it('接続確認できたらonConnected()実行し、再接続をやめる', () => {
-    const onConnectedSpy = sinon.spy();
-    const sut = new ReconnectingEventSource(
-      URL,
-      onConnectedSpy,
-      () => {},
-      10,
-      20
-    );
-    clock.tick(40000); // 40s
-    expect(onConnectedSpy.callCount).to.equal(1);
-    expect(createEventSourceStub.callCount).to.equal(2);
+  Object.values(EventType).forEach(eventType => {
+    it('接続確認できたらonConnected()実行し、再接続をやめる', () => {
+      const onConnectedSpy = sinon.spy();
+      new ReconnectingEventSource(URL, onConnectedSpy, () => {}, 10, 20);
+      clock.tick(40000); // 40s
+      expect(onConnectedSpy.callCount).to.equal(1);
+      expect(createEventSourceStub.callCount).to.equal(2);
 
-    const ev = new MessageEvent(EventType.ALIVE, {});
-    sources[URL].emit(ev.type, ev);
-    expect(onConnectedSpy.callCount).to.equal(2);
+      const ev = new MessageEvent(eventType, {});
+      sources[URL].emit(ev.type, ev);
+      expect(onConnectedSpy.callCount).to.equal(2);
 
-    clock.tick(5000); // 45s
-    sources[URL].emit(ev.type, ev);
+      clock.tick(5000); // 45s
+      sources[URL].emit(ev.type, ev);
 
-    clock.tick(5000); // 50s
-    sources[URL].emit(ev.type, ev);
+      clock.tick(5000); // 50s
+      sources[URL].emit(ev.type, ev);
 
-    clock.tick(5000); // 55s
-    expect(onConnectedSpy.callCount).to.equal(2);
-    expect(createEventSourceStub.callCount).to.equal(2);
+      clock.tick(5000); // 55s
+      expect(onConnectedSpy.callCount).to.equal(2);
+      expect(createEventSourceStub.callCount).to.equal(2);
+    });
   });
 
   it('切断状態でなければ、eventを受信してもonConnectedは実行されない', () => {
-    //TODO
+    const onConnectedSpy = sinon.spy();
+    new ReconnectingEventSource(URL, onConnectedSpy, () => {}, 10, 20);
+    expect(onConnectedSpy.callCount).to.equal(1);
+    const ev = new MessageEvent(EventType.ALIVE, {});
+    sources[URL].emit(ev.type, ev);
+    expect(onConnectedSpy.callCount).to.equal(1);
   });
 });
