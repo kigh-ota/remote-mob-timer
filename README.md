@@ -1,4 +1,4 @@
-# Mob Timer
+# Remote Mob Timer
 
 [![CircleCI](https://circleci.com/gh/kigh-ota/mob-timer.svg?style=svg)](https://circleci.com/gh/kigh-ota/mob-timer)
 
