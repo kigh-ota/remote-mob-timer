@@ -14,7 +14,8 @@ export default class ReconnectingEventSource extends EventTarget {
     private readonly url: string,
     private readonly onConnected: Function,
     private readonly onDisconnected: Function,
-    connectionTimeoutSec: number
+    connectionTimeoutSec: number,
+    reconnectingIntervalSec: number
   ) {
     super();
     this.evtSource = null;
@@ -25,10 +26,14 @@ export default class ReconnectingEventSource extends EventTarget {
         this.handleDisconnected();
       }
     }, connectionTimeoutSec);
-    this.isConnected = true;
     this.connectionTimeoutWatcher.notify();
-    this.reconnecter = new IntervalTimer(this.tryToConnect.bind(this), 20);
+    this.reconnecter = new IntervalTimer(
+      this.tryToConnect.bind(this),
+      reconnectingIntervalSec
+    );
     this.tryToConnect();
+    this.isConnected = true;
+    this.handleConnected();
   }
 
   private tryToConnect() {
@@ -38,7 +43,7 @@ export default class ReconnectingEventSource extends EventTarget {
       this.allEventsSubscription.unsubscribe();
       this.allEventsSubscription = null;
     }
-    this.evtSource = new (<any>window).EventSource(this.url); // FIXME  error TS2339: Property 'EventSource' does not exist on type 'Window'.
+    this.evtSource = this.createEventSource(this.url);
     const allEvents = Object.values(EventType).map(eventType =>
       fromEvent(this.evtSource, eventType)
     );
@@ -53,6 +58,10 @@ export default class ReconnectingEventSource extends EventTarget {
         this.dispatchEvent(new MessageEvent(e.type, event));
       }
     );
+  }
+
+  private createEventSource(url: string) {
+    return new (<any>window).EventSource(url); // FIXME  error TS2339: Property 'EventSource' does not exist on type 'Window'.
   }
 
   private handleConnected() {
