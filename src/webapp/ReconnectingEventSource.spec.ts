@@ -28,7 +28,7 @@ describe('ReconnectingEventSource', () => {
     clock.restore();
   });
 
-  it('起動後n秒経過でonDisconnect()が実行される', () => {
+  it('calls onDisconnect() after n seconds', () => {
     const disconnectSpy = sinon.spy();
     new ReconnectingEventSource(URL, () => {}, disconnectSpy, 10, 20);
 
@@ -39,7 +39,7 @@ describe('ReconnectingEventSource', () => {
     expect(disconnectSpy.callCount).to.equal(1);
   });
 
-  it('切断後n秒おきに再接続を繰り返し試みる', () => {
+  it('try to reconnect every n seconds after disconnected', () => {
     new ReconnectingEventSource(URL, () => {}, () => {}, 10, 20);
     clock.tick(29500);
     expect(createEventSourceStub.callCount).to.equal(1);
@@ -55,7 +55,7 @@ describe('ReconnectingEventSource', () => {
   });
 
   Object.values(EventType).forEach(eventType => {
-    it('接続確認できたらonConnected()実行し、再接続をやめる', () => {
+    it('calls onConnected() and stop reconnecting when connection is recovered', () => {
       const onConnectedSpy = sinon.spy();
       new ReconnectingEventSource(URL, onConnectedSpy, () => {}, 10, 20);
       clock.tick(40000); // 40s
@@ -78,7 +78,7 @@ describe('ReconnectingEventSource', () => {
     });
   });
 
-  it('切断状態でなければ、eventを受信してもonConnectedは実行されない', () => {
+  it('does not call onConnected() even when receives an event, unless disconnected', () => {
     const onConnectedSpy = sinon.spy();
     new ReconnectingEventSource(URL, onConnectedSpy, () => {}, 10, 20);
     expect(onConnectedSpy.callCount).to.equal(1);
