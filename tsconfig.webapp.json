@@ -4,6 +4,7 @@
     "esModuleInterop": true,
     "module": "commonjs",
     "target": "es2017",
+    "jsx": "react",
     "outDir": "public/javascripts",
     "noImplicitAny": true,
     "typeRoots": ["src/webapp/typings", "node_modules/@types"]
