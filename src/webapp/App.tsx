@@ -19,6 +19,11 @@ interface Props {
 const App: React.SFC<Props> = props => {
   const [sec, setSec] = useState(0);
 
+  const savedName = window.localStorage.getItem('name');
+  const initialName = savedName || randomName();
+  const [name, setNameState] = useState(initialName);
+  setStoredName(name);
+
   const notifier = new Notifier();
   setupEventHandlers(props.reconnectingEventSource, notifier);
   fetch('/status.json')
@@ -54,12 +59,12 @@ const App: React.SFC<Props> = props => {
     });
   }
 
-  function getNameInput(): HTMLInputElement {
-    return document.querySelector('input#name-input');
+  function setStoredName(name: string) {
+    window.localStorage.setItem('name', name);
   }
 
   function getName() {
-    return encodeURIComponent(getNameInput().value);
+    return encodeURIComponent(name);
   }
 
   function updateHistoryList(list: IEvent[]) {
@@ -86,9 +91,20 @@ const App: React.SFC<Props> = props => {
       <div>
         <ToggleButton getName={getName} setSec={setSec} />
       </div>
-      <NameInput />
+      <NameInput
+        name={name}
+        setName={n => {
+          setNameState(n);
+          setStoredName(n);
+        }}
+      />
     </React.Fragment>
   );
 };
+
+function randomName() {
+  const i = Math.floor(Math.random() * Math.floor(animals.length));
+  return animals[i];
+}
 
 export default App;
