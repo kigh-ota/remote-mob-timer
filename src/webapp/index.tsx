@@ -60,7 +60,7 @@ import StatusJson from '../common/StatusJson';
   function setupNameInput() {
     const input = getNameInput();
     input.addEventListener('change', e => {
-      window.localStorage.setItem('name', (<HTMLInputElement>e.target).value);
+      window.localStorage.setItem('name', (e.target as HTMLInputElement).value);
     });
     const savedName = window.localStorage.getItem('name');
     const name = savedName || randomName();
