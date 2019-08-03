@@ -1,17 +1,19 @@
 // Karma configuration
 // Generated on Tue Jul 30 2019 00:06:50 GMT+0900 (GMT+09:00)
 
+const webpackConfig = require('./webpack.config.js');
+
 module.exports = function(config) {
   config.set({
     // base path that will be used to resolve all patterns (eg. files, exclude)
-    basePath: '',
+    basePath: 'src/webapp',
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['mocha', 'karma-typescript'],
+    frameworks: ['mocha'],
 
     // list of files / patterns to load in the browser
-    files: ['src/webapp/**/*.ts', 'src/common/**/*.ts'],
+    files: ['**/*.spec.ts'],
 
     // list of files / patterns to exclude
     exclude: [],
@@ -19,13 +21,21 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      '**/*.ts': ['karma-typescript']
+      '**/*.spec.ts': ['webpack']
+    },
+
+    webpack: {
+      module: webpackConfig.module,
+      resolve: webpackConfig.resolve,
+      node: {
+        fs: 'empty' // https://github.com/webpack-contrib/css-loader/issues/447
+      }
     },
 
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['progress', 'karma-typescript'],
+    reporters: ['progress'],
 
     // web server port
     port: 9876,
@@ -50,13 +60,6 @@ module.exports = function(config) {
 
     // Concurrency level
     // how many browser should be started simultaneous
-    concurrency: Infinity,
-
-    karmaTypescriptConfig: {
-      bundlerOptions: {
-        entrypoints: /\.spec\.ts$/
-      },
-      tsconfig: './tsconfig.webapp.json'
-    }
+    concurrency: Infinity
   });
 };
