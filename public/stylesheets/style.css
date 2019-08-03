@@ -17,11 +17,7 @@ button {
   font-size: medium;
 }
 
-.name-input-wrapper {
-  margin-top: 20px;
-}
-
-.name-input-wrapper input {
+#name-input {
   font-size: medium;
 }
 

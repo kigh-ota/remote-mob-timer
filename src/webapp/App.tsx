@@ -10,6 +10,7 @@ import { secondToDisplayTime } from './util';
 import { useState } from 'react';
 import ResetButton from './components/ResetTimerButton';
 import ToggleButton from './components/ToggleButton';
+import NameInput from './components/NameInput';
 
 interface Props {
   reconnectingEventSource: ReconnectingEventSource;
@@ -20,7 +21,6 @@ const App: React.SFC<Props> = props => {
 
   const notifier = new Notifier();
   setupEventHandlers(props.reconnectingEventSource, notifier);
-  setupNameInput();
   fetch('/status.json')
     .then(res => res.json())
     .then((json: StatusJson) => {
@@ -52,22 +52,6 @@ const App: React.SFC<Props> = props => {
     fromEvent(evtSource, EventType.TIMER_OVER).subscribe((e: MessageEvent) => {
       notifier.send('Time ended');
     });
-  }
-
-  function setupNameInput() {
-    const input = getNameInput();
-    input.addEventListener('change', e => {
-      window.localStorage.setItem('name', (e.target as HTMLInputElement).value);
-    });
-    const savedName = window.localStorage.getItem('name');
-    const name = savedName || randomName();
-    input.value = name;
-    window.localStorage.setItem('name', name);
-  }
-
-  function randomName() {
-    const i = Math.floor(Math.random() * Math.floor(animals.length));
-    return animals[i];
   }
 
   function getNameInput(): HTMLInputElement {
@@ -102,6 +86,7 @@ const App: React.SFC<Props> = props => {
       <div>
         <ToggleButton getName={getName} setSec={setSec} />
       </div>
+      <NameInput />
     </React.Fragment>
   );
 };
