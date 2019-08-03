@@ -7,7 +7,7 @@ interface Props {
 
 const ConnectionStatus: React.SFC<Props> = props => {
   return (
-    <div className="connection">
+    <div className="connection" style={{ marginTop: 20 }}>
       <span>
         {props.connected ? '' : 'Disconnected. Trying to reconnect...'}
       </span>

@@ -12,29 +12,27 @@ import ResetButton from './components/ResetTimerButton';
 import ToggleButton from './components/ToggleButton';
 import NameInput from './components/NameInput';
 import ConnectionStatus from './components/ConnectionStatus';
+import EventHistory from './components/EventHistory';
 
 interface Props {
   reconnectingEventSource: ReconnectingEventSource;
+  notifier: Notifier;
+  initialSec: number;
+  initialEvents: IEvent[];
 }
 
 const App: React.SFC<Props> = props => {
-  const [sec, setSec] = useState(0);
+  const [sec, setSec] = useState(props.initialSec);
+  const [connected, setConnected] = useState(true);
+  const [events, setEvents] = useState(props.initialEvents);
 
   const savedName = window.localStorage.getItem('name');
   const initialName = savedName || randomName();
   const [name, setNameState] = useState(initialName);
   setStoredName(name);
+  
 
-  const [connected, setConnected] = useState(true);
-
-  const notifier = new Notifier();
-  setupEventHandlers(props.reconnectingEventSource, notifier);
-  fetch('/status.json')
-    .then(res => res.json())
-    .then((json: StatusJson) => {
-      setSec(json.timer.time);
-      updateHistoryList(json.eventHistory.reverse());
-    });
+  setupEventHandlers(props.reconnectingEventSource, props.notifier);
 
   function setupEventHandlers(evtSource: EventTarget, notifier: Notifier) {
     fromEvent(evtSource, EventType.TIMER_TICK).subscribe((e: MessageEvent) => {
@@ -65,22 +63,8 @@ const App: React.SFC<Props> = props => {
     fromEvent(evtSource, 'disconnected').subscribe(e => setConnected(false));
   }
 
-  function setStoredName(name: string) {
-    window.localStorage.setItem('name', name);
-  }
-
   function getName() {
     return encodeURIComponent(name);
-  }
-
-  function updateHistoryList(list: IEvent[]) {
-    const listEl = document.getElementsByClassName('history-list')[0];
-    listEl.innerHTML = '';
-    list.forEach(h => {
-      const item = document.createElement('li');
-      item.textContent = JSON.stringify(h);
-      listEl.appendChild(item);
-    });
   }
 
   const resetButtons = [25, 20, 15, 10, 5].map(min => (
@@ -95,7 +79,7 @@ const App: React.SFC<Props> = props => {
         {resetButtons}
       </div>
       <div>
-        <ToggleButton getName={getName} setSec={setSec} />
+        <ToggleButton getName={getName.bind(this)} setSec={setSec} />
       </div>
       <NameInput
         name={name}
@@ -105,6 +89,7 @@ const App: React.SFC<Props> = props => {
         }}
       />
       <ConnectionStatus connected={connected} />
+      <EventHistory events={events} />
     </React.Fragment>
   );
 };
@@ -112,6 +97,10 @@ const App: React.SFC<Props> = props => {
 function randomName() {
   const i = Math.floor(Math.random() * Math.floor(animals.length));
   return animals[i];
+}
+
+function setStoredName(name: string) {
+  window.localStorage.setItem('name', name);
 }
 
 export default App;

@@ -18,10 +18,20 @@ import { secondToDisplayTime } from './util';
       10,
       20
     );
+    const notifier = new Notifier();
 
-    ReactDOM.render(
-      <App reconnectingEventSource={reconnectingEventSource} />,
-      document.getElementById('root')
-    );
+    fetch('/status.json')
+      .then(res => res.json())
+      .then((json: StatusJson) => {
+        ReactDOM.render(
+          <App
+            reconnectingEventSource={reconnectingEventSource}
+            notifier={notifier}
+            initialSec={json.timer.time}
+            initialEvents={json.eventHistory.reverse()}
+          />,
+          document.getElementById('root')
+        );
+      });
   };
 })();

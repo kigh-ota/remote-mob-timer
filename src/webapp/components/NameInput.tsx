@@ -13,6 +13,7 @@ const NameInput: React.SFC<Props> = props => {
       <input
         type="text"
         id="name-input"
+        style={{ fontSize: 'medium' }}
         onChange={e => props.setName(e.target.value)}
         value={props.name}
       />

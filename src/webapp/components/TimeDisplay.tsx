@@ -6,7 +6,9 @@ interface Props {
 }
 
 const TimeDisplay: React.SFC<Props> = props => {
-  return <div className="time-display">{secondToDisplayTime(props.sec)}</div>;
+  return (
+    <div style={{ fontSize: 'xx-large' }}>{secondToDisplayTime(props.sec)}</div>
+  );
 };
 
 export default TimeDisplay;
