@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { secondToDisplayTime } from './util';
+import { secondToDisplayTime } from '../util';
 
 interface Props {
   sec: number;

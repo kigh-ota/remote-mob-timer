@@ -1,5 +1,5 @@
 import * as React from 'react';
-import TimeDisplay from './TimeDisplay';
+import TimeDisplay from './components/TimeDisplay';
 import animals from './animals';
 import IEvent, { EventType } from '../common/IEvent';
 import ReconnectingEventSource from './ReconnectingEventSource';
@@ -8,6 +8,7 @@ import { fromEvent } from 'rxjs';
 import StatusJson from '../common/StatusJson';
 import { secondToDisplayTime } from './util';
 import { useState } from 'react';
+import ResetTimerButton from './components/ResetTimerButton';
 
 interface Props {
   reconnectingEventSource: ReconnectingEventSource;
@@ -78,13 +79,6 @@ const App: React.SFC<Props> = props => {
   }
 
   function setupTimerButtons() {
-    [25, 20, 15, 10, 5].forEach(min => {
-      document
-        .getElementsByClassName(`start-${min}-min`)[0]
-        .addEventListener('click', e => {
-          fetch(`/reset?sec=${min * 60}&name=${getName()}`, { method: 'POST' });
-        });
-    });
     document
       .getElementsByClassName('toggle')[0]
       .addEventListener('click', e => {
@@ -106,7 +100,19 @@ const App: React.SFC<Props> = props => {
     });
   }
 
-  return <TimeDisplay sec={sec} />;
+  const resetButtons = [25, 20, 15, 10, 5].map(min => (
+    <ResetTimerButton min={min} getName={getName.bind(this)} />
+  ));
+
+  return (
+    <React.Fragment>
+      <TimeDisplay sec={sec} />
+      <div>
+        <span>START:</span>
+        {resetButtons}
+      </div>
+    </React.Fragment>
+  );
 };
 
 export default App;
