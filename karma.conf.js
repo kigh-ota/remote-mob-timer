@@ -25,8 +25,13 @@ module.exports = function(config) {
     },
 
     webpack: {
-      module: webpackConfig.module,
+      module: Object.assign(webpackConfig.module, {
+        // Suppress warning from mocha: "Critical dependency: the request of a dependency is an expression"
+        exprContextCritical: false
+      }),
       resolve: webpackConfig.resolve,
+      performance: { hints: false },
+      mode: 'none',
       node: {
         fs: 'empty' // https://github.com/webpack-contrib/css-loader/issues/447
       }

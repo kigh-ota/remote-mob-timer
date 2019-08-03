@@ -17,5 +17,9 @@ module.exports = {
         options: { configFile: 'tsconfig.webapp.json' }
       }
     ]
+  },
+  performance: {
+    maxEntrypointSize: 1000000,
+    maxAssetSize: 1000000
   }
 };
