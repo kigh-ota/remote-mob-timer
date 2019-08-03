@@ -11,6 +11,7 @@ import { useState } from 'react';
 import ResetButton from './components/ResetTimerButton';
 import ToggleButton from './components/ToggleButton';
 import NameInput from './components/NameInput';
+import ConnectionStatus from './components/ConnectionStatus';
 
 interface Props {
   reconnectingEventSource: ReconnectingEventSource;
@@ -23,6 +24,8 @@ const App: React.SFC<Props> = props => {
   const initialName = savedName || randomName();
   const [name, setNameState] = useState(initialName);
   setStoredName(name);
+
+  const [connected, setConnected] = useState(true);
 
   const notifier = new Notifier();
   setupEventHandlers(props.reconnectingEventSource, notifier);
@@ -57,6 +60,9 @@ const App: React.SFC<Props> = props => {
     fromEvent(evtSource, EventType.TIMER_OVER).subscribe((e: MessageEvent) => {
       notifier.send('Time ended');
     });
+
+    fromEvent(evtSource, 'connected').subscribe(e => setConnected(true));
+    fromEvent(evtSource, 'disconnected').subscribe(e => setConnected(false));
   }
 
   function setStoredName(name: string) {
@@ -98,6 +104,7 @@ const App: React.SFC<Props> = props => {
           setStoredName(n);
         }}
       />
+      <ConnectionStatus connected={connected} />
     </React.Fragment>
   );
 };

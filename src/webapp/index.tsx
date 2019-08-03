@@ -13,13 +13,8 @@ import { secondToDisplayTime } from './util';
   window.onload = () => {
     const reconnectingEventSource = new ReconnectingEventSource(
       '/events/',
-      () => {
-        document.querySelector('.connection-status').textContent = '';
-      },
-      () => {
-        document.querySelector('.connection-status').textContent =
-          'Disconnected. Trying to reconnect...';
-      },
+      () => {},
+      () => {},
       10,
       20
     );
