@@ -1,6 +1,6 @@
 # Remote Mob Timer
 
-[![CircleCI](https://circleci.com/gh/kigh-ota/mob-timer.svg?style=svg)](https://circleci.com/gh/kigh-ota/mob-timer)
+[![CircleCI](https://circleci.com/gh/kigh-ota/remote-mob-timer.svg?style=svg)](https://circleci.com/gh/kigh-ota/remote-mob-timer)
 
 ## To run
 
