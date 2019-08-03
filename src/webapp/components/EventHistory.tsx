@@ -1,14 +1,20 @@
 import * as React from 'react';
-import { secondToDisplayTime } from '../util';
 import IEvent from '../../common/IEvent';
+import { List } from 'antd';
 
 interface Props {
   events: IEvent[];
 }
 
 const EventHistory: React.SFC<Props> = props => {
-  const items = props.events.map(e => <li>{JSON.stringify(e)}</li>);
-  return <ul style={{ color: '#fff' }}>{items}</ul>;
+  return (
+    <List
+      size="small"
+      dataSource={props.events}
+      renderItem={e => <List.Item>{JSON.stringify(e)}</List.Item>}
+      bordered
+    />
+  );
 };
 
 export default EventHistory;

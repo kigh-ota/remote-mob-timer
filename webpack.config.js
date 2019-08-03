@@ -1,5 +1,6 @@
 module.exports = {
   entry: './src/webapp/index.tsx',
+  mode: 'development',
   devtool: 'inline-source-map',
   output: {
     path: __dirname + '/public/javascripts',
