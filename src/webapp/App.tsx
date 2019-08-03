@@ -5,7 +5,6 @@ import IEvent, { EventType } from '../common/IEvent';
 import ReconnectingEventSource from './ReconnectingEventSource';
 import Notifier from './Notifier';
 import { fromEvent } from 'rxjs';
-import StatusJson from '../common/StatusJson';
 import { secondToDisplayTime } from './util';
 import { useState } from 'react';
 import ResetButton from './components/ResetTimerButton';
@@ -24,7 +23,7 @@ interface Props {
 const App: React.SFC<Props> = props => {
   const [sec, setSec] = useState(props.initialSec);
   const [connected, setConnected] = useState(true);
-  const [events, setEvents] = useState(props.initialEvents);
+  const [events] = useState(props.initialEvents);
 
   const savedName = window.localStorage.getItem('name');
   const initialName = savedName || randomName();
@@ -54,12 +53,12 @@ const App: React.SFC<Props> = props => {
         `Timer stopped by ${data.name} (${secondToDisplayTime(sec)})`
       );
     });
-    fromEvent(evtSource, EventType.TIMER_OVER).subscribe((e: MessageEvent) => {
+    fromEvent(evtSource, EventType.TIMER_OVER).subscribe(() => {
       notifier.send('Time ended');
     });
 
-    fromEvent(evtSource, 'connected').subscribe(e => setConnected(true));
-    fromEvent(evtSource, 'disconnected').subscribe(e => setConnected(false));
+    fromEvent(evtSource, 'connected').subscribe(() => setConnected(true));
+    fromEvent(evtSource, 'disconnected').subscribe(() => setConnected(false));
   }
 
   function getName() {
