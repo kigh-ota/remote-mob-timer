@@ -9,23 +9,15 @@ import StatusJson from '../common/StatusJson';
 import { secondToDisplayTime } from './util';
 import { useState } from 'react';
 
-const App = () => {
+interface Props {
+  reconnectingEventSource: ReconnectingEventSource;
+}
+
+const App: React.SFC<Props> = props => {
   const [sec, setSec] = useState(0);
 
-  const evtSource = new ReconnectingEventSource(
-    '/events/',
-    () => {
-      document.querySelector('.connection-status').textContent = '';
-    },
-    () => {
-      document.querySelector('.connection-status').textContent =
-        'Disconnected. Trying to reconnect...';
-    },
-    10,
-    20
-  );
   const notifier = new Notifier();
-  setupEventHandlers(evtSource, notifier);
+  setupEventHandlers(props.reconnectingEventSource, notifier);
   setupTimerButtons();
   setupNameInput();
   fetch('/status.json')

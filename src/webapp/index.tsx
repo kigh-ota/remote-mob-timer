@@ -11,6 +11,22 @@ import { secondToDisplayTime } from './util';
 
 (() => {
   window.onload = () => {
-    ReactDOM.render(<App />, document.getElementById('root'));
+    const reconnectingEventSource = new ReconnectingEventSource(
+      '/events/',
+      () => {
+        document.querySelector('.connection-status').textContent = '';
+      },
+      () => {
+        document.querySelector('.connection-status').textContent =
+          'Disconnected. Trying to reconnect...';
+      },
+      10,
+      20
+    );
+
+    ReactDOM.render(
+      <App reconnectingEventSource={reconnectingEventSource} />,
+      document.getElementById('root')
+    );
   };
 })();
