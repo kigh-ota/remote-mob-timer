@@ -4,6 +4,9 @@ import ReconnectingEventSource from './ReconnectingEventSource';
 import Notifier from './Notifier';
 import { fromEvent } from 'rxjs';
 import StatusJson from '../common/StatusJson';
+import App from './App';
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 
 (() => {
   window.onload = () => {
@@ -29,6 +32,8 @@ import StatusJson from '../common/StatusJson';
         updateTime(json.timer.time);
         updateHistoryList(json.eventHistory.reverse());
       });
+
+    ReactDOM.render(<App />, document.getElementById('root'));
   };
 
   function setupEventHandlers(evtSource: EventTarget, notifier: Notifier) {
