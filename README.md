@@ -18,6 +18,7 @@ npm run start
 - [Power-assert](https://github.com/power-assert-js/power-assert)
 - [Prettier](https://prettier.io/)
 - [Pug](https://pugjs.org/)
+- [React](https://ja.reactjs.org/)
 - [RxJS](https://rxjs-dev.firebaseapp.com/)
 - [Server-Sent Events](https://developer.mozilla.org/docs/Web/API/Server-sent_events)
 - [Sinon.JS](https://sinonjs.org/)

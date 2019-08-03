@@ -4,24 +4,5 @@ html
     title= title
     link(rel='stylesheet', href='/stylesheets/style.css')
   body
-    block content
+    div#root
     script(type='text/javascript' src='/javascripts/index.js')
-
-block content
-  h1= "Mob Timer"
-  p.time
-  div
-    span START:
-    button.start-25-min 25-min
-    button.start-20-min 20-min
-    button.start-15-min 15-min
-    button.start-10-min 10-min
-    button.start-5-min 5-min
-  div
-    button.toggle TOGGLE start/stop
-  div.name-input-wrapper
-    label(for='name-input') NAME:
-    input(type='text')#name-input
-  div.connection
-    span.connection-status
-  ul.history-list

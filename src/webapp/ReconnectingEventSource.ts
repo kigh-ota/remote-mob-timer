@@ -67,12 +67,14 @@ export default class ReconnectingEventSource extends EventTarget {
   private handleConnected() {
     this.reconnecter.stop();
     this.onConnected();
+    this.dispatchEvent(new Event('connected'));
     console.debug('ReconnectingEventSource: connected');
   }
 
   private handleDisconnected() {
     this.reconnecter.start();
     this.onDisconnected();
+    this.dispatchEvent(new Event('disconnected'));
     console.debug('ReconnectingEventSource: disconnected');
   }
 }

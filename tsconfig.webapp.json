@@ -6,6 +6,7 @@
     "target": "es2017",
     "outDir": "public/javascripts",
     "noImplicitAny": true,
+    "jsx": "react",
     "typeRoots": ["src/webapp/typings", "node_modules/@types"]
   },
   "include": ["src/webapp/**/*.ts"]

@@ -3,32 +3,8 @@ body {
   font: 14px 'Lucida Grande', Helvetica, Arial, sans-serif;
 }
 
-a {
-  color: #00b7ff;
-}
-
-.time {
-  font-size: xx-large;
-}
-
 button {
   padding: 5px;
   margin: 2px;
   font-size: medium;
-}
-
-.name-input-wrapper {
-  margin-top: 20px;
-}
-
-.name-input-wrapper input {
-  font-size: medium;
-}
-
-.connection {
-  margin-top: 20px;
-}
-
-.history-list {
-  color: #fff;
 }

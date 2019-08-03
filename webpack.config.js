@@ -1,18 +1,18 @@
 module.exports = {
-  entry: './src/webapp/index.ts',
+  entry: './src/webapp/index.tsx',
   devtool: 'inline-source-map',
   output: {
     path: __dirname + '/public/javascripts',
     filename: 'index.js'
   },
   resolve: {
-    extensions: ['.ts', '.js', '.json'], // without 'json', growl causes compile error
+    extensions: ['.ts', '.tsx', '.js', '.json'], // without 'json', growl causes compile error
     modules: ['node_modules']
   },
   module: {
     rules: [
       {
-        test: /\.ts$/,
+        test: /\.tsx?$/,
         loader: 'ts-loader',
         options: { configFile: 'tsconfig.webapp.json' }
       }
