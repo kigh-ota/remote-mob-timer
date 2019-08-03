@@ -30,7 +30,6 @@ const App: React.SFC<Props> = props => {
   const initialName = savedName || randomName();
   const [name, setNameState] = useState(initialName);
   setStoredName(name);
-  
 
   setupEventHandlers(props.reconnectingEventSource, props.notifier);
 
@@ -73,6 +72,7 @@ const App: React.SFC<Props> = props => {
 
   return (
     <React.Fragment>
+      <h1>Remote Mob Timer</h1>
       <TimeDisplay sec={sec} />
       <div>
         <span>START:</span>
