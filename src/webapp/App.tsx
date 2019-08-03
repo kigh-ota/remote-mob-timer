@@ -8,7 +8,8 @@ import { fromEvent } from 'rxjs';
 import StatusJson from '../common/StatusJson';
 import { secondToDisplayTime } from './util';
 import { useState } from 'react';
-import ResetTimerButton from './components/ResetTimerButton';
+import ResetButton from './components/ResetTimerButton';
+import ToggleButton from './components/ToggleButton';
 
 interface Props {
   reconnectingEventSource: ReconnectingEventSource;
@@ -19,7 +20,6 @@ const App: React.SFC<Props> = props => {
 
   const notifier = new Notifier();
   setupEventHandlers(props.reconnectingEventSource, notifier);
-  setupTimerButtons();
   setupNameInput();
   fetch('/status.json')
     .then(res => res.json())
@@ -78,18 +78,6 @@ const App: React.SFC<Props> = props => {
     return encodeURIComponent(getNameInput().value);
   }
 
-  function setupTimerButtons() {
-    document
-      .getElementsByClassName('toggle')[0]
-      .addEventListener('click', e => {
-        fetch(`/toggle?name=${getName()}`, { method: 'POST' })
-          .then(res => res.json())
-          .then(json => {
-            setSec(json.time);
-          });
-      });
-  }
-
   function updateHistoryList(list: IEvent[]) {
     const listEl = document.getElementsByClassName('history-list')[0];
     listEl.innerHTML = '';
@@ -101,7 +89,7 @@ const App: React.SFC<Props> = props => {
   }
 
   const resetButtons = [25, 20, 15, 10, 5].map(min => (
-    <ResetTimerButton min={min} getName={getName.bind(this)} />
+    <ResetButton min={min} getName={getName.bind(this)} />
   ));
 
   return (
@@ -110,6 +98,9 @@ const App: React.SFC<Props> = props => {
       <div>
         <span>START:</span>
         {resetButtons}
+      </div>
+      <div>
+        <ToggleButton getName={getName} setSec={setSec} />
       </div>
     </React.Fragment>
   );

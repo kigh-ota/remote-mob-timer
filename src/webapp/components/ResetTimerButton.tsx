@@ -5,7 +5,7 @@ interface Props {
   getName: () => string;
 }
 
-const ResetTimerButton: React.SFC<Props> = props => {
+const ResetButton: React.SFC<Props> = props => {
   return (
     <button
       onClick={e => {
@@ -17,4 +17,4 @@ const ResetTimerButton: React.SFC<Props> = props => {
   );
 };
 
-export default ResetTimerButton;
+export default ResetButton;
