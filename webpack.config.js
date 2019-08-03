@@ -6,7 +6,8 @@ module.exports = {
     filename: 'index.js'
   },
   resolve: {
-    extensions: ['.ts', '.js']
+    extensions: ['.ts', '.js', '.json'], // without 'json', growl causes compile error
+    modules: ['node_modules']
   },
   module: {
     rules: [
@@ -16,5 +17,9 @@ module.exports = {
         options: { configFile: 'tsconfig.webapp.json' }
       }
     ]
+  },
+  performance: {
+    maxEntrypointSize: 1000000,
+    maxAssetSize: 1000000
   }
 };
