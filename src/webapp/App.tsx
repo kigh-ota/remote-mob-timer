@@ -4,9 +4,9 @@ import animals from './animals';
 import IEvent, { EventType } from '../common/IEvent';
 import ReconnectingEventSource from './ReconnectingEventSource';
 import Notifier from './Notifier';
-import { fromEvent } from 'rxjs';
+import { fromEvent, Subscription } from 'rxjs';
 import { secondToDisplayTime } from './util';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ResetButton from './components/ResetTimerButton';
 import ToggleButton from './components/ToggleButton';
 import NameInput from './components/NameInput';
@@ -31,38 +31,56 @@ const App: React.SFC<Props> = props => {
   const [name, setNameState] = useState(initialName);
   setStoredName(name);
 
-  setupEventHandlers(props.reconnectingEventSource, props.notifier);
+  useEffect(() => {
+    const subs = setupEventHandlers(
+      props.reconnectingEventSource,
+      props.notifier
+    );
+    return () => {
+      subs.forEach(sub => sub.unsubscribe());
+    };
+  });
 
-  function setupEventHandlers(evtSource: EventTarget, notifier: Notifier) {
-    fromEvent(evtSource, EventType.TIMER_TICK).subscribe((e: MessageEvent) => {
-      const data = JSON.parse(e.data);
-      setSec(parseInt(data.sec));
-    });
-    fromEvent(evtSource, EventType.TIMER_START).subscribe((e: MessageEvent) => {
-      const data = JSON.parse(e.data);
-      const sec = parseInt(data.sec);
-      setSec(sec);
-      notifier.send(
-        `Timer started by ${data.name} (${secondToDisplayTime(sec)})`
-      );
-      updateEvents();
-    });
-    fromEvent(evtSource, EventType.TIMER_STOP).subscribe((e: MessageEvent) => {
-      const data = JSON.parse(e.data);
-      const sec = parseInt(data.sec);
-      setSec(sec);
-      notifier.send(
-        `Timer stopped by ${data.name} (${secondToDisplayTime(sec)})`
-      );
-      updateEvents();
-    });
-    fromEvent(evtSource, EventType.TIMER_OVER).subscribe(() => {
-      notifier.send('Time ended');
-      updateEvents();
-    });
-
-    fromEvent(evtSource, 'connected').subscribe(() => setConnected(true));
-    fromEvent(evtSource, 'disconnected').subscribe(() => setConnected(false));
+  function setupEventHandlers(
+    evtSource: EventTarget,
+    notifier: Notifier
+  ): Subscription[] {
+    return [
+      fromEvent(evtSource, EventType.TIMER_TICK).subscribe(
+        (e: MessageEvent) => {
+          const data = JSON.parse(e.data);
+          setSec(parseInt(data.sec));
+        }
+      ),
+      fromEvent(evtSource, EventType.TIMER_START).subscribe(
+        (e: MessageEvent) => {
+          const data = JSON.parse(e.data);
+          const sec = parseInt(data.sec);
+          setSec(sec);
+          notifier.send(
+            `Timer started by ${data.name} (${secondToDisplayTime(sec)})`
+          );
+          updateEvents();
+        }
+      ),
+      fromEvent(evtSource, EventType.TIMER_STOP).subscribe(
+        (e: MessageEvent) => {
+          const data = JSON.parse(e.data);
+          const sec = parseInt(data.sec);
+          setSec(sec);
+          notifier.send(
+            `Timer stopped by ${data.name} (${secondToDisplayTime(sec)})`
+          );
+          updateEvents();
+        }
+      ),
+      fromEvent(evtSource, EventType.TIMER_OVER).subscribe(() => {
+        notifier.send('Time ended');
+        updateEvents();
+      }),
+      fromEvent(evtSource, 'connected').subscribe(() => setConnected(true)),
+      fromEvent(evtSource, 'disconnected').subscribe(() => setConnected(false))
+    ];
   }
 
   function getName() {
