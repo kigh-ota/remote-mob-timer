@@ -12,6 +12,7 @@ import ToggleButton from './components/ToggleButton';
 import NameInput from './components/NameInput';
 import ConnectionStatus from './components/ConnectionStatus';
 import EventHistory from './components/EventHistory';
+import StatusJson from '../common/StatusJson';
 
 interface Props {
   reconnectingEventSource: ReconnectingEventSource;
@@ -23,7 +24,7 @@ interface Props {
 const App: React.SFC<Props> = props => {
   const [sec, setSec] = useState(props.initialSec);
   const [connected, setConnected] = useState(true);
-  const [events] = useState(props.initialEvents);
+  const [events, setEvents] = useState(props.initialEvents);
 
   const savedName = window.localStorage.getItem('name');
   const initialName = savedName || randomName();
@@ -44,6 +45,7 @@ const App: React.SFC<Props> = props => {
       notifier.send(
         `Timer started by ${data.name} (${secondToDisplayTime(sec)})`
       );
+      updateEvents();
     });
     fromEvent(evtSource, EventType.TIMER_STOP).subscribe((e: MessageEvent) => {
       const data = JSON.parse(e.data);
@@ -52,9 +54,11 @@ const App: React.SFC<Props> = props => {
       notifier.send(
         `Timer stopped by ${data.name} (${secondToDisplayTime(sec)})`
       );
+      updateEvents();
     });
     fromEvent(evtSource, EventType.TIMER_OVER).subscribe(() => {
       notifier.send('Time ended');
+      updateEvents();
     });
 
     fromEvent(evtSource, 'connected').subscribe(() => setConnected(true));
@@ -68,6 +72,14 @@ const App: React.SFC<Props> = props => {
   const resetButtons = [25, 20, 15, 10, 5].map(min => (
     <ResetButton min={min} getName={getName.bind(this)} />
   ));
+
+  function updateEvents() {
+    fetch('/status.json')
+      .then(res => res.json())
+      .then((json: StatusJson) => {
+        setEvents(json.eventHistory.reverse());
+      });
+  }
 
   return (
     <React.Fragment>
