@@ -17,9 +17,7 @@ describe('ReconnectingEventSource', () => {
     clock = sinon.useFakeTimers();
     createEventSourceStub = sinon
       .stub(ReconnectingEventSource.prototype as any, 'createEventSource')
-      .callsFake(() => {
-        return new EventSourceMock(URL);
-      });
+      .callsFake(() => new EventSourceMock(URL));
     consoleDebugStub = sinon.stub(console, 'debug');
   });
 
@@ -29,32 +27,23 @@ describe('ReconnectingEventSource', () => {
     clock.restore();
   });
 
-  it('calls onDisconnect() and dispatch event after n seconds', done => {
-    const disconnectSpy = sinon.spy();
-    const eventSpy = sinon.spy();
-    const sut = new ReconnectingEventSource(
-      URL,
-      () => {},
-      disconnectSpy,
-      10,
-      20
-    );
-    sut.addEventListener('disconnected', () => {
-      eventSpy();
-      if (eventSpy.callCount === 1) {
-        done();
-      }
-    });
+  it('dispatch disconnected event after timeout', () => {
+    const disconnectedEventSpy = sinon.spy();
+    const sut = new ReconnectingEventSource(URL, 10, 20);
+    sut.addEventListener('disconnected', disconnectedEventSpy);
+    simulateAliveEvent();
 
     clock.tick(9000);
-    expect(disconnectSpy.callCount).to.equal(0);
+    expect(disconnectedEventSpy.callCount).to.equal(0);
 
     clock.tick(1500);
-    expect(disconnectSpy.callCount).to.equal(1);
+    expect(disconnectedEventSpy.callCount).to.equal(1);
   });
 
   it('try to reconnect every n seconds after disconnected', () => {
-    new ReconnectingEventSource(URL, () => {}, () => {}, 10, 20);
+    new ReconnectingEventSource(URL, 10, 20);
+    simulateAliveEvent();
+
     clock.tick(29500);
     expect(createEventSourceStub.callCount).to.equal(1);
 
@@ -69,59 +58,49 @@ describe('ReconnectingEventSource', () => {
   });
 
   Object.values(EventType).forEach(eventType => {
-    it('calls onConnected(), dispatch event and stop reconnecting when connection is recovered', done => {
-      const onConnectedSpy = sinon.spy();
-      const eventSpy = sinon.spy();
-      const sut = new ReconnectingEventSource(
-        URL,
-        onConnectedSpy,
-        () => {},
-        10,
-        20
-      );
-      clock.tick(40000); // 40s
-      expect(onConnectedSpy.callCount).to.equal(1);
-      expect(createEventSourceStub.callCount).to.equal(2);
+    it('dispatch connected event and stop trying to reconnect when connection is recovered', () => {
+      const sut = new ReconnectingEventSource(URL, 10, 20);
+      const connectedEventSpy = sinon.spy();
+      sut.addEventListener('connected', connectedEventSpy);
+      expect(createEventSourceStub.callCount).to.equal(1);
+      expect(connectedEventSpy.callCount).to.equal(0);
 
-      sut.addEventListener('connected', () => {
-        eventSpy();
-        if (eventSpy.callCount === 1) {
-          done();
-        }
-      });
+      simulateAliveEvent();
+      expect(createEventSourceStub.callCount).to.equal(1);
+      expect(connectedEventSpy.callCount).to.equal(1);
+
+      clock.tick(40000); // wait 40s to ensure disconnected
+      expect(createEventSourceStub.callCount).to.equal(2);
+      expect(connectedEventSpy.callCount).to.equal(1);
 
       const ev = new MessageEvent(eventType, {});
       sources[URL].emit(ev.type, ev);
-      expect(onConnectedSpy.callCount).to.equal(2);
+      expect(connectedEventSpy.callCount).to.equal(2);
 
       clock.tick(5000); // 45s
       sources[URL].emit(ev.type, ev);
+      expect(connectedEventSpy.callCount).to.equal(2);
 
       clock.tick(5000); // 50s
       sources[URL].emit(ev.type, ev);
+      expect(connectedEventSpy.callCount).to.equal(2);
 
       clock.tick(5000); // 55s
-      expect(onConnectedSpy.callCount).to.equal(2);
       expect(createEventSourceStub.callCount).to.equal(2);
+      expect(connectedEventSpy.callCount).to.equal(2);
     });
   });
 
-  it('does not call onConnected() nor dispatch event even when receives an event, unless disconnected', () => {
-    const onConnectedSpy = sinon.spy();
-    const eventSpy = sinon.spy();
-    const sut = new ReconnectingEventSource(
-      URL,
-      onConnectedSpy,
-      () => {},
-      10,
-      20
-    );
-    expect(onConnectedSpy.callCount).to.equal(1);
-    sut.addEventListener('connected', () => {
-      fail();
-    });
-    const ev = new MessageEvent(EventType.ALIVE, {});
-    sources[URL].emit(ev.type, ev);
-    expect(onConnectedSpy.callCount).to.equal(1);
+  it('does not dispatch connected event even when receives an event, unless disconnected', () => {
+    const sut = new ReconnectingEventSource(URL, 10, 20);
+    simulateAliveEvent();
+
+    sut.addEventListener('connected', () => fail());
+    simulateAliveEvent();
   });
 });
+
+function simulateAliveEvent() {
+  const ev = new MessageEvent(EventType.ALIVE, {});
+  sources[URL].emit(ev.type, ev);
+}

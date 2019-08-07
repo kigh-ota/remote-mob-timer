@@ -9,8 +9,6 @@ import * as ReactDOM from 'react-dom';
   window.onload = () => {
     const reconnectingEventSource = new ReconnectingEventSource(
       '/events/',
-      () => {},
-      () => {},
       10,
       20
     );
