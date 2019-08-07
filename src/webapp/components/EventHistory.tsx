@@ -1,6 +1,7 @@
 import * as React from 'react';
 import IEvent from '../../common/IEvent';
 import { EventType } from '../../common/IEvent';
+import { secondToDisplayTime } from '../util';
 
 interface Props {
   events: IEvent[];
@@ -22,7 +23,12 @@ const Row: React.SFC<{ event: IEvent }> = props => {
       </td>
       <td style={cellStyle}>{eventTypeString[props.event.type]}</td>
       <td style={cellStyle}>
-        {props.event.data.name ? `(${props.event.data.name})` : ''}
+        {props.event.type === EventType.TIMER_START ||
+        props.event.type === EventType.TIMER_STOP
+          ? `(${secondToDisplayTime(props.event.data.sec)}; ${
+              props.event.data.name
+            })`
+          : ''}
       </td>
     </tr>
   );
