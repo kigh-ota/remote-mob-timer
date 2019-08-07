@@ -1,27 +1,22 @@
 import { EventType } from '../common/IEvent';
-import IntervalTimer from './IntervalTimer';
-import { Observable, fromEvent, merge, Subscription } from 'rxjs';
+import { Observable, fromEvent, merge, Subscription, interval } from 'rxjs';
 import { timeout, first } from 'rxjs/operators';
 import { assert } from './util';
 
 export default class ReconnectingEventSource extends EventTarget {
   private evtSource: EventSource | null;
   private allEventsSubscription: Subscription | null;
-  private reconnecter: IntervalTimer;
-  private isConnected: boolean;
+  private reconnecter: Subscription | null;
 
   constructor(
     private readonly url: string,
     private readonly connectionTimeoutSec: number,
-    reconnectingIntervalSec: number
+    private readonly reconnectingIntervalSec: number
   ) {
     super();
     this.evtSource = null;
     this.allEventsSubscription = null;
-    this.reconnecter = new IntervalTimer(
-      this.tryToConnect.bind(this),
-      reconnectingIntervalSec
-    );
+    this.reconnecter = null;
     this.tryToConnect();
   }
 
@@ -30,10 +25,7 @@ export default class ReconnectingEventSource extends EventTarget {
       this.evtSource.close();
       this.evtSource = null;
     }
-    if (this.allEventsSubscription) {
-      this.allEventsSubscription.unsubscribe();
-      this.allEventsSubscription = null;
-    }
+    this.clearAllEventsSubscription();
 
     this.evtSource = this.createEventSource(this.url);
     const anyEvents = this.createAnyEvents();
@@ -42,12 +34,27 @@ export default class ReconnectingEventSource extends EventTarget {
     this.allEventsSubscription = this.subscribeAllEvents(anyEvents);
   }
 
+  private clearAllEventsSubscription() {
+    if (this.allEventsSubscription) {
+      this.allEventsSubscription.unsubscribe();
+      this.allEventsSubscription = null;
+    }
+  }
+
   private waitForFirstEvent(anyEvents: Observable<Event>) {
-    anyEvents.pipe(first()).subscribe((e: MessageEvent) => {
-      assert(!this.isConnected);
-      this.isConnected = true;
-      this.handleConnected(anyEvents);
-    });
+    anyEvents
+      .pipe(first())
+      .subscribe((e: MessageEvent) => this.handleConnected(anyEvents));
+  }
+
+  private handleConnected(anyEvents: Observable<Event>) {
+    if (this.reconnecter) {
+      // null if first time
+      this.stopReconnector();
+    }
+    this.dispatchEvent(new Event('connected'));
+    console.debug('ReconnectingEventSource: connected');
+    this.watchConnectionIsAlive(anyEvents);
   }
 
   private subscribeAllEvents(anyEvents: Observable<Event>): Subscription {
@@ -68,26 +75,32 @@ export default class ReconnectingEventSource extends EventTarget {
     return new (<any>window).EventSource(url); // FIXME  error TS2339: Property 'EventSource' does not exist on type 'Window'.
   }
 
-  private handleConnected(anyEvents: Observable<Event>) {
-    this.reconnecter.stop();
-    this.dispatchEvent(new Event('connected'));
-    console.debug('ReconnectingEventSource: connected');
-    this.watchConnection(anyEvents);
-  }
-
-  private watchConnection(anyEvents: Observable<Event>) {
+  private watchConnectionIsAlive(anyEvents: Observable<Event>) {
     anyEvents.pipe(timeout(this.connectionTimeoutSec * 1000)).subscribe(
       () => {}, // do nothing
       () => {
-        this.isConnected = false;
         this.handleDisconnected();
       }
     );
   }
 
   private handleDisconnected() {
-    this.reconnecter.start();
     this.dispatchEvent(new Event('disconnected'));
     console.debug('ReconnectingEventSource: disconnected');
+    this.clearAllEventsSubscription();
+    this.startReconnector();
+  }
+
+  private startReconnector() {
+    assert(!this.reconnecter);
+    this.reconnecter = interval(this.reconnectingIntervalSec * 1000).subscribe(
+      this.tryToConnect.bind(this)
+    );
+  }
+
+  private stopReconnector() {
+    assert(!!this.reconnecter);
+    this.reconnecter.unsubscribe();
+    this.reconnecter = null;
   }
 }
