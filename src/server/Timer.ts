@@ -1,5 +1,7 @@
+import { Subscription, interval } from 'rxjs';
+
 class Timer {
-  private timeout: NodeJS.Timeout | null;
+  private timeout: Subscription | null;
   private remainingSec: number;
   private onTick: (sec: number) => void;
   private onOver: () => void;
@@ -31,14 +33,14 @@ class Timer {
     if (this.isRunning() || this.remainingSec === 0) {
       return;
     }
-    this.timeout = setInterval(() => this.tick(), 1000);
+    this.timeout = interval(1000).subscribe(() => this.tick());
   }
 
   public stop() {
     if (!this.isRunning()) {
       return;
     }
-    clearInterval(this.timeout);
+    this.timeout.unsubscribe();
     this.timeout = null;
   }
 

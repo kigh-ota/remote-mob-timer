@@ -8,6 +8,7 @@ import EventHistoryStore from './EventHistoryStore';
 import EventFactory from './EventFactory';
 import ClientInfo from '../common/ClientInfo';
 import StatusJson from '../common/StatusJson';
+import { interval } from 'rxjs';
 
 const app = express();
 const eventHistoryStore = new EventHistoryStore();
@@ -152,9 +153,8 @@ app.use(<express.ErrorRequestHandler>function(err, req, res, next) {
 timer.setTime(TIMER_SEC);
 
 const SEND_ALIVE_INTERVAL_SEC = 5;
-setInterval(
-  () => sendServerEvent(EventFactory.alive()),
-  SEND_ALIVE_INTERVAL_SEC * 1000
+interval(SEND_ALIVE_INTERVAL_SEC * 1000).subscribe(() =>
+  sendServerEvent(EventFactory.alive())
 );
 
 module.exports = app;
