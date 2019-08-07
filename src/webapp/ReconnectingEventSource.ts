@@ -21,17 +21,20 @@ export default class ReconnectingEventSource extends EventTarget {
   }
 
   private tryToConnect() {
-    if (this.evtSource) {
-      this.evtSource.close();
-      this.evtSource = null;
-    }
+    this.clearEventSource();
     this.clearAllEventsSubscription();
 
     this.evtSource = this.createEventSource(this.url);
     const anyEvents = this.createAnyEvents();
-
-    this.waitForFirstEvent(anyEvents);
+    this.waitForConnection(anyEvents);
     this.allEventsSubscription = this.subscribeAllEvents(anyEvents);
+  }
+
+  private clearEventSource() {
+    if (this.evtSource) {
+      this.evtSource.close();
+      this.evtSource = null;
+    }
   }
 
   private clearAllEventsSubscription() {
@@ -41,20 +44,19 @@ export default class ReconnectingEventSource extends EventTarget {
     }
   }
 
-  private waitForFirstEvent(anyEvents: Observable<Event>) {
+  private waitForConnection(anyEvents: Observable<Event>) {
     anyEvents
       .pipe(first())
       .subscribe((e: MessageEvent) => this.handleConnected(anyEvents));
   }
 
   private handleConnected(anyEvents: Observable<Event>) {
-    if (this.reconnecter) {
-      // null if first time
+    if (this.reconnecter /* null if first time */) {
       this.stopReconnector();
     }
     this.dispatchEvent(new Event('connected'));
     console.debug('ReconnectingEventSource: connected');
-    this.watchConnectionIsAlive(anyEvents);
+    this.waitForDisconnection(anyEvents);
   }
 
   private subscribeAllEvents(anyEvents: Observable<Event>): Subscription {
@@ -75,7 +77,7 @@ export default class ReconnectingEventSource extends EventTarget {
     return new (<any>window).EventSource(url); // FIXME  error TS2339: Property 'EventSource' does not exist on type 'Window'.
   }
 
-  private watchConnectionIsAlive(anyEvents: Observable<Event>) {
+  private waitForDisconnection(anyEvents: Observable<Event>) {
     anyEvents.pipe(timeout(this.connectionTimeoutSec * 1000)).subscribe(
       () => {}, // do nothing
       () => {
