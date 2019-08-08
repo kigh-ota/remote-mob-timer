@@ -19,7 +19,9 @@ const Row: React.SFC<{ event: IEvent }> = props => {
   return (
     <tr>
       <td style={cellStyle}>
-        {props.event.date.substr(0, 19).replace('T', ' ')}
+        {UTCtoJSTDateString(props.event.date)
+          .substr(0, 19)
+          .replace('T', ' ')}
       </td>
       <td style={cellStyle}>{eventTypeString[props.event.type]}</td>
       <td style={cellStyle}>
@@ -39,5 +41,10 @@ const eventTypeString: { [eventType in EventType]?: string } = {
   stop: 'Stop',
   over: 'Over'
 };
+
+function UTCtoJSTDateString(utcDateString: string) {
+  const jstValue = new Date(utcDateString).getTime() + 9 * 60 * 60 * 1000;
+  return new Date(jstValue).toISOString();
+}
 
 export default EventHistory;
