@@ -1,160 +1,84 @@
-import createError from 'http-errors';
-import express, { Response } from 'express';
+import express from 'express';
+import { Express } from 'express';
 import path from 'path';
 import logger from 'morgan';
 import Timer from './Timer';
-import IEvent from '../common/IEvent';
 import EventHistoryStore from './EventHistoryStore';
 import EventFactory from './EventFactory';
-import ClientInfo from '../common/ClientInfo';
-import StatusJson from '../common/StatusJson';
 import { interval } from 'rxjs';
+import ClientPool from './ClientPool';
+import ServerEvent from './ServerEvent';
+import Endpoints from './Endpoints';
+import { MongoClient } from 'mongodb';
+import MongoDbEventHistoryStore from './MongoDbEventHistoryStore';
+import InMemoryEventHistoryStore from './InMemoryEventHistoryStore';
 
-const app = express();
-const eventHistoryStore = new EventHistoryStore();
+function initializeExpress(): Express {
+  const app = express();
 
-// view engine setup
-app.set('views', path.join(__dirname, '..', '..', 'views'));
-app.set('view engine', 'pug');
+  // view engine setup
+  app.set('views', path.join(__dirname, '..', '..', 'views'));
+  app.set('view engine', 'pug');
 
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+  app.use(logger('dev'));
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: false }));
 
-app.use(express.static(path.join(__dirname, '..', '..', 'public')));
+  app.use(express.static(path.join(__dirname, '..', '..', 'public')));
 
-const TIMER_SEC = 25 * 60;
-
-const timer = new Timer(
-  (sec: number) => sendServerEvent(EventFactory.tick(sec)),
-  () => {
-    const event = EventFactory.over();
-    sendServerEvent(event);
-    eventHistoryStore.add(event);
-  }
-);
-
-// Main Endpoint
-app.get('/', (req, res, next) => {
-  res.render('index');
-});
-
-// Endpoint for Server-Sent Events
-// Ref. https://qiita.com/akameco/items/c54af5af35ef9b500b54
-let clientId = 0;
-let clients: { [clientId: number]: ClientInfo & { response: Response } } = {};
-app.get('/events', (req, res) => {
-  req.socket.setTimeout(43200);
-  res.writeHead(200, {
-    'Content-Type': 'text/event-stream',
-    'Cache-Control': 'no-store'
-  });
-  res.write('\n');
-  (clientId => {
-    const clientInfo = { ip: req.ip, userAgent: req.header('User-Agent') };
-    clients[clientId] = {
-      response: res,
-      ip: req.ip,
-      userAgent: req.header('User-Agent')
-    };
-    console.log(`Registered client: id=${clientId}`);
-    eventHistoryStore.add(EventFactory.clientRegistered(clientInfo));
-    req.on('close', () => {
-      delete clients[clientId];
-      console.log(`Unregistered client: id=${clientId}`);
-      eventHistoryStore.add(EventFactory.clientUnregistered(clientInfo));
-    });
-  })(++clientId);
-});
-
-function sendServerEvent(event: IEvent) {
-  const dataString = JSON.stringify(event.data);
-  const payload = `event: ${event.type}\ndata: ${dataString}\n\n`;
-  console.log(`sendServerEvent(): ${payload.replace(/\n/g, ' ')}`);
-  for (let clientId in clients) {
-    clients[clientId].response.write(payload);
-  }
+  return app;
 }
 
-app.get('/status.json', (req, res, next) => {
-  const statusJson: StatusJson = {
-    timer: {
-      time: timer.getTime(),
-      nClient: Object.keys(clients).length,
-      isRunning: timer.isRunning()
-    },
-    clients: clientInfoMap(),
-    eventHistory: eventHistoryStore.list()
-  };
-  res.json(statusJson);
-});
-
-function clientInfoMap(): { [clientId: number]: ClientInfo } {
-  const ret: { [clientId: number]: ClientInfo } = {};
-  for (let clientId in clients) {
-    ret[clientId] = {
-      userAgent: clients[clientId].userAgent,
-      ip: clients[clientId].ip
-    };
-  }
-  return ret;
-}
-
-app.post('/reset', (req, res, next) => {
-  timer.stop();
-  const sec = req.query.sec ? Number(req.query.sec) : TIMER_SEC;
-  timer.setTime(sec);
-  timer.start();
-  const event = EventFactory.start(sec, decodeURIComponent(req.query.name));
-  sendServerEvent(event);
-  eventHistoryStore.add(event);
-  res.send('reset');
-});
-
-app.post('/toggle', (req, res, next) => {
-  if (timer.getTime() > 0) {
-    if (timer.isRunning()) {
-      timer.stop();
-      const event = EventFactory.stop(
-        timer.getTime(),
-        decodeURIComponent(req.query.name)
-      );
-      sendServerEvent(event);
-      eventHistoryStore.add(event);
-    } else {
-      timer.start();
-      const event = EventFactory.start(
-        timer.getTime(),
-        decodeURIComponent(req.query.name)
-      );
-      sendServerEvent(event);
+function setupTimer(
+  eventHistoryStore: EventHistoryStore,
+  clientPool: ClientPool,
+  defaultTimerSec: number
+): Timer {
+  const timer = new Timer(
+    (sec: number) => ServerEvent.send(EventFactory.tick(sec), clientPool),
+    () => {
+      const event = EventFactory.over();
+      ServerEvent.send(event, clientPool);
       eventHistoryStore.add(event);
     }
+  );
+  timer.setTime(defaultTimerSec);
+  return timer;
+}
+
+async function createMongoDbEventHistoryStore(): Promise<EventHistoryStore> {
+  const mongoClient = new MongoClient(
+    'mongodb://root:example@localhost:27017',
+    { useNewUrlParser: true, useUnifiedTopology: true }
+  );
+  try {
+    await mongoClient.connect();
+  } catch (err) {
+    console.error('Failed to connect to database', err);
+    process.exit(1);
   }
-  res.send({ isRunning: timer.isRunning(), time: timer.getTime() });
-});
+  return new MongoDbEventHistoryStore(mongoClient);
+}
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
-});
+async function createInMemoryEventHistoryStore(): Promise<EventHistoryStore> {
+  return new InMemoryEventHistoryStore();
+}
 
-// error handler
-app.use(<express.ErrorRequestHandler>function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+async function main(app: Express) {
+  const TIMER_SEC = 25 * 60;
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
-});
+  const eventHistoryStore = await createMongoDbEventHistoryStore();
+  const clientPool = new ClientPool(eventHistoryStore);
+  const timer = setupTimer(eventHistoryStore, clientPool, TIMER_SEC);
+  Endpoints.setup(app, timer, eventHistoryStore, clientPool, TIMER_SEC);
 
-timer.setTime(TIMER_SEC);
+  const SEND_ALIVE_INTERVAL_SEC = 5;
+  interval(SEND_ALIVE_INTERVAL_SEC * 1000).subscribe(() =>
+    ServerEvent.send(EventFactory.alive(), clientPool)
+  );
+}
 
-const SEND_ALIVE_INTERVAL_SEC = 5;
-interval(SEND_ALIVE_INTERVAL_SEC * 1000).subscribe(() =>
-  sendServerEvent(EventFactory.alive())
-);
+const app = initializeExpress();
+main(app);
 
 module.exports = app;

@@ -95,7 +95,7 @@ const App: React.SFC<Props> = props => {
     fetch('/status.json')
       .then(res => res.json())
       .then((json: StatusJson) => {
-        setEvents(json.eventHistory.reverse());
+        setEvents(json.eventHistory);
       });
   }
 
