@@ -1,5 +1,5 @@
 import createError from 'http-errors';
-import express, { Response } from 'express';
+import express, { Request, Response } from 'express';
 import { Express } from 'express';
 import path from 'path';
 import logger from 'morgan';
@@ -27,21 +27,24 @@ function initializeExpress(): Express {
   return app;
 }
 
-function sendServerEvent(event: IEvent) {
+function sendServerEvent(event: IEvent, clientPool: ClientPool) {
   const dataString = JSON.stringify(event.data);
   const payload = `event: ${event.type}\ndata: ${dataString}\n\n`;
   console.log(`sendServerEvent(): ${payload.replace(/\n/g, ' ')}`);
-  for (let clientId in clients) {
-    clients[clientId].response.write(payload);
-  }
+  clientPool.forEach((id, res) => {
+    res.write(payload);
+  });
 }
 
-function setupTimer(eventHistoryStore: EventHistoryStore): Timer {
+function setupTimer(
+  eventHistoryStore: EventHistoryStore,
+  clientPool: ClientPool
+): Timer {
   const timer = new Timer(
-    (sec: number) => sendServerEvent(EventFactory.tick(sec)),
+    (sec: number) => sendServerEvent(EventFactory.tick(sec), clientPool),
     () => {
       const event = EventFactory.over();
-      sendServerEvent(event);
+      sendServerEvent(event, clientPool);
       eventHistoryStore.add(event);
     }
   );
@@ -49,21 +52,21 @@ function setupTimer(eventHistoryStore: EventHistoryStore): Timer {
   return timer;
 }
 
-function clientInfoMap(): { [clientId: number]: ClientInfo } {
+function clientInfoMap(
+  clientPool: ClientPool
+): { [clientId: number]: ClientInfo } {
   const ret: { [clientId: number]: ClientInfo } = {};
-  for (let clientId in clients) {
-    ret[clientId] = {
-      userAgent: clients[clientId].userAgent,
-      ip: clients[clientId].ip
-    };
-  }
+  clientPool.forEach((id, res, ip, userAgent) => {
+    ret[id] = { ip, userAgent };
+  });
   return ret;
 }
 
 function setupEndpoints(
   app: Express,
   timer: Timer,
-  eventHistoryStore: EventHistoryStore
+  eventHistoryStore: EventHistoryStore,
+  clientPool: ClientPool
 ) {
   // Main Endpoint
   app.get('/', (req, res, next) => {
@@ -79,31 +82,17 @@ function setupEndpoints(
       'Cache-Control': 'no-store'
     });
     res.write('\n');
-    (clientId => {
-      const clientInfo = { ip: req.ip, userAgent: req.header('User-Agent') };
-      clients[clientId] = {
-        response: res,
-        ip: req.ip,
-        userAgent: req.header('User-Agent')
-      };
-      console.log(`Registered client: id=${clientId}`);
-      eventHistoryStore.add(EventFactory.clientRegistered(clientInfo));
-      req.on('close', () => {
-        delete clients[clientId];
-        console.log(`Unregistered client: id=${clientId}`);
-        eventHistoryStore.add(EventFactory.clientUnregistered(clientInfo));
-      });
-    })(++clientId);
+    clientPool.add(req, res);
   });
 
   app.get('/status.json', (req, res, next) => {
     const statusJson: StatusJson = {
       timer: {
         time: timer.getTime(),
-        nClient: Object.keys(clients).length,
+        nClient: clientPool.count(),
         isRunning: timer.isRunning()
       },
-      clients: clientInfoMap(),
+      clients: clientInfoMap(clientPool),
       eventHistory: eventHistoryStore.list()
     };
     res.json(statusJson);
@@ -115,7 +104,7 @@ function setupEndpoints(
     timer.setTime(sec);
     timer.start();
     const event = EventFactory.start(sec, decodeURIComponent(req.query.name));
-    sendServerEvent(event);
+    sendServerEvent(event, clientPool);
     eventHistoryStore.add(event);
     res.send('reset');
   });
@@ -128,7 +117,7 @@ function setupEndpoints(
           timer.getTime(),
           decodeURIComponent(req.query.name)
         );
-        sendServerEvent(event);
+        sendServerEvent(event, clientPool);
         eventHistoryStore.add(event);
       } else {
         timer.start();
@@ -136,7 +125,7 @@ function setupEndpoints(
           timer.getTime(),
           decodeURIComponent(req.query.name)
         );
-        sendServerEvent(event);
+        sendServerEvent(event, clientPool);
         eventHistoryStore.add(event);
       }
     }
@@ -160,19 +149,63 @@ function setupEndpoints(
   });
 }
 
+class ClientPool {
+  private id = 0;
+  private clients: {
+    [clientId: number]: ClientInfo & { response: Response };
+  } = {};
+
+  constructor(private readonly eventHistoryStore: EventHistoryStore) {}
+
+  public add(request: Request, response: Response) {
+    (id => {
+      const ip = request.ip;
+      const userAgent = request.header('User-Agent');
+      const clientInfo = { ip, userAgent };
+      this.clients[id] = {
+        response,
+        ip,
+        userAgent
+      };
+      console.log(`Registered client: id=${id}`);
+      eventHistoryStore.add(EventFactory.clientRegistered(clientInfo));
+      request.on('close', () => {
+        delete this.clients[id];
+        console.log(`Unregistered client: id=${id}`);
+        eventHistoryStore.add(EventFactory.clientUnregistered(clientInfo));
+      });
+    })(++this.id);
+  }
+
+  public forEach(
+    fn: (
+      id: number,
+      reponse?: Response,
+      ip?: string,
+      userAgent?: string
+    ) => void
+  ) {
+    for (let id in this.clients) {
+      const c = this.clients[id];
+      fn(Number(id), c.response, c.ip, c.userAgent);
+    }
+  }
+
+  public count() {
+    return Object.keys(this.clients).length;
+  }
+}
+
 const TIMER_SEC = 25 * 60;
 const eventHistoryStore = new EventHistoryStore();
-
-let clientId = 0;
-let clients: { [clientId: number]: ClientInfo & { response: Response } } = {};
-
-const timer = setupTimer(eventHistoryStore);
+const clientPool = new ClientPool(eventHistoryStore);
+const timer = setupTimer(eventHistoryStore, clientPool);
 const app = initializeExpress();
-setupEndpoints(app, timer, eventHistoryStore);
+setupEndpoints(app, timer, eventHistoryStore, clientPool);
 
 const SEND_ALIVE_INTERVAL_SEC = 5;
 interval(SEND_ALIVE_INTERVAL_SEC * 1000).subscribe(() =>
-  sendServerEvent(EventFactory.alive())
+  sendServerEvent(EventFactory.alive(), clientPool)
 );
 
 module.exports = app;
