@@ -22,7 +22,7 @@ import * as ReactDOM from 'react-dom';
             reconnectingEventSource={reconnectingEventSource}
             notifier={notifier}
             initialSec={json.timer.time}
-            initialEvents={json.eventHistory.reverse()}
+            initialEvents={json.eventHistory}
           />,
           document.getElementById('root')
         );

@@ -1,18 +1,29 @@
-import IEvent from '../common/IEvent';
+import IEvent, { EventType } from '../common/IEvent';
+import { Db, Collection } from 'mongodb';
 
 class EventHistoryStore {
-  private history: IEvent[] = [];
-  static readonly MAX_HISTORY_LENGTH: number = 100;
+  private coll: Collection;
+  static readonly COLLECTION_NAME = 'events';
 
-  public add(event: IEvent): void {
-    if (this.history.length === EventHistoryStore.MAX_HISTORY_LENGTH) {
-      this.history.shift();
-    }
-    this.history.push(event);
+  constructor(private readonly db: Db) {
+    this.coll = db.collection(EventHistoryStore.COLLECTION_NAME);
   }
 
-  public list(): IEvent[] {
-    return this.history;
+  public add(event: IEvent): void {
+    this.coll.insertOne(event);
+  }
+
+  public listExceptClient(limit: number): Promise<IEvent[]> {
+    return this.coll
+      .find({
+        $or: [
+          { type: { $ne: EventType.CLIENT_REGISTERED } },
+          { type: { $ne: EventType.CLIENT_UNREGISTERED } }
+        ]
+      })
+      .sort({ _id: -1 })
+      .limit(limit)
+      .toArray();
   }
 }
 

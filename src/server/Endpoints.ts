@@ -44,7 +44,11 @@ export default class Endpoints {
       clientPool.add(req, res);
     });
 
-    app.get('/status.json', (req, res) => {
+    app.get('/status.json', async (req, res) => {
+      const MAX_HISTORY_LENGTH = 100;
+      const eventHistory = await eventHistoryStore.listExceptClient(
+        MAX_HISTORY_LENGTH
+      );
       const statusJson: StatusJson = {
         timer: {
           time: timer.getTime(),
@@ -52,7 +56,7 @@ export default class Endpoints {
           isRunning: timer.isRunning()
         },
         clients: clientInfoMap(clientPool),
-        eventHistory: eventHistoryStore.list()
+        eventHistory
       };
       res.json(statusJson);
     });

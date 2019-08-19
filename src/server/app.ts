@@ -9,6 +9,7 @@ import { interval } from 'rxjs';
 import ClientPool from './ClientPool';
 import ServerEvent from './ServerEvent';
 import Endpoints from './Endpoints';
+import { MongoClient } from 'mongodb';
 
 function initializeExpress(): Express {
   const app = express();
@@ -43,15 +44,25 @@ function setupTimer(
 }
 
 const TIMER_SEC = 25 * 60;
-const eventHistoryStore = new EventHistoryStore();
-const clientPool = new ClientPool(eventHistoryStore);
-const timer = setupTimer(eventHistoryStore, clientPool);
+const DB_NAME = 'remote-mob-timer';
 const app = initializeExpress();
-Endpoints.setup(app, timer, eventHistoryStore, clientPool, TIMER_SEC);
+const mongoClient = new MongoClient('mongodb://root:example@localhost:27017');
+mongoClient
+  .connect()
+  .then(client => {
+    const eventHistoryStore = new EventHistoryStore(client.db(DB_NAME));
+    const clientPool = new ClientPool(eventHistoryStore);
+    const timer = setupTimer(eventHistoryStore, clientPool);
+    Endpoints.setup(app, timer, eventHistoryStore, clientPool, TIMER_SEC);
 
-const SEND_ALIVE_INTERVAL_SEC = 5;
-interval(SEND_ALIVE_INTERVAL_SEC * 1000).subscribe(() =>
-  ServerEvent.send(EventFactory.alive(), clientPool)
-);
+    const SEND_ALIVE_INTERVAL_SEC = 5;
+    interval(SEND_ALIVE_INTERVAL_SEC * 1000).subscribe(() =>
+      ServerEvent.send(EventFactory.alive(), clientPool)
+    );
+  })
+  .catch(err => {
+    console.error('Failed to connect to database', err);
+    process.exit(1);
+  });
 
 module.exports = app;
