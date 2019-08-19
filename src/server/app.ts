@@ -10,6 +10,8 @@ import ClientPool from './ClientPool';
 import ServerEvent from './ServerEvent';
 import Endpoints from './Endpoints';
 import { MongoClient } from 'mongodb';
+import MongoDbEventHistoryStore from './MongoDbEventHistoryStore';
+import InMemoryEventHistoryStore from './InMemoryEventHistoryStore';
 
 function initializeExpress(): Express {
   const app = express();
@@ -44,25 +46,36 @@ function setupTimer(
   return timer;
 }
 
-async function main(app: Express) {
-  const TIMER_SEC = 25 * 60;
-  const DB_NAME = 'remote-mob-timer';
-  const mongoClient = new MongoClient('mongodb://root:example@localhost:27017');
+async function createMongoDbEventHistoryStore(): Promise<EventHistoryStore> {
+  const mongoClient = new MongoClient(
+    'mongodb://root:example@localhost:27017',
+    { useNewUrlParser: true, useUnifiedTopology: true }
+  );
   try {
     await mongoClient.connect();
-    const eventHistoryStore = new EventHistoryStore(mongoClient.db(DB_NAME));
-    const clientPool = new ClientPool(eventHistoryStore);
-    const timer = setupTimer(eventHistoryStore, clientPool, TIMER_SEC);
-    Endpoints.setup(app, timer, eventHistoryStore, clientPool, TIMER_SEC);
-
-    const SEND_ALIVE_INTERVAL_SEC = 5;
-    interval(SEND_ALIVE_INTERVAL_SEC * 1000).subscribe(() =>
-      ServerEvent.send(EventFactory.alive(), clientPool)
-    );
   } catch (err) {
     console.error('Failed to connect to database', err);
     process.exit(1);
   }
+  return new MongoDbEventHistoryStore(mongoClient);
+}
+
+async function createInMemoryEventHistoryStore(): Promise<EventHistoryStore> {
+  return new InMemoryEventHistoryStore();
+}
+
+async function main(app: Express) {
+  const TIMER_SEC = 25 * 60;
+
+  const eventHistoryStore = await createMongoDbEventHistoryStore();
+  const clientPool = new ClientPool(eventHistoryStore);
+  const timer = setupTimer(eventHistoryStore, clientPool, TIMER_SEC);
+  Endpoints.setup(app, timer, eventHistoryStore, clientPool, TIMER_SEC);
+
+  const SEND_ALIVE_INTERVAL_SEC = 5;
+  interval(SEND_ALIVE_INTERVAL_SEC * 1000).subscribe(() =>
+    ServerEvent.send(EventFactory.alive(), clientPool)
+  );
 }
 
 const app = initializeExpress();
