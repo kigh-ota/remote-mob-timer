@@ -5,6 +5,7 @@
 ## To run
 
 ```sh
+docker-compose up -d
 npm install && npm run build
 npm run start
 ```
@@ -12,8 +13,10 @@ npm run start
 ## Uses
 
 - [Chai](https://www.chaijs.com/)
+- [Docker](https://www.docker.com/)
 - [Express](https://expressjs.com/)
 - [Mocha](https://mochajs.org/)
+- [MongoDB](https://www.mongodb.com/)
 - [Notification API](https://developer.mozilla.org/docs/Web/API/Notifications_API)
 - [Power-assert](https://github.com/power-assert-js/power-assert)
 - [Prettier](https://prettier.io/)
