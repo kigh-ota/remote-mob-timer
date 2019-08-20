@@ -9,7 +9,8 @@
     "test:server": "mocha --require espower-typescript/guess \"src/server/**/*.spec.ts\"",
     "test:webapp": "karma start karma.conf.js",
     "test": "npm run test:server && npm run test:webapp",
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "start:dev": "USE_IN_MEMORY_STORE=1 node ./bin/www"
   },
   "directories": {
     "test": "src/"

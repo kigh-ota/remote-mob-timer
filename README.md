@@ -10,6 +10,14 @@ npm install && npm run build
 npm run start
 ```
 
+or
+
+```sh
+# Use in-memory DB for dev
+npm install && npm run build
+npm run start:dev
+```
+
 ## Uses
 
 - [Chai](https://www.chaijs.com/)

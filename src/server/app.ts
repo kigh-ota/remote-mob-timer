@@ -64,10 +64,20 @@ async function createInMemoryEventHistoryStore(): Promise<EventHistoryStore> {
   return new InMemoryEventHistoryStore();
 }
 
+function useInMemoryStore(): boolean {
+  const ret = process.env.USE_IN_MEMORY_STORE === '1';
+  if (ret) {
+    console.debug('Using in-memory store...');
+  }
+  return ret;
+}
+
 async function main(app: Express) {
   const TIMER_SEC = 25 * 60;
 
-  const eventHistoryStore = await createMongoDbEventHistoryStore();
+  const eventHistoryStore = useInMemoryStore()
+    ? await createInMemoryEventHistoryStore()
+    : await createMongoDbEventHistoryStore();
   const clientPool = new ClientPool(eventHistoryStore);
   const timer = setupTimer(eventHistoryStore, clientPool, TIMER_SEC);
   Endpoints.setup(app, timer, eventHistoryStore, clientPool, TIMER_SEC);
