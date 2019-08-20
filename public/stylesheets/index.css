@@ -11,3 +11,8 @@ ul.timer-list {
   list-style: none;
   font-size: x-large;
 }
+
+ul.timer-list li {
+  display: inline-block;
+  margin: 0 10px;
+}
