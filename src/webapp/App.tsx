@@ -98,6 +98,7 @@ const App: React.SFC<Props> = props => {
         setEvents(json.eventHistory);
       });
   }
+  document.title = secondToDisplayTime(sec);
 
   return (
     <React.Fragment>
