@@ -95,6 +95,7 @@ import Notifier from './Notifier';
   }
 
   function updateTime(sec: number) {
+    document.title = secondToDisplayTime(sec);
     document.getElementsByClassName(
       'time'
     )[0].textContent = secondToDisplayTime(sec);
