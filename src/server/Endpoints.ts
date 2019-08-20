@@ -1,4 +1,3 @@
-import Timer from './Timer';
 import { Express } from 'express';
 import EventHistoryStore from './EventHistoryStore';
 import ClientPool from './ClientPool';
@@ -8,6 +7,7 @@ import EventFactory from './EventFactory';
 import ServerEvent from './ServerEvent';
 import createError from 'http-errors';
 import express = require('express');
+import { RemoteMobTimer } from './app';
 
 function clientInfoMap(
   clientPool: ClientPool
@@ -22,9 +22,8 @@ function clientInfoMap(
 export default class Endpoints {
   public static setup(
     app: Express,
-    timer: Timer,
+    remoteMobTimer: RemoteMobTimer,
     eventHistoryStore: EventHistoryStore,
-    clientPool: ClientPool,
     defaultTimerSec: number
   ) {
     // Main Endpoint
@@ -41,7 +40,7 @@ export default class Endpoints {
         'Cache-Control': 'no-store'
       });
       res.write('\n');
-      clientPool.add(req, res);
+      remoteMobTimer.clientPool.add(req, res);
     });
 
     app.get('/status.json', async (req, res) => {
@@ -51,48 +50,51 @@ export default class Endpoints {
       );
       const statusJson: StatusJson = {
         timer: {
-          time: timer.getTime(),
-          nClient: clientPool.count(),
-          isRunning: timer.isRunning()
+          time: remoteMobTimer.timer.getTime(),
+          nClient: remoteMobTimer.clientPool.count(),
+          isRunning: remoteMobTimer.timer.isRunning()
         },
-        clients: clientInfoMap(clientPool),
+        clients: clientInfoMap(remoteMobTimer.clientPool),
         eventHistory
       };
       res.json(statusJson);
     });
 
     app.post('/reset', (req, res) => {
-      timer.stop();
+      remoteMobTimer.timer.stop();
       const sec = req.query.sec ? Number(req.query.sec) : defaultTimerSec;
-      timer.setTime(sec);
-      timer.start();
+      remoteMobTimer.timer.setTime(sec);
+      remoteMobTimer.timer.start();
       const event = EventFactory.start(sec, decodeURIComponent(req.query.name));
-      ServerEvent.send(event, clientPool);
+      ServerEvent.send(event, remoteMobTimer.clientPool);
       eventHistoryStore.add(event);
       res.send('reset');
     });
 
     app.post('/toggle', (req, res) => {
-      if (timer.getTime() > 0) {
-        if (timer.isRunning()) {
-          timer.stop();
+      if (remoteMobTimer.timer.getTime() > 0) {
+        if (remoteMobTimer.timer.isRunning()) {
+          remoteMobTimer.timer.stop();
           const event = EventFactory.stop(
-            timer.getTime(),
+            remoteMobTimer.timer.getTime(),
             decodeURIComponent(req.query.name)
           );
-          ServerEvent.send(event, clientPool);
+          ServerEvent.send(event, remoteMobTimer.clientPool);
           eventHistoryStore.add(event);
         } else {
-          timer.start();
+          remoteMobTimer.timer.start();
           const event = EventFactory.start(
-            timer.getTime(),
+            remoteMobTimer.timer.getTime(),
             decodeURIComponent(req.query.name)
           );
-          ServerEvent.send(event, clientPool);
+          ServerEvent.send(event, remoteMobTimer.clientPool);
           eventHistoryStore.add(event);
         }
       }
-      res.send({ isRunning: timer.isRunning(), time: timer.getTime() });
+      res.send({
+        isRunning: remoteMobTimer.timer.isRunning(),
+        time: remoteMobTimer.timer.getTime()
+      });
     });
 
     // catch 404 and forward to error handler

@@ -72,6 +72,11 @@ function useInMemoryStore(): boolean {
   return ret;
 }
 
+export interface RemoteMobTimer {
+  clientPool: ClientPool;
+  timer: Timer;
+}
+
 async function main(app: Express) {
   const TIMER_SEC = 25 * 60;
 
@@ -80,7 +85,8 @@ async function main(app: Express) {
     : await createMongoDbEventHistoryStore();
   const clientPool = new ClientPool(eventHistoryStore);
   const timer = setupTimer(eventHistoryStore, clientPool, TIMER_SEC);
-  Endpoints.setup(app, timer, eventHistoryStore, clientPool, TIMER_SEC);
+  const remoteMobTimer = { clientPool, timer };
+  Endpoints.setup(app, remoteMobTimer, eventHistoryStore, TIMER_SEC);
 
   const SEND_ALIVE_INTERVAL_SEC = 5;
   interval(SEND_ALIVE_INTERVAL_SEC * 1000).subscribe(() =>
