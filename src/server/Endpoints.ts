@@ -23,6 +23,11 @@ export default class Endpoints {
       if (!remoteMobTimerPool.exists(req.params.id)) {
         throw new Error(`Timer with id=${req.params.id} does not exist!`);
       }
+
+      if (req.path.slice(-1) !== '/') {
+        res.redirect(req.path + '/');
+      }
+
       res.render('timer');
     });
 
