@@ -9,7 +9,7 @@ const ResetButton: React.SFC<Props> = props => {
   return (
     <button
       onClick={e => {
-        fetch(`/reset?sec=${props.min * 60}&name=${props.getName()}`, {
+        fetch(`reset?sec=${props.min * 60}&name=${props.getName()}`, {
           method: 'POST'
         });
       }}

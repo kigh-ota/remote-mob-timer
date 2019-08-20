@@ -9,7 +9,7 @@ const ToggleButton: React.SFC<Props> = props => {
   return (
     <button
       onClick={e => {
-        fetch(`/toggle?name=${props.getName()}`, {
+        fetch(`toggle?name=${props.getName()}`, {
           method: 'POST'
         })
           .then(res => res.json())

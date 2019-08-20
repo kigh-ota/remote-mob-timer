@@ -6,22 +6,24 @@ import ServerEvent from './ServerEvent';
 import createError from 'http-errors';
 import express = require('express');
 import RemoteMobTimer from './RemoteMobTimer';
+import RemoteMobTimerPool from './RemoteMobTimerPool';
 
 export default class Endpoints {
   public static setup(
     app: Express,
-    remoteMobTimer: RemoteMobTimer,
+    remoteMobTimerPool: RemoteMobTimerPool,
     eventHistoryStore: EventHistoryStore,
     defaultTimerSec: number
   ) {
     // Main Endpoint
-    app.get('/', (req, res) => {
+    app.get('/:id', (req, res) => {
       res.render('index');
     });
 
     // Endpoint for Server-Sent Events
     // Ref. https://qiita.com/akameco/items/c54af5af35ef9b500b54
-    app.get('/events', (req, res) => {
+    app.get(`/:id/events`, (req, res) => {
+      const remoteMobTimer = remoteMobTimerPool.get(req.params.id);
       req.socket.setTimeout(43200);
       res.writeHead(200, {
         'Content-Type': 'text/event-stream',
@@ -31,7 +33,8 @@ export default class Endpoints {
       remoteMobTimer.clientPool.add(req, res);
     });
 
-    app.get('/status.json', async (req, res) => {
+    app.get(`/:id/status.json`, async (req, res) => {
+      const remoteMobTimer = remoteMobTimerPool.get(req.params.id);
       const MAX_HISTORY_LENGTH = 100;
       const eventHistory = await eventHistoryStore.listExceptClient(
         MAX_HISTORY_LENGTH
@@ -48,7 +51,8 @@ export default class Endpoints {
       res.json(statusJson);
     });
 
-    app.post('/reset', (req, res) => {
+    app.post(`/:id/reset`, (req, res) => {
+      const remoteMobTimer = remoteMobTimerPool.get(req.params.id);
       remoteMobTimer.timer.stop();
       const sec = req.query.sec ? Number(req.query.sec) : defaultTimerSec;
       remoteMobTimer.timer.setTime(sec);
@@ -59,7 +63,8 @@ export default class Endpoints {
       res.send('reset');
     });
 
-    app.post('/toggle', (req, res) => {
+    app.post(`/:id/toggle`, (req, res) => {
+      const remoteMobTimer = remoteMobTimerPool.get(req.params.id);
       if (remoteMobTimer.timer.getTime() > 0) {
         if (remoteMobTimer.timer.isRunning()) {
           remoteMobTimer.timer.stop();

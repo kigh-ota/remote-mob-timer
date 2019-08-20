@@ -92,7 +92,7 @@ const App: React.SFC<Props> = props => {
   ));
 
   function updateEvents() {
-    fetch('/status.json')
+    fetch('status.json')
       .then(res => res.json())
       .then((json: StatusJson) => {
         setEvents(json.eventHistory);

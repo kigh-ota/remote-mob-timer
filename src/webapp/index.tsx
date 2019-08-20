@@ -8,13 +8,13 @@ import * as ReactDOM from 'react-dom';
 (() => {
   window.onload = () => {
     const reconnectingEventSource = new ReconnectingEventSource(
-      '/events/',
+      'events',
       10,
       20
     );
     const notifier = new Notifier();
 
-    fetch('/status.json')
+    fetch('status.json')
       .then(res => res.json())
       .then((json: StatusJson) => {
         ReactDOM.render(
