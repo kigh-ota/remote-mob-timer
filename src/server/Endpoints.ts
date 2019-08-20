@@ -34,20 +34,23 @@ export default class Endpoints {
     // Endpoint for Server-Sent Events
     // Ref. https://qiita.com/akameco/items/c54af5af35ef9b500b54
     app.get(`/:id/events`, (req, res) => {
-      const remoteMobTimer = remoteMobTimerPool.get(req.params.id);
+      const id = req.params.id;
+      const remoteMobTimer = remoteMobTimerPool.get(id);
       req.socket.setTimeout(43200);
       res.writeHead(200, {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-store'
       });
       res.write('\n');
-      remoteMobTimer.clientPool.add(req, res);
+      remoteMobTimer.clientPool.add(req, res, id);
     });
 
     app.get(`/:id/status.json`, async (req, res) => {
-      const remoteMobTimer = remoteMobTimerPool.get(req.params.id);
+      const id = req.params.id;
+      const remoteMobTimer = remoteMobTimerPool.get(id);
       const MAX_HISTORY_LENGTH = 100;
       const eventHistory = await eventHistoryStore.listExceptClient(
+        id,
         MAX_HISTORY_LENGTH
       );
       const statusJson: StatusJson = {
@@ -63,25 +66,32 @@ export default class Endpoints {
     });
 
     app.post(`/:id/reset`, (req, res) => {
-      const remoteMobTimer = remoteMobTimerPool.get(req.params.id);
+      const id = req.params.id;
+      const remoteMobTimer = remoteMobTimerPool.get(id);
       remoteMobTimer.timer.stop();
       const sec = req.query.sec ? Number(req.query.sec) : defaultTimerSec;
       remoteMobTimer.timer.setTime(sec);
       remoteMobTimer.timer.start();
-      const event = EventFactory.start(sec, decodeURIComponent(req.query.name));
+      const event = EventFactory.start(
+        sec,
+        decodeURIComponent(req.query.name),
+        id
+      );
       ServerEvent.send(event, remoteMobTimer.clientPool);
       eventHistoryStore.add(event);
       res.send('reset');
     });
 
     app.post(`/:id/toggle`, (req, res) => {
-      const remoteMobTimer = remoteMobTimerPool.get(req.params.id);
+      const id = req.params.id;
+      const remoteMobTimer = remoteMobTimerPool.get(id);
       if (remoteMobTimer.timer.getTime() > 0) {
         if (remoteMobTimer.timer.isRunning()) {
           remoteMobTimer.timer.stop();
           const event = EventFactory.stop(
             remoteMobTimer.timer.getTime(),
-            decodeURIComponent(req.query.name)
+            decodeURIComponent(req.query.name),
+            id
           );
           ServerEvent.send(event, remoteMobTimer.clientPool);
           eventHistoryStore.add(event);
@@ -89,7 +99,8 @@ export default class Endpoints {
           remoteMobTimer.timer.start();
           const event = EventFactory.start(
             remoteMobTimer.timer.getTime(),
-            decodeURIComponent(req.query.name)
+            decodeURIComponent(req.query.name),
+            id
           );
           ServerEvent.send(event, remoteMobTimer.clientPool);
           eventHistoryStore.add(event);

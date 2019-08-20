@@ -13,9 +13,10 @@ export default class InMemoryEventHistoryStore implements EventHistoryStore {
     this.history.push(event);
   }
 
-  public listExceptClient(limit: number): Promise<IEvent[]> {
+  public listExceptClient(id: string, limit: number): Promise<IEvent[]> {
     return Promise.resolve(
       this.history
+        .filter(e => e.id === id)
         .filter(
           e =>
             e.type !== EventType.CLIENT_REGISTERED &&

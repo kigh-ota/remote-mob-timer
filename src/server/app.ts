@@ -37,9 +37,8 @@ async function main(app: Express) {
   const eventHistoryStore = useInMemoryStore()
     ? await EventHistoryStoreFactory.createInMemory()
     : await EventHistoryStoreFactory.createMongoDb();
-  const remoteMobTimer = new RemoteMobTimer(eventHistoryStore, TIMER_SEC);
   const pool = new RemoteMobTimerPool();
-  pool.add(remoteMobTimer, '1');
+  pool.add(new RemoteMobTimer(eventHistoryStore, '1', TIMER_SEC), '1');
   Endpoints.setup(app, pool, eventHistoryStore, TIMER_SEC);
 }
 

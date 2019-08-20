@@ -11,22 +11,28 @@ export default class ClientPool {
 
   constructor(private readonly eventHistoryStore: EventHistoryStore) {}
 
-  public add(request: Request, response: Response) {
-    (id => {
+  public add(request: Request, response: Response, timerId: string) {
+    (clientId => {
       const ip = request.ip;
       const userAgent = request.header('User-Agent');
       const clientInfo = { ip, userAgent };
-      this.clients[id] = {
+      this.clients[clientId] = {
         response,
         ip,
         userAgent
       };
-      console.log(`Registered client: id=${id}`);
-      this.eventHistoryStore.add(EventFactory.clientRegistered(clientInfo));
+      console.log(
+        `Registered client: clientId=${clientId}, timerId=${timerId}`
+      );
+      this.eventHistoryStore.add(
+        EventFactory.clientRegistered(clientInfo, timerId)
+      );
       request.on('close', () => {
-        delete this.clients[id];
-        console.log(`Unregistered client: id=${id}`);
-        this.eventHistoryStore.add(EventFactory.clientUnregistered(clientInfo));
+        delete this.clients[clientId];
+        console.log(`Unregistered client: id=${clientId}, timerId=${timerId}`);
+        this.eventHistoryStore.add(
+          EventFactory.clientUnregistered(clientInfo, timerId)
+        );
       });
     })(++this.id);
   }

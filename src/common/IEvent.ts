@@ -1,5 +1,6 @@
 export default interface IEvent {
   type: EventType;
+  id: string;
   data: any;
   date: string; // ISO 8601
 }

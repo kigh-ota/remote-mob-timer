@@ -10,13 +10,17 @@ export default class RemoteMobTimer {
   public readonly clientPool: ClientPool;
   public readonly timer: Timer;
 
-  constructor(eventHistoryStore: EventHistoryStore, defaultTimerSec: number) {
+  constructor(
+    eventHistoryStore: EventHistoryStore,
+    id: string,
+    defaultTimerSec: number
+  ) {
     this.clientPool = new ClientPool(eventHistoryStore);
     this.timer = new Timer(
       (sec: number) =>
-        ServerEvent.send(EventFactory.tick(sec), this.clientPool),
+        ServerEvent.send(EventFactory.tick(sec, id), this.clientPool),
       () => {
-        const event = EventFactory.over();
+        const event = EventFactory.over(id);
         ServerEvent.send(event, this.clientPool);
         eventHistoryStore.add(event);
       }
@@ -25,7 +29,7 @@ export default class RemoteMobTimer {
 
     const SEND_ALIVE_INTERVAL_SEC = 5;
     interval(SEND_ALIVE_INTERVAL_SEC * 1000).subscribe(() =>
-      ServerEvent.send(EventFactory.alive(), this.clientPool)
+      ServerEvent.send(EventFactory.alive(id), this.clientPool)
     );
   }
 
