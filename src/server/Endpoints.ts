@@ -17,6 +17,9 @@ export default class Endpoints {
   ) {
     // Main Endpoint
     app.get('/:id', (req, res) => {
+      if (!remoteMobTimerPool.exists(req.params.id)) {
+        throw new Error(`Timer with id=${req.params.id} does not exist!`);
+      }
       res.render('index');
     });
 
