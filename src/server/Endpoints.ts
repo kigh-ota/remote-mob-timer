@@ -1,23 +1,11 @@
 import { Express } from 'express';
 import EventHistoryStore from './EventHistoryStore';
-import ClientPool from './ClientPool';
 import StatusJson from '../common/StatusJson';
-import ClientInfo from '../common/ClientInfo';
 import EventFactory from './EventFactory';
 import ServerEvent from './ServerEvent';
 import createError from 'http-errors';
 import express = require('express');
-import { RemoteMobTimer } from './app';
-
-function clientInfoMap(
-  clientPool: ClientPool
-): { [clientId: number]: ClientInfo } {
-  const ret: { [clientId: number]: ClientInfo } = {};
-  clientPool.forEach((id, res, ip, userAgent) => {
-    ret[id] = { ip, userAgent };
-  });
-  return ret;
-}
+import RemoteMobTimer from './RemoteMobTimer';
 
 export default class Endpoints {
   public static setup(
@@ -54,7 +42,7 @@ export default class Endpoints {
           nClient: remoteMobTimer.clientPool.count(),
           isRunning: remoteMobTimer.timer.isRunning()
         },
-        clients: clientInfoMap(remoteMobTimer.clientPool),
+        clients: remoteMobTimer.clientInfoMap(),
         eventHistory
       };
       res.json(statusJson);
