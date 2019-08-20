@@ -2,8 +2,11 @@ doctype html
 html
   head
     title= title
-    link(rel='stylesheet', href='/stylesheets/style.css')
+    link(rel='stylesheet', href='/stylesheets/index.css')
   body
-    ul
-      each id in ids
-        li=id
+    nav
+      h2 Choose Timer:
+      ul.timer-list
+        each id in ids
+          li
+            a(href=id + "/") #{id}
