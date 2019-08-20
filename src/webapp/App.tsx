@@ -13,6 +13,7 @@ import NameInput from './components/NameInput';
 import ConnectionStatus from './components/ConnectionStatus';
 import EventHistory from './components/EventHistory';
 import StatusJson from '../common/StatusJson';
+import { makeUrl } from './UrlUtil';
 
 interface Props {
   reconnectingEventSource: ReconnectingEventSource;
@@ -92,7 +93,7 @@ const App: React.SFC<Props> = props => {
   ));
 
   function updateEvents() {
-    fetch('status.json')
+    fetch(makeUrl('status.json'))
       .then(res => res.json())
       .then((json: StatusJson) => {
         setEvents(json.eventHistory);

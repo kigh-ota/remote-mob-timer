@@ -5,7 +5,6 @@ import EventFactory from './EventFactory';
 import ServerEvent from './ServerEvent';
 import createError from 'http-errors';
 import express = require('express');
-import RemoteMobTimer from './RemoteMobTimer';
 import RemoteMobTimerPool from './RemoteMobTimerPool';
 
 export default class Endpoints {
@@ -15,12 +14,16 @@ export default class Endpoints {
     eventHistoryStore: EventHistoryStore,
     defaultTimerSec: number
   ) {
+    app.get('/', (req, res) => {
+      res.render('index', { ids: remoteMobTimerPool.listIds() });
+    });
+
     // Main Endpoint
     app.get('/:id', (req, res) => {
       if (!remoteMobTimerPool.exists(req.params.id)) {
         throw new Error(`Timer with id=${req.params.id} does not exist!`);
       }
-      res.render('index');
+      res.render('timer');
     });
 
     // Endpoint for Server-Sent Events

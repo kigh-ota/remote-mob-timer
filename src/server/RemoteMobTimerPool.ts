@@ -16,4 +16,8 @@ export default class RemoteMobTimerPool {
   public get(id: string) {
     return this.pool[id];
   }
+
+  public listIds() {
+    return Object.keys(this.pool);
+  }
 }

@@ -4,17 +4,18 @@ import StatusJson from '../common/StatusJson';
 import App from './App';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import { makeUrl } from './UrlUtil';
 
 (() => {
   window.onload = () => {
     const reconnectingEventSource = new ReconnectingEventSource(
-      'events',
+      makeUrl('events'),
       10,
       20
     );
     const notifier = new Notifier();
 
-    fetch('status.json')
+    fetch(makeUrl('status.json'))
       .then(res => res.json())
       .then((json: StatusJson) => {
         ReactDOM.render(
