@@ -36,6 +36,7 @@ const App: React.SFC<Props> = props => {
       props.reconnectingEventSource,
       props.notifier
     );
+    document.title = secondToDisplayTime(sec);
     return () => {
       subs.forEach(sub => sub.unsubscribe());
     };
@@ -98,7 +99,6 @@ const App: React.SFC<Props> = props => {
         setEvents(json.eventHistory);
       });
   }
-  document.title = secondToDisplayTime(sec);
 
   return (
     <React.Fragment>
