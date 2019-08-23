@@ -32,6 +32,7 @@ const App: React.SFC<Props> = props => {
   setStoredName(name);
 
   useEffect(() => {
+    document.title = secondToDisplayTime(sec);
     const subs = setupEventHandlers(
       props.reconnectingEventSource,
       props.notifier
