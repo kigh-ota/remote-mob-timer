@@ -16,12 +16,23 @@ export default class MongoDbEventHistoryStore implements EventHistoryStore {
     this.coll.insertOne(event);
   }
 
-  public listExceptClient(limit: number): Promise<IEvent[]> {
+  public listExceptClient(id: string, limit: number): Promise<IEvent[]> {
+    const idCondition = id === '1' ? {
+      $or: [
+        { id },
+        { id: { $exists: false } } // think of doc without id as doc with id = 1
+      ]
+    } : { id }
     return this.coll
       .find({
-        $or: [
-          { type: { $ne: EventType.CLIENT_REGISTERED } },
-          { type: { $ne: EventType.CLIENT_UNREGISTERED } }
+        $and: [
+          idCondition,
+          {
+            $or: [
+              { type: { $ne: EventType.CLIENT_REGISTERED } },
+              { type: { $ne: EventType.CLIENT_UNREGISTERED } }
+            ]
+          }
         ]
       })
       .sort({ _id: -1 })

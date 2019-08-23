@@ -1,0 +1,18 @@
+body {
+  padding: 50px;
+  font: 14px 'Lucida Grande', Helvetica, Arial, sans-serif;
+}
+
+h2 {
+  display: inline;
+}
+
+ul.timer-list {
+  list-style: none;
+  font-size: x-large;
+}
+
+ul.timer-list li {
+  display: inline-block;
+  margin: 0 10px;
+}

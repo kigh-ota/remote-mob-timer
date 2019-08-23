@@ -2,7 +2,11 @@ doctype html
 html
   head
     title= title
-    link(rel='stylesheet', href='/stylesheets/style.css')
+    link(rel='stylesheet', href='/stylesheets/index.css')
   body
-    div#root
-    script(type='text/javascript' src='/javascripts/index.js')
+    nav
+      h2 Choose Timer:
+      ul.timer-list
+        each id in ids
+          li
+            a(href=id + "/") #{id}

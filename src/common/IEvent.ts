@@ -1,6 +1,8 @@
 export default interface IEvent {
   type: EventType;
   data: any;
+  // Only type and data will be sent to clients
+  id: string;
   date: string; // ISO 8601
 }
 

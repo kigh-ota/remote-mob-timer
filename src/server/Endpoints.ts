@@ -1,107 +1,127 @@
-import Timer from './Timer';
 import { Express } from 'express';
 import EventHistoryStore from './EventHistoryStore';
-import ClientPool from './ClientPool';
 import StatusJson from '../common/StatusJson';
-import ClientInfo from '../common/ClientInfo';
 import EventFactory from './EventFactory';
 import ServerEvent from './ServerEvent';
 import createError from 'http-errors';
 import express = require('express');
+import RemoteMobTimerPool from './RemoteMobTimerPool';
 
-function clientInfoMap(
-  clientPool: ClientPool
-): { [clientId: number]: ClientInfo } {
-  const ret: { [clientId: number]: ClientInfo } = {};
-  clientPool.forEach((id, res, ip, userAgent) => {
-    ret[id] = { ip, userAgent };
-  });
-  return ret;
-}
+const ID_PART = ':id(\\d+)'
 
 export default class Endpoints {
+
   public static setup(
     app: Express,
-    timer: Timer,
+    remoteMobTimerPool: RemoteMobTimerPool,
     eventHistoryStore: EventHistoryStore,
-    clientPool: ClientPool,
     defaultTimerSec: number
   ) {
-    // Main Endpoint
     app.get('/', (req, res) => {
-      res.render('index');
+      res.render('index', { ids: remoteMobTimerPool.listIds() });
+    });
+
+    // Main Endpoint
+    app.get(`/${ID_PART}`, (req, res) => {
+      if (!remoteMobTimerPool.exists(req.params.id)) {
+        throw new Error(`Timer with id=${req.params.id} does not exist!`);
+      }
+
+      if (req.path.slice(-1) !== '/') {
+        res.redirect(req.path + '/');
+      }
+
+      res.render('timer');
     });
 
     // Endpoint for Server-Sent Events
     // Ref. https://qiita.com/akameco/items/c54af5af35ef9b500b54
-    app.get('/events', (req, res) => {
+    app.get(`/${ID_PART}/events`, (req, res) => {
+      const id = req.params.id;
+      const remoteMobTimer = remoteMobTimerPool.get(id);
       req.socket.setTimeout(43200);
       res.writeHead(200, {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-store'
       });
       res.write('\n');
-      clientPool.add(req, res);
+      remoteMobTimer.clientPool.add(req, res, id);
     });
 
-    app.get('/status.json', async (req, res) => {
+    app.get(`/${ID_PART}/status.json`, async (req, res) => {
+      const id = req.params.id;
+      const remoteMobTimer = remoteMobTimerPool.get(id);
       const MAX_HISTORY_LENGTH = 100;
       const eventHistory = await eventHistoryStore.listExceptClient(
+        id,
         MAX_HISTORY_LENGTH
       );
       const statusJson: StatusJson = {
         timer: {
-          time: timer.getTime(),
-          nClient: clientPool.count(),
-          isRunning: timer.isRunning()
+          time: remoteMobTimer.timer.getTime(),
+          nClient: remoteMobTimer.clientPool.count(),
+          isRunning: remoteMobTimer.timer.isRunning()
         },
-        clients: clientInfoMap(clientPool),
+        clients: remoteMobTimer.clientInfoMap(),
         eventHistory
       };
       res.json(statusJson);
     });
 
-    app.post('/reset', (req, res) => {
-      timer.stop();
+    app.post(`/${ID_PART}/reset`, (req, res) => {
+      const id = req.params.id;
+      const remoteMobTimer = remoteMobTimerPool.get(id);
+      remoteMobTimer.timer.stop();
       const sec = req.query.sec ? Number(req.query.sec) : defaultTimerSec;
-      timer.setTime(sec);
-      timer.start();
-      const event = EventFactory.start(sec, decodeURIComponent(req.query.name));
-      ServerEvent.send(event, clientPool);
+      remoteMobTimer.timer.setTime(sec);
+      remoteMobTimer.timer.start();
+      const event = EventFactory.start(
+        sec,
+        decodeURIComponent(req.query.name),
+        id
+      );
+      ServerEvent.send(event, remoteMobTimer.clientPool);
       eventHistoryStore.add(event);
       res.send('reset');
     });
 
-    app.post('/toggle', (req, res) => {
-      if (timer.getTime() > 0) {
-        if (timer.isRunning()) {
-          timer.stop();
+    app.post(`/${ID_PART}/toggle`, (req, res) => {
+      const id = req.params.id;
+      const remoteMobTimer = remoteMobTimerPool.get(id);
+      if (remoteMobTimer.timer.getTime() > 0) {
+        if (remoteMobTimer.timer.isRunning()) {
+          remoteMobTimer.timer.stop();
           const event = EventFactory.stop(
-            timer.getTime(),
-            decodeURIComponent(req.query.name)
+            remoteMobTimer.timer.getTime(),
+            decodeURIComponent(req.query.name),
+            id
           );
-          ServerEvent.send(event, clientPool);
+          ServerEvent.send(event, remoteMobTimer.clientPool);
           eventHistoryStore.add(event);
         } else {
-          timer.start();
+          remoteMobTimer.timer.start();
           const event = EventFactory.start(
-            timer.getTime(),
-            decodeURIComponent(req.query.name)
+            remoteMobTimer.timer.getTime(),
+            decodeURIComponent(req.query.name),
+            id
           );
-          ServerEvent.send(event, clientPool);
+          ServerEvent.send(event, remoteMobTimer.clientPool);
           eventHistoryStore.add(event);
         }
       }
-      res.send({ isRunning: timer.isRunning(), time: timer.getTime() });
+      res.send({
+        isRunning: remoteMobTimer.timer.isRunning(),
+        time: remoteMobTimer.timer.getTime()
+      });
     });
 
     // catch 404 and forward to error handler
-    app.use(function(req, res, next) {
+    app.use(function (req, res, next) {
       next(createError(404));
     });
 
     // error handler
-    app.use(<express.ErrorRequestHandler>function(err, req, res) {
+    app.use(<express.ErrorRequestHandler>function (err, req, res) {
       // set locals, only providing error in development
       res.locals.message = err.message;
       res.locals.error = req.app.get('env') === 'development' ? err : {};
