@@ -7,7 +7,10 @@ import createError from 'http-errors';
 import express = require('express');
 import RemoteMobTimerPool from './RemoteMobTimerPool';
 
+const ID_PART = ':id(\\d+)'
+
 export default class Endpoints {
+
   public static setup(
     app: Express,
     remoteMobTimerPool: RemoteMobTimerPool,
@@ -19,7 +22,7 @@ export default class Endpoints {
     });
 
     // Main Endpoint
-    app.get('/:id', (req, res) => {
+    app.get(`/${ID_PART}`, (req, res) => {
       if (!remoteMobTimerPool.exists(req.params.id)) {
         throw new Error(`Timer with id=${req.params.id} does not exist!`);
       }
@@ -33,7 +36,7 @@ export default class Endpoints {
 
     // Endpoint for Server-Sent Events
     // Ref. https://qiita.com/akameco/items/c54af5af35ef9b500b54
-    app.get(`/:id/events`, (req, res) => {
+    app.get(`/${ID_PART}/events`, (req, res) => {
       const id = req.params.id;
       const remoteMobTimer = remoteMobTimerPool.get(id);
       req.socket.setTimeout(43200);
@@ -45,7 +48,7 @@ export default class Endpoints {
       remoteMobTimer.clientPool.add(req, res, id);
     });
 
-    app.get(`/:id/status.json`, async (req, res) => {
+    app.get(`/${ID_PART}/status.json`, async (req, res) => {
       const id = req.params.id;
       const remoteMobTimer = remoteMobTimerPool.get(id);
       const MAX_HISTORY_LENGTH = 100;
@@ -65,7 +68,7 @@ export default class Endpoints {
       res.json(statusJson);
     });
 
-    app.post(`/:id/reset`, (req, res) => {
+    app.post(`/${ID_PART}/reset`, (req, res) => {
       const id = req.params.id;
       const remoteMobTimer = remoteMobTimerPool.get(id);
       remoteMobTimer.timer.stop();
@@ -82,7 +85,7 @@ export default class Endpoints {
       res.send('reset');
     });
 
-    app.post(`/:id/toggle`, (req, res) => {
+    app.post(`/${ID_PART}/toggle`, (req, res) => {
       const id = req.params.id;
       const remoteMobTimer = remoteMobTimerPool.get(id);
       if (remoteMobTimer.timer.getTime() > 0) {
@@ -113,12 +116,12 @@ export default class Endpoints {
     });
 
     // catch 404 and forward to error handler
-    app.use(function(req, res, next) {
+    app.use(function (req, res, next) {
       next(createError(404));
     });
 
     // error handler
-    app.use(<express.ErrorRequestHandler>function(err, req, res) {
+    app.use(<express.ErrorRequestHandler>function (err, req, res) {
       // set locals, only providing error in development
       res.locals.message = err.message;
       res.locals.error = req.app.get('env') === 'development' ? err : {};
