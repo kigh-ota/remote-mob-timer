@@ -28,7 +28,7 @@ export default class MongoDbEventHistoryStore implements EventHistoryStore {
         $and: [
           idCondition,
           {
-            $or: [
+            $and: [
               { type: { $ne: EventType.CLIENT_REGISTERED } },
               { type: { $ne: EventType.CLIENT_UNREGISTERED } }
             ]
