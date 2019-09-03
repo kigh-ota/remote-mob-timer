@@ -9,6 +9,7 @@ interface Props {
 const ResetButton: React.SFC<Props> = props => {
   return (
     <button
+      style={{ marginRight: 6 }}
       onClick={e => {
         fetch(makeUrl(`reset?sec=${props.min * 60}&name=${props.getName()}`), {
           method: 'POST'
