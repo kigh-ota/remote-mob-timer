@@ -9,6 +9,7 @@ interface Props {
 const ToggleButton: React.SFC<Props> = props => {
   return (
     <button
+      style={{ marginTop: 10 }}
       onClick={e => {
         fetch(makeUrl(`toggle?name=${props.getName()}`), {
           method: 'POST'
