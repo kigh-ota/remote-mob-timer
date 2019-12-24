@@ -13,8 +13,23 @@ module.exports = {
     rules: [
       {
         test: /\.tsx?$/,
-        loader: 'ts-loader',
-        options: { configFile: 'tsconfig.webapp.json' }
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              [
+                '@babel/preset-env',
+                {
+                  targets: {
+                    node: 'current',
+                  },
+                },
+              ],
+              '@babel/preset-typescript',
+              '@babel/preset-react',
+            ],
+          }
+        }
       }
     ]
   },
