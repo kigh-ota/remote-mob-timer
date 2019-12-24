@@ -1,5 +1,6 @@
 dist/
-public/javascripts/**/*.js
+public/javascripts/**/*
+!public/**/.keep
 db/
 configdb/
 
