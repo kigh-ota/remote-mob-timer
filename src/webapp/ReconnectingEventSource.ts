@@ -2,6 +2,7 @@ import { EventType } from '../common/IEvent';
 import { Observable, fromEvent, merge, Subscription, interval } from 'rxjs';
 import { timeout, first } from 'rxjs/operators';
 import { assert } from './util';
+import { EventTarget } from 'event-target-shim';
 
 export default class ReconnectingEventSource extends EventTarget {
   private evtSource: EventSource | null;
