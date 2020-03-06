@@ -1,0 +1,5 @@
+configdb/
+coverage/
+db/
+dist/
+node_modules/
