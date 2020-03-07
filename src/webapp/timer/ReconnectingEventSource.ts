@@ -1,4 +1,4 @@
-import { EventType } from '../common/IEvent';
+import { EventType } from '../../common/IEvent';
 import { Observable, fromEvent, merge, Subscription, interval } from 'rxjs';
 import { timeout, first } from 'rxjs/operators';
 import { assert } from './util';

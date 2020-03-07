@@ -1,24 +1,23 @@
 import * as React from 'react';
 import TimeDisplay from './components/TimeDisplay';
 import animals from './animals';
-import IEvent, { EventType } from '../common/IEvent';
+import IEvent, { EventType } from '../../common/IEvent';
 import ReconnectingEventSource from './ReconnectingEventSource';
-import Notifier from './Notifier';
 import { fromEvent, Subscription } from 'rxjs';
 import { secondToDisplayTime } from './util';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import ResetButton from './components/ResetTimerButton';
 import ToggleButton from './components/ToggleButton';
 import NameInput from './components/NameInput';
 import ConnectionStatus from './components/ConnectionStatus';
 import EventHistory from './components/EventHistory';
-import StatusJson from '../common/StatusJson';
+import StatusJson from '../../common/StatusJson';
 import { makeV1TimerUrl } from './UrlUtil';
+import AppContext from './AppContext';
 
 interface Props {
   timerName: string;
   reconnectingEventSource: ReconnectingEventSource;
-  notifier: Notifier;
   initialSec: number;
   initialEvents: IEvent[];
 }
@@ -42,18 +41,19 @@ export default function App(props: Props) {
   const [name, setNameState] = useState(initialName);
   setStoredName(name);
 
-  function updateEvents() {
+  const { notifier, clickSound, chimeSound } = useContext(AppContext);
+
+  const updateEvents = () => {
     fetch(makeV1TimerUrl('status'))
       .then(res => res.json())
       .then((json: StatusJson) => {
         setEvents(json.eventHistory);
       });
-  }
+  };
 
-  function setupEventHandlers(
-    evtSource: EventTarget,
-    notifier: Notifier
-  ): Subscription[] {
+  const setupEventHandlers: (
+    evtSource: EventTarget
+  ) => Subscription[] = evtSource => {
     return [
       fromEvent(evtSource, EventType.TIMER_TICK).subscribe(
         (e: MessageEvent) => {
@@ -69,6 +69,7 @@ export default function App(props: Props) {
           notifier.send(
             `Timer started by ${data.name} (${secondToDisplayTime(sec)})`
           );
+          clickSound.play();
           updateEvents();
         }
       ),
@@ -80,24 +81,23 @@ export default function App(props: Props) {
           notifier.send(
             `Timer stopped by ${data.name} (${secondToDisplayTime(sec)})`
           );
+          clickSound.play();
           updateEvents();
         }
       ),
       fromEvent(evtSource, EventType.TIMER_OVER).subscribe(() => {
         notifier.send('Time ended');
+        chimeSound.play();
         updateEvents();
       }),
       fromEvent(evtSource, 'connected').subscribe(() => setConnected(true)),
       fromEvent(evtSource, 'disconnected').subscribe(() => setConnected(false)),
     ];
-  }
+  };
 
   useEffect(() => {
     document.title = secondToDisplayTime(sec);
-    const subs = setupEventHandlers(
-      props.reconnectingEventSource,
-      props.notifier
-    );
+    const subs = setupEventHandlers(props.reconnectingEventSource);
     return () => {
       subs.forEach(sub => sub.unsubscribe());
     };

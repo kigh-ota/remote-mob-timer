@@ -1,10 +1,11 @@
-import ReconnectingEventSource from './ReconnectingEventSource';
-import Notifier from './Notifier';
+import ReconnectingEventSource from './timer/ReconnectingEventSource';
+import Notifier from './timer/Notifier';
 import StatusJson from '../common/StatusJson';
-import App from './App';
+import App from './timer/App';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { makeV1TimerUrl, makeTimerUrl } from './UrlUtil';
+import { makeV1TimerUrl, makeTimerUrl } from './timer/UrlUtil';
+import AppContext from './timer/AppContext';
 
 (() => {
   window.onload = () => {
@@ -13,19 +14,25 @@ import { makeV1TimerUrl, makeTimerUrl } from './UrlUtil';
       10,
       20
     );
-    const notifier = new Notifier();
+    const appContextValue = {
+      bellSound: new Audio('/sounds/bell.mp3'),
+      clickSound: new Audio('/sounds/click.mp3'),
+      chimeSound: new Audio('/sounds/chime.mp3'),
+      notifier: new Notifier(),
+    };
 
     fetch(makeV1TimerUrl('status'))
       .then(res => res.json())
       .then((json: StatusJson) => {
         ReactDOM.render(
-          <App
-            timerName={json.timer.name}
-            reconnectingEventSource={reconnectingEventSource}
-            notifier={notifier}
-            initialSec={json.timer.time}
-            initialEvents={json.eventHistory}
-          />,
+          <AppContext.Provider value={appContextValue}>
+            <App
+              timerName={json.timer.name}
+              reconnectingEventSource={reconnectingEventSource}
+              initialSec={json.timer.time}
+              initialEvents={json.eventHistory}
+            />
+          </AppContext.Provider>,
           document.getElementById('root')
         );
       });

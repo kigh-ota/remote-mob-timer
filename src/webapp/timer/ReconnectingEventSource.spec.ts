@@ -3,7 +3,7 @@ import * as sinon from 'sinon';
 import { expect } from 'chai';
 import ReconnectingEventSource from './ReconnectingEventSource';
 import EventSourceMock, { sources } from './EventSourceMock';
-import { EventType } from '../common/IEvent';
+import { EventType } from '../../common/IEvent';
 import { fail } from 'assert';
 
 const URL = '/events/';

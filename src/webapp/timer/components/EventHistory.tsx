@@ -1,6 +1,6 @@
 import * as React from 'react';
-import IEvent from '../../common/IEvent';
-import { EventType } from '../../common/IEvent';
+import IEvent from '../../../common/IEvent';
+import { EventType } from '../../../common/IEvent';
 import { secondToDisplayTime } from '../util';
 
 interface Props {
