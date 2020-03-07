@@ -1,4 +1,3 @@
-import ClientInfo from './ClientInfo';
 import IEvent from './IEvent';
 
 export default interface StatusJson {
@@ -8,6 +7,5 @@ export default interface StatusJson {
     nClient: number;
     isRunning: boolean;
   };
-  clients: { [clientId: number]: ClientInfo };
   eventHistory: IEvent[];
 }

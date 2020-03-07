@@ -35,7 +35,7 @@ const UseCases = {
         nClient: timer.clientPool.count(),
         isRunning: timer.clock.isRunning(),
       },
-      clients: timer.clientInfoMap(),
+      // clients: timer.clientInfoMap(),
       eventHistory,
     };
     return statusJson;

@@ -18,10 +18,30 @@ npm install && npm run build
 npm run start:dev
 ```
 
+## API
+
+| Endpoint                                          | Description             | Request  | Response                                                            |
+| :------------------------------------------------ | :---------------------- | :------- | :------------------------------------------------------------------ |
+| `GET /v1/timer/{id}/status`                       | Get timer's status      |          | `{timer: {name, time, nClient, isRunning}, eventHistory: IEvent[]}` |
+| `POST /v1/timer/{id}/reset?sec={sec}?name={name}` | Reset timer             |          |                                                                     |
+| `POST /v1/timer/{id}/toggle?name={name}`          | Toggle timer start/stop |          | `{isRunning, time}`                                                 |
+| `PUT /v1/timer/{id}/name`                         | Change timer name       | `{name}` |                                                                     |
+| `POST /v1/timer/{id}/good?name={name}`            | Send a "good!" event    |          |                                                                     |
+| `GET /v1/timers`                                  | Get list of timers      |          |                                                                     |
+| `PUT /v1/timer/{id}`                              | Add a timer             |          |                                                                     |
+
+## Environment variables
+
+| Name                | Description                       |
+| ------------------- | --------------------------------- |
+| PORT                | HTTP Port                         |
+| USE_IN_MEMORY_STORE | Use in-memory store if set to `1` |
+
 ## Uses
 
 - [Chai](https://www.chaijs.com/)
 - [Docker](https://www.docker.com/)
+- [ESLint](https://eslint.org/)
 - [Express](https://expressjs.com/)
 - [Mocha](https://mochajs.org/)
 - [MongoDB](https://www.mongodb.com/)
@@ -35,22 +55,3 @@ npm run start:dev
 - [Sinon.JS](https://sinonjs.org/)
 - [TypeScript](https://www.typescriptlang.org/)
 - [Webpack](https://webpack.js.org/)
-
-## API
-
-| Endpoint              | Method | Description             |
-| :-------------------- | :----: | :---------------------- |
-| /v1/timer/{id}/status |  GET   | Get timer's status      |
-| /v1/timer/{id}/reset  |  POST  | Reset timer             |
-| /v1/timer/{id}/toggle |  POST  | Toggle timer start/stop |
-| /v1/timer/{id}/name   |  PUT   | Change timer name       |
-| /v1/timer/{id}/good   |  POST  | Send a "good!" event    |
-| /v1/timers            |  GET   | Get list of timers      |
-| /v1/timer/{id}        |  PUT   | Add a timer             |
-
-## Environment variables
-
-| Name                | Description                       |
-| ------------------- | --------------------------------- |
-| PORT                | HTTP Port                         |
-| USE_IN_MEMORY_STORE | Use in-memory store if set to `1` |
