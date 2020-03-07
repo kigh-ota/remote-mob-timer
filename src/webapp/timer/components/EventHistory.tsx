@@ -40,8 +40,8 @@ function Row(props: RowProps) {
       </td>
       <td style={cellStyle}>{eventTypeString[props.event.type]}</td>
       <td style={cellStyle}>
-        {props.event.type === EventType.TIMER_START ||
-        props.event.type === EventType.TIMER_STOP
+        {props.event.type === EventType.START ||
+        props.event.type === EventType.STOP
           ? `(${secondToDisplayTime(props.event.data.sec)}; ${
               props.event.data.name
             })`

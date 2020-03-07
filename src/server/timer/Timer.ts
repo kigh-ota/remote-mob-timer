@@ -26,7 +26,7 @@ export default class Timer {
       (sec: number) =>
         ServerEvent.send(EventFactory.tick(sec, id), this.clientPool),
       () => {
-        const event = EventFactory.over(id);
+        const event = EventFactory.over(id, this.getName());
         ServerEvent.send(event, this.clientPool);
         eventHistoryStore.add(event);
       }

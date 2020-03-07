@@ -44,6 +44,7 @@ npm run start:dev
 | /v1/timer/{id}/reset  |  POST  | Reset timer             |
 | /v1/timer/{id}/toggle |  POST  | Toggle timer start/stop |
 | /v1/timer/{id}/name   |  PUT   | Change timer name       |
+| /v1/timer/{id}/good   |  POST  | Send a "good!" event    |
 | /v1/timers            |  GET   | Get list of timers      |
 | /v1/timer/{id}        |  PUT   | Add a timer             |
 

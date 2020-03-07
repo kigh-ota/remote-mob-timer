@@ -51,7 +51,7 @@ const UseCases = {
     timer.clock.stop();
     timer.clock.setTime(sec);
     timer.clock.start();
-    const event = EventFactory.start(sec, userName, id);
+    const event = EventFactory.start(sec, userName, timer.getName(), id);
     ServerEvent.send(event, timer.clientPool);
     eventHistoryStore.add(event);
   },
@@ -65,12 +65,22 @@ const UseCases = {
     if (timer.clock.getTime() > 0) {
       if (timer.clock.isRunning()) {
         timer.clock.stop();
-        const event = EventFactory.stop(timer.clock.getTime(), userName, id);
+        const event = EventFactory.stop(
+          timer.clock.getTime(),
+          userName,
+          timer.getName(),
+          id
+        );
         ServerEvent.send(event, timer.clientPool);
         eventHistoryStore.add(event);
       } else {
         timer.clock.start();
-        const event = EventFactory.start(timer.clock.getTime(), userName, id);
+        const event = EventFactory.start(
+          timer.clock.getTime(),
+          userName,
+          timer.getName(),
+          id
+        );
         ServerEvent.send(event, timer.clientPool);
         eventHistoryStore.add(event);
       }
@@ -91,7 +101,7 @@ const UseCases = {
     eventHistoryStore: EventHistoryStore
   ) => {
     const timer = pool.get(id);
-    const event = EventFactory.good(id, userName);
+    const event = EventFactory.good(id, userName, timer.getName());
     ServerEvent.send(event, timer.clientPool);
     eventHistoryStore.add(event);
   },

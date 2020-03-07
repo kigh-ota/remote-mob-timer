@@ -17,7 +17,7 @@ export default class ClientPool {
     (clientId => {
       const ip = request.ip;
       const userAgent = request.header('User-Agent');
-      const clientInfo = { ip, userAgent };
+      const clientInfo: ClientInfo = { ip, userAgent };
       this.clients[clientId] = {
         response,
         ip,

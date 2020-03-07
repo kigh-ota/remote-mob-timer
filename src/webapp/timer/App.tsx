@@ -1,7 +1,13 @@
 import * as React from 'react';
 import TimeDisplay from './components/TimeDisplay';
 import animals from './animals';
-import IEvent, { EventType } from '../../common/IEvent';
+import IEvent, {
+  EventType,
+  StartEvent,
+  StopEvent,
+  OverEvent,
+  GoodEvent,
+} from '../../common/IEvent';
 import ReconnectingEventSource from './ReconnectingEventSource';
 import { fromEvent, Subscription } from 'rxjs';
 import { secondToDisplayTime } from './util';
@@ -15,6 +21,7 @@ import StatusJson from '../../common/StatusJson';
 import { makeV1TimerUrl } from './UrlUtil';
 import AppContext from './AppContext';
 import GoodButton from './components/GoodButton';
+import { TickEvent } from '../../common/IEvent';
 
 interface Props {
   timerName: string;
@@ -58,44 +65,41 @@ export default function App(props: Props) {
     evtSource: EventTarget
   ) => Subscription[] = evtSource => {
     return [
-      fromEvent(evtSource, EventType.TIMER_TICK).subscribe(
-        (e: MessageEvent) => {
-          const data = JSON.parse(e.data);
-          setSec(parseInt(data.sec));
-        }
-      ),
-      fromEvent(evtSource, EventType.TIMER_START).subscribe(
-        (e: MessageEvent) => {
-          const data = JSON.parse(e.data);
-          const sec = parseInt(data.sec);
-          setSec(sec);
-          notifier.send(
-            `Timer started by ${data.name} (${secondToDisplayTime(sec)})`
-          );
-          clickSound.play();
-          updateEvents();
-        }
-      ),
-      fromEvent(evtSource, EventType.TIMER_STOP).subscribe(
-        (e: MessageEvent) => {
-          const data = JSON.parse(e.data);
-          const sec = parseInt(data.sec);
-          setSec(sec);
-          notifier.send(
-            `Timer stopped by ${data.name} (${secondToDisplayTime(sec)})`
-          );
-          clickSound.play();
-          updateEvents();
-        }
-      ),
-      fromEvent(evtSource, EventType.TIMER_OVER).subscribe(() => {
-        notifier.send('Time ended');
+      fromEvent(evtSource, EventType.TICK).subscribe((e: MessageEvent) => {
+        const data: TickEvent['data'] = JSON.parse(e.data);
+        setSec(data.sec);
+      }),
+      fromEvent(evtSource, EventType.START).subscribe((e: MessageEvent) => {
+        const data: StartEvent['data'] = JSON.parse(e.data);
+        const sec = data.sec;
+        setSec(sec);
+        notifier.send(
+          `Timer started by ${data.userName} (${secondToDisplayTime(sec)})`,
+          data.timerName
+        );
+        clickSound.play();
+        updateEvents();
+      }),
+      fromEvent(evtSource, EventType.STOP).subscribe((e: MessageEvent) => {
+        const data: StopEvent['data'] = JSON.parse(e.data);
+        const sec = data.sec;
+        setSec(sec);
+        notifier.send(
+          `Timer stopped by ${data.userName} (${secondToDisplayTime(sec)})`,
+          data.timerName
+        );
+        clickSound.play();
+        updateEvents();
+      }),
+      fromEvent(evtSource, EventType.OVER).subscribe((e: MessageEvent) => {
+        const data: OverEvent['data'] = JSON.parse(e.data);
+        notifier.send('Time ended', data.timerName);
         chimeSound.play();
         updateEvents();
       }),
       fromEvent(evtSource, EventType.GOOD).subscribe((e: MessageEvent) => {
-        const data = JSON.parse(e.data);
-        notifier.send(`${data.userName} is saying good!`);
+        const data: GoodEvent['data'] = JSON.parse(e.data);
+        notifier.send(`${data.userName} is saying good!`, data.timerName);
         bellSound.play();
       }),
       fromEvent(evtSource, 'connected').subscribe(() => setConnected(true)),

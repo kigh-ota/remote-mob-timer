@@ -1,48 +1,72 @@
-import IEvent, { EventType } from '../../common/IEvent';
+import { EventType, StartEvent } from '../../common/IEvent';
 import { TimerId } from '../timer/Timer';
+import {
+  StopEvent,
+  TickEvent,
+  OverEvent,
+  GoodEvent,
+  AliveEvent,
+  ClientRegisteredEvent,
+  ClientUnregisteredEvent,
+} from '../../common/IEvent';
+import ClientInfo from '../../common/ClientInfo';
 
 export default class EventFactory {
-  public static start(sec: number, name: string, id: TimerId): IEvent {
+  public static start(
+    sec: number,
+    userName: string,
+    timerName: string,
+    id: TimerId
+  ): StartEvent {
     return {
-      type: EventType.TIMER_START,
+      type: EventType.START,
       id,
-      data: { sec, name },
+      data: { sec, userName, timerName },
       date: new Date().toISOString(),
     };
   }
-  public static stop(sec: number, name: string, id: TimerId): IEvent {
+  public static stop(
+    sec: number,
+    userName: string,
+    timerName: string,
+    id: TimerId
+  ): StopEvent {
     return {
-      type: EventType.TIMER_STOP,
+      type: EventType.STOP,
       id,
-      data: { sec, name },
+      data: { sec, userName, timerName },
       date: new Date().toISOString(),
     };
   }
-  public static tick(sec: number, id: TimerId): IEvent {
+  public static tick(sec: number, id: TimerId): TickEvent {
     return {
-      type: EventType.TIMER_TICK,
+      type: EventType.TICK,
       id,
       data: { sec },
       date: new Date().toISOString(),
     };
   }
-  public static over(id: TimerId): IEvent {
+  public static over(id: TimerId, timerName: string): OverEvent {
     return {
-      type: EventType.TIMER_OVER,
+      type: EventType.OVER,
       id,
-      data: {},
+      data: { timerName },
       date: new Date().toISOString(),
     };
   }
-  public static good(id: TimerId, userName: string): IEvent {
+  public static good(
+    id: TimerId,
+    userName: string,
+    timerName: string
+  ): GoodEvent {
     return {
       type: EventType.GOOD,
       id,
-      data: { userName },
+      data: { userName, timerName },
       date: new Date().toISOString(),
     };
   }
-  public static alive(id: TimerId): IEvent {
+  public static alive(id: TimerId): AliveEvent {
     return {
       type: EventType.ALIVE,
       id,
@@ -50,7 +74,10 @@ export default class EventFactory {
       date: new Date().toISOString(),
     };
   }
-  public static clientRegistered(clientInfo: object, id: TimerId): IEvent {
+  public static clientRegistered(
+    clientInfo: ClientInfo,
+    id: TimerId
+  ): ClientRegisteredEvent {
     return {
       type: EventType.CLIENT_REGISTERED,
       id,
@@ -58,7 +85,10 @@ export default class EventFactory {
       date: new Date().toISOString(),
     };
   }
-  public static clientUnregistered(clientInfo: object, id: TimerId): IEvent {
+  public static clientUnregistered(
+    clientInfo: ClientInfo,
+    id: TimerId
+  ): ClientUnregisteredEvent {
     return {
       type: EventType.CLIENT_UNREGISTERED,
       id,
