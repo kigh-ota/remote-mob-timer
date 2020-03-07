@@ -15,6 +15,9 @@ const UseCases = {
     pool.add(timer);
   },
   listTimers: (pool: TimerPool) => pool.list(),
+  changeTimerName: (id: TimerId, name: string, pool: TimerPool) => {
+    pool.get(id).setName(name);
+  },
 };
 
 export default UseCases;

@@ -24,6 +24,7 @@
     "no-empty-function": [
       "error",
       { "allow": ["arrowFunctions", "constructors"] }
-    ]
+    ],
+    "no-prototype-builtins": "off"
   }
 }

@@ -33,7 +33,7 @@ export default class Timer {
     );
     this.clock.setTime(defaultTimerSec);
     this.id = id;
-    this.name = name;
+    this.setName(name);
 
     const SEND_ALIVE_INTERVAL_SEC = 5;
     interval(SEND_ALIVE_INTERVAL_SEC * 1000).subscribe(() =>
@@ -55,5 +55,13 @@ export default class Timer {
 
   public getName(): string {
     return this.name;
+  }
+
+  public setName(name: string): void {
+    if (name.match(/^\s*$/)) {
+      this.name = '(Unnamed)';
+      return;
+    }
+    this.name = name;
   }
 }

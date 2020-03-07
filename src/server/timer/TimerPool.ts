@@ -7,7 +7,7 @@ export default class TimerPool {
     [id: string]: Timer;
   } = {};
 
-  public add(remoteMobTimer: Timer) {
+  public add(remoteMobTimer: Timer): void {
     if (Object.keys(this.pool).length === MAX_TIMER_COUNT) {
       throw new Error('Mamimum number of timers reached');
     }
@@ -22,11 +22,11 @@ export default class TimerPool {
     this.pool[id] = remoteMobTimer;
   }
 
-  public exists(id: TimerId) {
+  public exists(id: TimerId): boolean {
     return Object.keys(this.pool).includes(id);
   }
 
-  public get(id: TimerId) {
+  public get(id: TimerId): Timer {
     return this.pool[id];
   }
 
