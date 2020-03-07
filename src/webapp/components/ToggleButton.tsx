@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { makeUrl } from '../UrlUtil';
+import { makeV1TimerUrl } from '../UrlUtil';
 
 interface Props {
   getName: () => string;
@@ -11,7 +11,7 @@ const ToggleButton: React.SFC<Props> = props => {
     <button
       style={{ marginTop: 10 }}
       onClick={e => {
-        fetch(makeUrl(`toggle?name=${props.getName()}`), {
+        fetch(makeV1TimerUrl(`toggle?name=${props.getName()}`), {
           method: 'POST'
         })
           .then(res => res.json())

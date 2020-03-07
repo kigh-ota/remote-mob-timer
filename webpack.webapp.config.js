@@ -1,9 +1,11 @@
 module.exports = {
-  entry: './src/webapp/index.tsx',
+  entry: {
+    index: './src/webapp/index.tsx',
+    timer: './src/webapp/timer.tsx'
+  },
   devtool: 'inline-source-map',
   output: {
-    path: __dirname + '/public/javascripts',
-    filename: 'index.js'
+    path: __dirname + '/public/javascripts'
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.json'], // without 'json', growl causes compile error

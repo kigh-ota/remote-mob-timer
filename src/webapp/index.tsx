@@ -1,30 +1,22 @@
-import ReconnectingEventSource from './ReconnectingEventSource';
-import Notifier from './Notifier';
-import StatusJson from '../common/StatusJson';
-import App from './App';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { makeUrl } from './UrlUtil';
 
 (() => {
   window.onload = () => {
-    const reconnectingEventSource = new ReconnectingEventSource(
-      makeUrl('events'),
-      10,
-      20
-    );
-    const notifier = new Notifier();
-
-    fetch(makeUrl('status.json'))
+    fetch('/v1/timer/ids')
       .then(res => res.json())
-      .then((json: StatusJson) => {
+      .then((json: string[]) => {
         ReactDOM.render(
-          <App
-            reconnectingEventSource={reconnectingEventSource}
-            notifier={notifier}
-            initialSec={json.timer.time}
-            initialEvents={json.eventHistory}
-          />,
+          <nav>
+            <h2>Choose Timer:</h2>
+            <ul className="timer-list">
+              {json.map(id => (
+                <li key={id}>
+                  <a href={`timer/${id}/`}>{id}</a>
+                </li>
+              ))}
+            </ul>
+          </nav>,
           document.getElementById('root')
         );
       });

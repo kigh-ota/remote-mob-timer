@@ -4,7 +4,7 @@
  * Module dependencies.
  */
 
-var app = require('../dist/server/app');
+var app = require('../dist/server/web/app');
 var debug = require('debug')('mob-timer:server');
 var http = require('http');
 

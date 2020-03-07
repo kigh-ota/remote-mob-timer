@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { makeUrl } from '../UrlUtil';
+import { makeV1TimerUrl } from '../UrlUtil';
 
 interface Props {
   min: number;
@@ -11,7 +11,7 @@ const ResetButton: React.SFC<Props> = props => {
     <button
       style={{ marginRight: 6 }}
       onClick={e => {
-        fetch(makeUrl(`reset?sec=${props.min * 60}&name=${props.getName()}`), {
+        fetch(makeV1TimerUrl(`reset?sec=${props.min * 60}&name=${props.getName()}`), {
           method: 'POST'
         });
       }}

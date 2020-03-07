@@ -16,11 +16,11 @@ export default function setupEndpoints(
   defaultTimerSec: number
 ) {
   app.get('/', (req, res) => {
-    res.render('index', { ids: remoteMobTimerPool.listIds() });
+    res.render('index');
   });
 
   // Main Endpoint
-  app.get(`/${ID_PART}`, (req, res) => {
+  app.get(`/timer/${ID_PART}`, (req, res) => {
     if (!remoteMobTimerPool.exists(req.params.id)) {
       throw new Error(`Timer with id=${req.params.id} does not exist!`);
     }
@@ -34,7 +34,7 @@ export default function setupEndpoints(
 
   // Endpoint for Server-Sent Events
   // Ref. https://qiita.com/akameco/items/c54af5af35ef9b500b54
-  app.get(`/${ID_PART}/events`, (req, res) => {
+  app.get(`/timer/${ID_PART}/events`, (req, res) => {
     const id = req.params.id;
     const remoteMobTimer = remoteMobTimerPool.get(id);
     req.socket.setTimeout(43200);
@@ -46,7 +46,7 @@ export default function setupEndpoints(
     remoteMobTimer.clientPool.add(req, res, id);
   });
 
-  app.get(`/${ID_PART}/status.json`, async (req, res) => {
+  app.get(`/v1/timer/${ID_PART}/status.json`, async (req, res) => {
     const id = req.params.id;
     const remoteMobTimer = remoteMobTimerPool.get(id);
     const MAX_HISTORY_LENGTH = 100;
@@ -66,7 +66,7 @@ export default function setupEndpoints(
     res.json(statusJson);
   });
 
-  app.post(`/${ID_PART}/reset`, (req, res) => {
+  app.post(`/v1/timer/${ID_PART}/reset`, (req, res) => {
     const id = req.params.id;
     const remoteMobTimer = remoteMobTimerPool.get(id);
     remoteMobTimer.clock.stop();
@@ -83,7 +83,7 @@ export default function setupEndpoints(
     res.send('reset');
   });
 
-  app.post(`/${ID_PART}/toggle`, (req, res) => {
+  app.post(`/v1/timer/${ID_PART}/toggle`, (req, res) => {
     const id = req.params.id;
     const remoteMobTimer = remoteMobTimerPool.get(id);
     if (remoteMobTimer.clock.getTime() > 0) {
@@ -113,22 +113,8 @@ export default function setupEndpoints(
     });
   });
 
-  app.post(`/v1/timerIds`, (req, res) => {
-    remoteMobTimerPool.listIds();
-    const id = req.params.id;
-    const remoteMobTimer = remoteMobTimerPool.get(id);
-    remoteMobTimer.clock.stop();
-    const sec = req.query.sec ? Number(req.query.sec) : defaultTimerSec;
-    remoteMobTimer.clock.setTime(sec);
-    remoteMobTimer.clock.start();
-    const event = EventFactory.start(
-      sec,
-      decodeURIComponent(req.query.name),
-      id
-    );
-    ServerEvent.send(event, remoteMobTimer.clientPool);
-    eventHistoryStore.add(event);
-    res.send('reset');
+  app.get(`/v1/timer/ids`, (req, res) => {
+    res.json(remoteMobTimerPool.listIds());
   });
 
   // catch 404 and forward to error handler

@@ -13,7 +13,7 @@ import NameInput from './components/NameInput';
 import ConnectionStatus from './components/ConnectionStatus';
 import EventHistory from './components/EventHistory';
 import StatusJson from '../common/StatusJson';
-import { makeUrl } from './UrlUtil';
+import { makeV1TimerUrl } from './UrlUtil';
 
 interface Props {
   reconnectingEventSource: ReconnectingEventSource;
@@ -94,7 +94,7 @@ const App: React.SFC<Props> = props => {
   ));
 
   function updateEvents() {
-    fetch(makeUrl('status.json'))
+    fetch(makeV1TimerUrl('status.json'))
       .then(res => res.json())
       .then((json: StatusJson) => {
         setEvents(json.eventHistory);

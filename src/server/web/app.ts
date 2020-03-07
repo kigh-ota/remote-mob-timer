@@ -12,14 +12,14 @@ function initializeExpress(): Express {
   const app = express();
 
   // view engine setup
-  app.set('views', path.join(__dirname, '..', '..', 'views'));
+  app.set('views', path.join(__dirname, '..', '..', '..', 'views'));
   app.set('view engine', 'pug');
 
   app.use(logger('dev'));
   app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
 
-  app.use(express.static(path.join(__dirname, '..', '..', 'public')));
+  app.use(express.static(path.join(__dirname, '..', '..', '..', 'public')));
 
   return app;
 }
@@ -40,6 +40,8 @@ async function main(app: Express) {
   UseCases.addTimer('1' as TimerId, pool, eventHistoryStore);
   UseCases.addTimer('2' as TimerId, pool, eventHistoryStore);
   UseCases.addTimer('3' as TimerId, pool, eventHistoryStore);
+  UseCases.addTimer('4' as TimerId, pool, eventHistoryStore);
+  UseCases.addTimer('5' as TimerId, pool, eventHistoryStore);
   setupEndpoints(app, pool, eventHistoryStore, TIMER_SEC);
 }
 

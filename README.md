@@ -38,9 +38,9 @@ npm run start:dev
 
 ## API
 
-| Endpoint          | Method | Description             |
-| :---------------- | :----: | :---------------------- |
-| /{id}/status.json |  GET   | Get timer's status      |
-| /{id}/reset       |  POST  | Reset timer             |
-| /{id}/toggle      |  POST  | Toggle timer start/stop |
-| /v1/timerIds      |  GET   | Get list of timer ids   |
+| Endpoint                   | Method | Description             |
+| :------------------------- | :----: | :---------------------- |
+| /v1/timer/{id}/status.json |  GET   | Get timer's status      |
+| /v1/timer/{id}/reset       |  POST  | Reset timer             |
+| /v1/timer/{id}/toggle      |  POST  | Toggle timer start/stop |
+| /v1/timer/ids              |  GET   | Get list of timer ids   |
