@@ -3,9 +3,10 @@ import { Express } from 'express';
 import path from 'path';
 import logger from 'morgan';
 import Endpoints from './Endpoints';
-import RemoteMobTimer from './RemoteMobTimer';
+import Timer from './RemoteMobTimer';
 import EventHistoryStoreFactory from './EventHistoryStoreFactory';
 import RemoteMobTimerPool from './RemoteMobTimerPool';
+import setupEndpoints from './Endpoints';
 
 function initializeExpress(): Express {
   const app = express();
@@ -38,10 +39,10 @@ async function main(app: Express) {
     ? await EventHistoryStoreFactory.createInMemory()
     : await EventHistoryStoreFactory.createMongoDb();
   const pool = new RemoteMobTimerPool();
-  pool.add(new RemoteMobTimer(eventHistoryStore, '1', TIMER_SEC), '1');
-  pool.add(new RemoteMobTimer(eventHistoryStore, '2', TIMER_SEC), '2');
-  pool.add(new RemoteMobTimer(eventHistoryStore, '3', TIMER_SEC), '3');
-  Endpoints.setup(app, pool, eventHistoryStore, TIMER_SEC);
+  pool.add(new Timer(eventHistoryStore, '1', TIMER_SEC), '1');
+  pool.add(new Timer(eventHistoryStore, '2', TIMER_SEC), '2');
+  pool.add(new Timer(eventHistoryStore, '3', TIMER_SEC), '3');
+  setupEndpoints(app, pool, eventHistoryStore, TIMER_SEC);
 }
 
 const app = initializeExpress();
