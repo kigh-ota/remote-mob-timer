@@ -16,7 +16,7 @@
     "test": "src/"
   },
   "dependencies": {
-    "debug": "2.6.9",
+    "debug": "4.1.1",
     "event-target-shim": "^5.0.1",
     "express": "4.16.4",
     "http-errors": "1.6.3",
