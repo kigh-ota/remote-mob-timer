@@ -5,7 +5,7 @@
   "scripts": {
     "watch": "concurrently \"tsc -w -p tsconfig.server.json\" \"tsc -w\" \"webpack --watch --config webpack.webapp.config.js\"",
     "build": "npm run build:server && npm run build:webapp",
-    "build:server": "rm -r dist/ && tsc -p tsconfig.server.json",
+    "build:server": "rm -rf dist/ && tsc -p tsconfig.server.json",
     "build:webapp": "tsc && webpack --config webpack.webapp.config.js",
     "test:server": "mocha --require espower-typescript/guess \"src/server/**/*.spec.ts\"",
     "test:webapp": "karma start karma.conf.js",
