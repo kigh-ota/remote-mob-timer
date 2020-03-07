@@ -45,3 +45,10 @@ npm run start:dev
 | /v1/timer/{id}/toggle |  POST  | Toggle timer start/stop |
 | /v1/timer/ids         |  GET   | Get list of timer ids   |
 | /v1/timer/{id}        |  PUT   | Add a timer             |
+
+## Environment variables
+
+| Name                | Description                       |
+| ------------------- | --------------------------------- |
+| PORT                | HTTP Port                         |
+| USE_IN_MEMORY_STORE | Use in-memory store if set to `1` |
