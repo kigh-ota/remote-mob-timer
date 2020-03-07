@@ -101,6 +101,7 @@ export default function App(props: Props) {
         const data: GoodEvent['data'] = JSON.parse(e.data);
         notifier.send(`${data.userName} is saying good!`, data.timerName);
         bellSound.play();
+        updateEvents();
       }),
       fromEvent(evtSource, 'connected').subscribe(() => setConnected(true)),
       fromEvent(evtSource, 'disconnected').subscribe(() => setConnected(false)),

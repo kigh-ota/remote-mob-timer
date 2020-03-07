@@ -1,5 +1,9 @@
 import * as React from 'react';
-import IEvent from '../../../common/IEvent';
+import IEvent, {
+  StartEvent,
+  StopEvent,
+  GoodEvent,
+} from '../../../common/IEvent';
 import { EventType } from '../../../common/IEvent';
 import { secondToDisplayTime } from '../util';
 
@@ -11,6 +15,7 @@ const eventTypeString: { [eventType in EventType]?: string } = {
   start: 'Start',
   stop: 'Stop',
   over: 'Over',
+  good: 'Good!',
 };
 
 export default function EventHistory(props: Props) {
@@ -31,6 +36,24 @@ interface RowProps {
 
 function Row(props: RowProps) {
   const cellStyle = { padding: '0 5px' };
+  let aux = '';
+  switch (props.event.type) {
+    case EventType.START: {
+      const e = props.event as StartEvent;
+      aux = `(${secondToDisplayTime(e.data.sec)}; ${e.data.userName})`;
+      break;
+    }
+    case EventType.STOP: {
+      const e = props.event as StopEvent;
+      aux = `(${secondToDisplayTime(e.data.sec)}; ${e.data.userName})`;
+      break;
+    }
+    case EventType.GOOD: {
+      const e = props.event as GoodEvent;
+      aux = `(${e.data.userName})`;
+      break;
+    }
+  }
   return (
     <tr>
       <td style={cellStyle}>
@@ -39,14 +62,7 @@ function Row(props: RowProps) {
           .replace('T', ' ')}
       </td>
       <td style={cellStyle}>{eventTypeString[props.event.type]}</td>
-      <td style={cellStyle}>
-        {props.event.type === EventType.START ||
-        props.event.type === EventType.STOP
-          ? `(${secondToDisplayTime(props.event.data.sec)}; ${
-              props.event.data.name
-            })`
-          : ''}
-      </td>
+      <td style={cellStyle}>{aux}</td>
     </tr>
   );
 }
