@@ -7,14 +7,29 @@ interface Props {
   events: IEvent[];
 }
 
-const EventHistory: React.SFC<Props> = props => {
-  const items = props.events
-    .filter(e => Object.keys(eventTypeString).includes(e.type))
-    .map(e => <Row event={e} />);
-  return <table>{items}</table>;
+const eventTypeString: { [eventType in EventType]?: string } = {
+  start: 'Start',
+  stop: 'Stop',
+  over: 'Over',
 };
 
-const Row: React.SFC<{ event: IEvent }> = props => {
+export default function EventHistory(props: Props) {
+  const items = props.events
+    .filter(e => Object.keys(eventTypeString).includes(e.type))
+    .map((e, i) => <Row key={i} event={e} />);
+  return <table>{items}</table>;
+}
+
+function UTCtoJSTDateString(utcDateString: string): string {
+  const jstValue = new Date(utcDateString).getTime() + 9 * 60 * 60 * 1000;
+  return new Date(jstValue).toISOString();
+}
+
+interface RowProps {
+  event: IEvent;
+}
+
+function Row(props: RowProps) {
   const cellStyle = { padding: '0 5px' };
   return (
     <tr>
@@ -34,17 +49,4 @@ const Row: React.SFC<{ event: IEvent }> = props => {
       </td>
     </tr>
   );
-};
-
-const eventTypeString: { [eventType in EventType]?: string } = {
-  start: 'Start',
-  stop: 'Stop',
-  over: 'Over'
-};
-
-function UTCtoJSTDateString(utcDateString: string) {
-  const jstValue = new Date(utcDateString).getTime() + 9 * 60 * 60 * 1000;
-  return new Date(jstValue).toISOString();
 }
-
-export default EventHistory;

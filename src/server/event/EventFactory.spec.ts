@@ -8,7 +8,7 @@ describe('EventFactory.start', () => {
       type: EventType.TIMER_START,
       id: 'ID',
       data: { sec: 127, name: 'HOGE' },
-      date: actual.date // skip
+      date: actual.date, // skip
     });
   });
 });

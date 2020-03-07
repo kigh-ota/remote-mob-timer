@@ -8,7 +8,7 @@ export default class Notifier {
       const n = new Notification('Mob Timer', {
         body: msg,
         renotify: true,
-        tag: 'mob-timer'
+        tag: 'mob-timer',
       });
       n.onclick = () => window.focus();
     }

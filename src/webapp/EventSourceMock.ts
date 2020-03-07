@@ -9,7 +9,7 @@ type EventSourceConfigurationType = {
 type ReadyStateType = 0 | 1 | 2;
 
 const defaultOptions = {
-  withCredentials: false
+  withCredentials: false,
 };
 
 export const sources: { [key: string]: EventSource } = {};
@@ -34,11 +34,14 @@ export default class EventSource {
     sources[url] = this;
   }
 
-  addEventListener(eventName: string, listener: (...args: any[]) => void) {
+  addEventListener(eventName: string, listener: (...args: unknown[]) => void) {
     this.__emitter.addListener(eventName, listener);
   }
 
-  removeEventListener(eventName: string, listener: (...args: any[]) => void) {
+  removeEventListener(
+    eventName: string,
+    listener: (...args: unknown[]) => void
+  ) {
     this.__emitter.removeListener(eventName, listener);
   }
 
@@ -50,7 +53,7 @@ export default class EventSource {
     this.__emitter.emit(eventName, messageEvent);
   }
 
-  emitError(error: any) {
+  emitError(error: unknown) {
     if (typeof this.onerror === 'function') {
       this.onerror(error);
     }
@@ -63,7 +66,7 @@ export default class EventSource {
     }
   }
 
-  emitMessage(message: any) {
+  emitMessage(message: unknown) {
     if (typeof this.onmessage === 'function') {
       this.onmessage(message);
     }

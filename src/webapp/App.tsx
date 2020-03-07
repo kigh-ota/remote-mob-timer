@@ -22,7 +22,16 @@ interface Props {
   initialEvents: IEvent[];
 }
 
-const App: React.SFC<Props> = props => {
+function randomName() {
+  const i = Math.floor(Math.random() * Math.floor(animals.length));
+  return animals[i];
+}
+
+function setStoredName(name: string) {
+  window.localStorage.setItem('name', name);
+}
+
+export default function App(props: Props) {
   const [sec, setSec] = useState(props.initialSec);
   const [connected, setConnected] = useState(true);
   const [events, setEvents] = useState(props.initialEvents);
@@ -32,16 +41,13 @@ const App: React.SFC<Props> = props => {
   const [name, setNameState] = useState(initialName);
   setStoredName(name);
 
-  useEffect(() => {
-    document.title = secondToDisplayTime(sec);
-    const subs = setupEventHandlers(
-      props.reconnectingEventSource,
-      props.notifier
-    );
-    return () => {
-      subs.forEach(sub => sub.unsubscribe());
-    };
-  });
+  function updateEvents() {
+    fetch(makeV1TimerUrl('status'))
+      .then(res => res.json())
+      .then((json: StatusJson) => {
+        setEvents(json.eventHistory);
+      });
+  }
 
   function setupEventHandlers(
     evtSource: EventTarget,
@@ -81,25 +87,28 @@ const App: React.SFC<Props> = props => {
         updateEvents();
       }),
       fromEvent(evtSource, 'connected').subscribe(() => setConnected(true)),
-      fromEvent(evtSource, 'disconnected').subscribe(() => setConnected(false))
+      fromEvent(evtSource, 'disconnected').subscribe(() => setConnected(false)),
     ];
   }
+
+  useEffect(() => {
+    document.title = secondToDisplayTime(sec);
+    const subs = setupEventHandlers(
+      props.reconnectingEventSource,
+      props.notifier
+    );
+    return () => {
+      subs.forEach(sub => sub.unsubscribe());
+    };
+  });
 
   function getName() {
     return encodeURIComponent(name);
   }
 
   const resetButtons = [25, 20, 15, 10, 5].map(min => (
-    <ResetButton min={min} getName={getName.bind(this)} />
+    <ResetButton key={min} min={min} getName={getName.bind(this)} />
   ));
-
-  function updateEvents() {
-    fetch(makeV1TimerUrl('status'))
-      .then(res => res.json())
-      .then((json: StatusJson) => {
-        setEvents(json.eventHistory);
-      });
-  }
 
   return (
     <React.Fragment>
@@ -123,15 +132,4 @@ const App: React.SFC<Props> = props => {
       <EventHistory events={events} />
     </React.Fragment>
   );
-};
-
-function randomName() {
-  const i = Math.floor(Math.random() * Math.floor(animals.length));
-  return animals[i];
 }
-
-function setStoredName(name: string) {
-  window.localStorage.setItem('name', name);
-}
-
-export default App;

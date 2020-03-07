@@ -6,13 +6,13 @@ interface Props {
   setSec: (sec: number) => void;
 }
 
-const ToggleButton: React.SFC<Props> = props => {
+export default function ToggleButton(props: Props) {
   return (
     <button
       style={{ marginTop: 10 }}
-      onClick={e => {
+      onClick={() => {
         fetch(makeV1TimerUrl(`toggle?name=${props.getName()}`), {
-          method: 'POST'
+          method: 'POST',
         })
           .then(res => res.json())
           .then(json => {
@@ -23,6 +23,4 @@ const ToggleButton: React.SFC<Props> = props => {
       TOGGLE start/stop
     </button>
   );
-};
-
-export default ToggleButton;
+}

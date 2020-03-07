@@ -1,7 +1,3 @@
-export function makeV1TimerUrl(endpoint: string) {
-  return makeV1TimerUrlInternal(endpoint, window.location.href);
-}
-
 // export for testing
 export function makeV1TimerUrlInternal(endpoint: string, href: string) {
   const url = new URL(href);
@@ -9,6 +5,10 @@ export function makeV1TimerUrlInternal(endpoint: string, href: string) {
   const id =
     url.pathname.slice(-1) === '/' ? arr[arr.length - 2] : arr[arr.length - 1];
   return `${url.origin}/v1/timer/${id}/${endpoint}`;
+}
+
+export function makeV1TimerUrl(endpoint: string) {
+  return makeV1TimerUrlInternal(endpoint, window.location.href);
 }
 
 export function makeTimerUrl(endpoint: string) {

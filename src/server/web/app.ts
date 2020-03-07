@@ -2,7 +2,7 @@ import express from 'express';
 import { Express } from 'express';
 import path from 'path';
 import logger from 'morgan';
-import Timer, { TimerId } from '../timer/Timer';
+import { TimerId } from '../timer/Timer';
 import EventHistoryStoreFactory from '../event/EventHistoryStoreFactory';
 import TimerPool from '../timer/TimerPool';
 import setupEndpoints from './Endpoints';

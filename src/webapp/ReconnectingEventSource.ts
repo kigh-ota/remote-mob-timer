@@ -46,9 +46,7 @@ export default class ReconnectingEventSource extends EventTarget {
   }
 
   private waitForConnection(anyEvents: Observable<Event>) {
-    anyEvents
-      .pipe(first())
-      .subscribe((e: MessageEvent) => this.handleConnected(anyEvents));
+    anyEvents.pipe(first()).subscribe(() => this.handleConnected(anyEvents));
   }
 
   private handleConnected(anyEvents: Observable<Event>) {
@@ -75,11 +73,12 @@ export default class ReconnectingEventSource extends EventTarget {
   }
 
   private createEventSource(url: string) {
-    return new (<any>window).EventSource(url); // FIXME  error TS2339: Property 'EventSource' does not exist on type 'Window'.
+    return new window.EventSource(url); // FIXME  error TS2339: Property 'EventSource' does not exist on type 'Window'.
   }
 
   private waitForDisconnection(anyEvents: Observable<Event>) {
     anyEvents.pipe(timeout(this.connectionTimeoutSec * 1000)).subscribe(
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       () => {}, // do nothing
       () => {
         this.handleDisconnected();

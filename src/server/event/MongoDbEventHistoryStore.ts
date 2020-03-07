@@ -17,12 +17,15 @@ export default class MongoDbEventHistoryStore implements EventHistoryStore {
   }
 
   public listExceptClient(id: string, limit: number): Promise<IEvent[]> {
-    const idCondition = id === '1' ? {
-      $or: [
-        { id },
-        { id: { $exists: false } } // think of doc without id as doc with id = 1
-      ]
-    } : { id }
+    const idCondition =
+      id === '1'
+        ? {
+            $or: [
+              { id },
+              { id: { $exists: false } }, // think of doc without id as doc with id = 1
+            ],
+          }
+        : { id };
     return this.coll
       .find({
         $and: [
@@ -30,10 +33,10 @@ export default class MongoDbEventHistoryStore implements EventHistoryStore {
           {
             $and: [
               { type: { $ne: EventType.CLIENT_REGISTERED } },
-              { type: { $ne: EventType.CLIENT_UNREGISTERED } }
-            ]
-          }
-        ]
+              { type: { $ne: EventType.CLIENT_UNREGISTERED } },
+            ],
+          },
+        ],
       })
       .sort({ _id: -1 })
       .limit(limit)

@@ -3,6 +3,7 @@ public/javascripts/**/*
 !public/**/.keep
 db/
 configdb/
+.DS_Store
 
 # Created by https://www.gitignore.io/api/node
 # Edit at https://www.gitignore.io/?templates=node

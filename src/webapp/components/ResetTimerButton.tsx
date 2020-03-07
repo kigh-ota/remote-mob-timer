@@ -6,17 +6,18 @@ interface Props {
   getName: () => string;
 }
 
-const ResetButton: React.SFC<Props> = props => {
+export default function ResetButton(props: Props) {
   return (
     <button
       style={{ marginRight: 6 }}
-      onClick={e => {
-        fetch(makeV1TimerUrl(`reset?sec=${props.min * 60}&name=${props.getName()}`), {
-          method: 'POST'
-        });
+      onClick={() => {
+        fetch(
+          makeV1TimerUrl(`reset?sec=${props.min * 60}&name=${props.getName()}`),
+          {
+            method: 'POST',
+          }
+        );
       }}
     >{`${props.min}-min`}</button>
   );
-};
-
-export default ResetButton;
+}

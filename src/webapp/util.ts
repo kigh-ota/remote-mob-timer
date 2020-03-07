@@ -1,6 +1,4 @@
-import { AssertionError } from 'assert';
-
-export function secondToDisplayTime(sec: number) {
+export function secondToDisplayTime(sec: number): string {
   return (
     `${Math.floor(sec / 60)}`.padStart(2, '0') +
     ':' +
@@ -8,7 +6,7 @@ export function secondToDisplayTime(sec: number) {
   );
 }
 
-export function assert(expr: boolean) {
+export function assert(expr: boolean): void {
   if (!expr) {
     throw new Error('assert');
   }

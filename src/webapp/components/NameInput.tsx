@@ -1,12 +1,11 @@
 import * as React from 'react';
-import animals from '../animals';
 
 interface Props {
   name: string;
   setName: (name: string) => void;
 }
 
-const NameInput: React.SFC<Props> = props => {
+export default function NameInput(props: Props) {
   return (
     <div style={{ marginTop: 20 }}>
       <label htmlFor="name-input">NAME:</label>
@@ -19,6 +18,4 @@ const NameInput: React.SFC<Props> = props => {
       />
     </div>
   );
-};
-
-export default NameInput;
+}

@@ -5,12 +5,12 @@ interface Props {
   sec: number;
 }
 
-const TimeDisplay: React.SFC<Props> = props => {
+function TimeDisplay(props: Props) {
   return (
     <div style={{ fontSize: 'xx-large', margin: '0.67em 0' }}>
       {secondToDisplayTime(props.sec)}
     </div>
   );
-};
+}
 
 export default TimeDisplay;

@@ -1,5 +1,4 @@
 import Timer, { TimerId } from './Timer';
-import { Brand } from '../Brand';
 
 const MAX_TIMER_COUNT = 20;
 

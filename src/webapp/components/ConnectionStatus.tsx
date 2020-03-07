@@ -1,11 +1,10 @@
 import * as React from 'react';
-import { secondToDisplayTime } from '../util';
 
 interface Props {
   connected: boolean;
 }
 
-const ConnectionStatus: React.SFC<Props> = props => {
+export default function ConnectionStatusReact(props: Props) {
   return (
     <div className="connection" style={{ marginTop: 20 }}>
       <span>
@@ -13,6 +12,4 @@ const ConnectionStatus: React.SFC<Props> = props => {
       </span>
     </div>
   );
-};
-
-export default ConnectionStatus;
+}

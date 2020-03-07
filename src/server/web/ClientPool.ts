@@ -19,7 +19,7 @@ export default class ClientPool {
       this.clients[clientId] = {
         response,
         ip,
-        userAgent
+        userAgent,
       };
       console.log(
         `Registered client: clientId=${clientId}, timerId=${timerId}`
@@ -45,7 +45,7 @@ export default class ClientPool {
       userAgent?: string
     ) => void
   ) {
-    for (let id in this.clients) {
+    for (const id in this.clients) {
       const c = this.clients[id];
       fn(Number(id), c.response, c.ip, c.userAgent);
     }

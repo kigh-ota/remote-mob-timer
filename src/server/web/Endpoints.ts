@@ -42,7 +42,7 @@ export default function setupEndpoints(
     req.socket.setTimeout(43200);
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-store'
+      'Cache-Control': 'no-store',
     });
     res.write('\n');
     remoteMobTimer.clientPool.add(req, res, id);
@@ -66,10 +66,10 @@ export default function setupEndpoints(
       timer: {
         time: remoteMobTimer.clock.getTime(),
         nClient: remoteMobTimer.clientPool.count(),
-        isRunning: remoteMobTimer.clock.isRunning()
+        isRunning: remoteMobTimer.clock.isRunning(),
       },
       clients: remoteMobTimer.clientInfoMap(),
-      eventHistory
+      eventHistory,
     };
     res.json(statusJson);
   });
@@ -117,7 +117,7 @@ export default function setupEndpoints(
     }
     res.send({
       isRunning: remoteMobTimer.clock.isRunning(),
-      time: remoteMobTimer.clock.getTime()
+      time: remoteMobTimer.clock.getTime(),
     });
   });
 
@@ -131,7 +131,7 @@ export default function setupEndpoints(
   });
 
   // error handler
-  app.use(<express.ErrorRequestHandler>function(err, req, res) {
+  app.use(function(err, req, res) {
     // set locals, only providing error in development
     res.locals.message = err.message;
     res.locals.error = req.app.get('env') === 'development' ? err : {};
@@ -139,5 +139,5 @@ export default function setupEndpoints(
     // render the error page
     res.status(err.status || 500);
     res.render('error');
-  });
+  } as express.ErrorRequestHandler);
 }

@@ -8,6 +8,11 @@ import { fail } from 'assert';
 
 const URL = '/events/';
 
+function simulateAliveEvent() {
+  const ev = new MessageEvent(EventType.ALIVE, {});
+  sources[URL].emit(ev.type, ev);
+}
+
 describe('ReconnectingEventSource', () => {
   let clock: sinon.SinonFakeTimers;
   let createEventSourceStub: sinon.SinonStub;
@@ -16,6 +21,7 @@ describe('ReconnectingEventSource', () => {
   beforeEach(() => {
     clock = sinon.useFakeTimers();
     createEventSourceStub = sinon
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .stub(ReconnectingEventSource.prototype as any, 'createEventSource')
       .callsFake(() => new EventSourceMock(URL));
     consoleDebugStub = sinon.stub(console, 'debug');
@@ -99,8 +105,3 @@ describe('ReconnectingEventSource', () => {
     simulateAliveEvent();
   });
 });
-
-function simulateAliveEvent() {
-  const ev = new MessageEvent(EventType.ALIVE, {});
-  sources[URL].emit(ev.type, ev);
-}

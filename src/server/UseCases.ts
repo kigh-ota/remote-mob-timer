@@ -13,7 +13,7 @@ const UseCases = {
     const timer = new Timer(eventHistoryStore, id, TIMER_SEC);
     pool.add(timer);
   },
-  listTimerIds: (pool: TimerPool) => pool.listIds()
+  listTimerIds: (pool: TimerPool) => pool.listIds(),
 };
 
 export default UseCases;
