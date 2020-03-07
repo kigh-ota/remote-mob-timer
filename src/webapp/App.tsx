@@ -94,7 +94,7 @@ const App: React.SFC<Props> = props => {
   ));
 
   function updateEvents() {
-    fetch(makeV1TimerUrl('status.json'))
+    fetch(makeV1TimerUrl('status'))
       .then(res => res.json())
       .then((json: StatusJson) => {
         setEvents(json.eventHistory);

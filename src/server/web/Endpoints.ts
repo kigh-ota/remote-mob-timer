@@ -6,6 +6,8 @@ import ServerEvent from './ServerEvent';
 import createError from 'http-errors';
 import express = require('express');
 import TimerPool from '../timer/TimerPool';
+import UseCases from '../UseCases';
+import { TimerId } from '../timer/Timer';
 
 const ID_PART = ':id(\\d+)';
 
@@ -46,7 +48,13 @@ export default function setupEndpoints(
     remoteMobTimer.clientPool.add(req, res, id);
   });
 
-  app.get(`/v1/timer/${ID_PART}/status.json`, async (req, res) => {
+  app.put(`/v1/timer/${ID_PART}`, (req, res) => {
+    const id = req.params.id;
+    UseCases.addTimer(id as TimerId, remoteMobTimerPool, eventHistoryStore);
+    res.status(201).end();
+  });
+
+  app.get(`/v1/timer/${ID_PART}/status`, async (req, res) => {
     const id = req.params.id;
     const remoteMobTimer = remoteMobTimerPool.get(id);
     const MAX_HISTORY_LENGTH = 100;
@@ -114,7 +122,7 @@ export default function setupEndpoints(
   });
 
   app.get(`/v1/timer/ids`, (req, res) => {
-    res.json(remoteMobTimerPool.listIds());
+    res.json(UseCases.listTimerIds(remoteMobTimerPool));
   });
 
   // catch 404 and forward to error handler

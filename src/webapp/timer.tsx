@@ -15,7 +15,7 @@ import { makeV1TimerUrl, makeTimerUrl } from './UrlUtil';
     );
     const notifier = new Notifier();
 
-    fetch(makeV1TimerUrl('status.json'))
+    fetch(makeV1TimerUrl('status'))
       .then(res => res.json())
       .then((json: StatusJson) => {
         ReactDOM.render(
