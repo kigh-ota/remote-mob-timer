@@ -35,3 +35,11 @@ npm run start:dev
 - [Sinon.JS](https://sinonjs.org/)
 - [TypeScript](https://www.typescriptlang.org/)
 - [Webpack](https://webpack.js.org/)
+
+## API
+
+| Endpoint          | Method | Description             |
+| :---------------- | :----: | :---------------------- |
+| /{id}/status.json |  GET   | Get timer's status      |
+| /{id}/reset       |  POST  | Reset timer             |
+| /{id}/toggle      |  POST  | Toggle timer start/stop |
