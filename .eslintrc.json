@@ -25,6 +25,7 @@
       "error",
       { "allow": ["arrowFunctions", "constructors"] }
     ],
-    "no-prototype-builtins": "off"
+    "no-prototype-builtins": "off",
+    "@typescript-eslint/no-unused-vars": "error"
   }
 }

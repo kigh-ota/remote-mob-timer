@@ -1,14 +1,11 @@
 import { Express } from 'express';
 import EventHistoryStore from '../event/EventHistoryStore';
 import StatusJson from '../../common/StatusJson';
-import EventFactory from '../event/EventFactory';
-import ServerEvent from './ServerEvent';
 import createError from 'http-errors';
 import express = require('express');
 import TimerPool from '../timer/TimerPool';
 import UseCases from '../UseCases';
 import { TimerId } from '../timer/Timer';
-import { timer } from 'rxjs';
 
 const ID_PART = ':id(\\d+)';
 
