@@ -14,6 +14,7 @@ import EventHistory from './components/EventHistory';
 import StatusJson from '../../common/StatusJson';
 import { makeV1TimerUrl } from './UrlUtil';
 import AppContext from './AppContext';
+import GoodButton from './components/GoodButton';
 
 interface Props {
   timerName: string;
@@ -41,7 +42,9 @@ export default function App(props: Props) {
   const [name, setNameState] = useState(initialName);
   setStoredName(name);
 
-  const { notifier, clickSound, chimeSound } = useContext(AppContext);
+  const { notifier, clickSound, chimeSound, bellSound } = useContext(
+    AppContext
+  );
 
   const updateEvents = () => {
     fetch(makeV1TimerUrl('status'))
@@ -90,6 +93,11 @@ export default function App(props: Props) {
         chimeSound.play();
         updateEvents();
       }),
+      fromEvent(evtSource, EventType.GOOD).subscribe((e: MessageEvent) => {
+        const data = JSON.parse(e.data);
+        notifier.send(`${data.userName} is saying good!`);
+        bellSound.play();
+      }),
       fromEvent(evtSource, 'connected').subscribe(() => setConnected(true)),
       fromEvent(evtSource, 'disconnected').subscribe(() => setConnected(false)),
     ];
@@ -103,12 +111,12 @@ export default function App(props: Props) {
     };
   });
 
-  function getName() {
+  const getName = () => {
     return encodeURIComponent(name);
-  }
+  };
 
   const resetButtons = [25, 20, 15, 10, 5].map(min => (
-    <ResetButton key={min} min={min} getName={getName.bind(this)} />
+    <ResetButton key={min} min={min} getName={getName} />
   ));
 
   return (
@@ -120,7 +128,10 @@ export default function App(props: Props) {
         {resetButtons}
       </div>
       <div>
-        <ToggleButton getName={getName.bind(this)} setSec={setSec} />
+        <ToggleButton getName={getName} setSec={setSec} />
+      </div>
+      <div>
+        <GoodButton getName={getName} />
       </div>
       <NameInput
         name={name}

@@ -7,6 +7,8 @@ import EventHistoryStoreFactory from '../event/EventHistoryStoreFactory';
 import TimerPool from '../timer/TimerPool';
 import setupEndpoints from './Endpoints';
 import UseCases, { TIMER_SEC } from '../UseCases';
+import log from '../Logger';
+import favicon from 'serve-favicon';
 
 function initializeExpress(): Express {
   const app = express();
@@ -17,8 +19,12 @@ function initializeExpress(): Express {
 
   app.use(logger('dev'));
   app.use(express.json());
+  app.use(
+    favicon(
+      path.join(__dirname, '..', '..', '..', 'public', 'images', 'favicon.ico')
+    )
+  );
   app.use(express.urlencoded({ extended: false }));
-
   app.use(express.static(path.join(__dirname, '..', '..', '..', 'public')));
 
   return app;
@@ -27,7 +33,7 @@ function initializeExpress(): Express {
 function useInMemoryStore(): boolean {
   const ret = process.env.USE_IN_MEMORY_STORE === '1';
   if (ret) {
-    console.debug('Using in-memory store...');
+    log.info('Using in-memory store...');
   }
   return ret;
 }

@@ -84,6 +84,17 @@ const UseCases = {
   changeTimerName: (id: TimerId, name: string, pool: TimerPool) => {
     pool.get(id).setName(name);
   },
+  sayGood: (
+    id: TimerId,
+    userName: string,
+    pool: TimerPool,
+    eventHistoryStore: EventHistoryStore
+  ) => {
+    const timer = pool.get(id);
+    const event = EventFactory.good(id, userName);
+    ServerEvent.send(event, timer.clientPool);
+    eventHistoryStore.add(event);
+  },
 };
 
 export default UseCases;

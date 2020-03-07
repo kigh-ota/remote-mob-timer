@@ -1,5 +1,6 @@
 import IEvent, { EventType } from '../../common/IEvent';
 import EventHistoryStore from './EventHistoryStore';
+import { TimerId } from '../timer/Timer';
 
 const MAX_HISTORY_LENGTH = 10000;
 
@@ -13,7 +14,7 @@ export default class InMemoryEventHistoryStore implements EventHistoryStore {
     this.history.push(event);
   }
 
-  public listExceptClient(id: string): Promise<IEvent[]> {
+  public listExceptClient(id: TimerId): Promise<IEvent[]> {
     return Promise.resolve(
       this.history
         .filter(e => e.id === id)

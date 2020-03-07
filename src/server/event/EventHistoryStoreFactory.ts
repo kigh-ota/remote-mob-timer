@@ -2,6 +2,7 @@ import EventHistoryStore from './EventHistoryStore';
 import { MongoClient } from 'mongodb';
 import MongoDbEventHistoryStore from './MongoDbEventHistoryStore';
 import InMemoryEventHistoryStore from './InMemoryEventHistoryStore';
+import log from '../Logger';
 
 export default class EventHistoryStoreFactory {
   public static async createMongoDb(): Promise<EventHistoryStore> {
@@ -12,7 +13,7 @@ export default class EventHistoryStoreFactory {
     try {
       await mongoClient.connect();
     } catch (err) {
-      console.error('Failed to connect to database', err);
+      log.error('Failed to connect to database', err);
       process.exit(1);
     }
     return new MongoDbEventHistoryStore(mongoClient);

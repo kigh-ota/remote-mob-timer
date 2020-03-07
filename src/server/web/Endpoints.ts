@@ -104,6 +104,13 @@ export default function setupEndpoints(
     res.status(200).end();
   });
 
+  app.post(`/v1/timer/${ID_PART}/good`, (req, res) => {
+    const id = req.params.id;
+    const userName = decodeURIComponent(req.query.name);
+    UseCases.sayGood(id, userName, timerPool, eventHistoryStore);
+    res.status(200).end();
+  });
+
   app.get(`/v1/timers`, (req, res) => {
     const timersJson = UseCases.listTimers(timerPool);
     res.json(timersJson);

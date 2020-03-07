@@ -34,12 +34,14 @@
     "event-target-shim": "5.0.1",
     "express": "4.17.1",
     "http-errors": "1.6.3",
+    "log4js": "^6.1.2",
     "mongodb": "3.3.0",
     "morgan": "1.9.1",
     "pug": "2.0.4",
     "react": "16.13.0",
     "react-dom": "16.13.0",
-    "rxjs": "6.5.2"
+    "rxjs": "6.5.2",
+    "serve-favicon": "^2.5.0"
   },
   "devDependencies": {
     "@babel/core": "7.8.7",
@@ -55,6 +57,7 @@
     "@types/node": "12.12.29",
     "@types/react": "16.9.23",
     "@types/react-dom": "16.9.5",
+    "@types/serve-favicon": "^2.5.0",
     "@types/sinon": "7.5.2",
     "@typescript-eslint/eslint-plugin": "2.22.0",
     "@typescript-eslint/parser": "2.22.0",

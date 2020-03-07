@@ -1,6 +1,7 @@
 import IEvent, { EventType } from '../../common/IEvent';
 import { Collection, MongoClient } from 'mongodb';
 import EventHistoryStore from './EventHistoryStore';
+import { TimerId } from '../timer/Timer';
 
 const DB_NAME = 'remote-mob-timer';
 const COLLECTION_NAME = 'events';
@@ -16,7 +17,7 @@ export default class MongoDbEventHistoryStore implements EventHistoryStore {
     this.coll.insertOne(event);
   }
 
-  public listExceptClient(id: string, limit: number): Promise<IEvent[]> {
+  public listExceptClient(id: TimerId, limit: number): Promise<IEvent[]> {
     const idCondition =
       id === '1'
         ? {

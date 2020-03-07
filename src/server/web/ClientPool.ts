@@ -2,6 +2,8 @@ import ClientInfo from '../../common/ClientInfo';
 import EventHistoryStore from '../event/EventHistoryStore';
 import { Request, Response } from 'express';
 import EventFactory from '../event/EventFactory';
+import { TimerId } from '../timer/Timer';
+import log from '../Logger';
 
 export default class ClientPool {
   private id = 0;
@@ -11,7 +13,7 @@ export default class ClientPool {
 
   constructor(private readonly eventHistoryStore: EventHistoryStore) {}
 
-  public add(request: Request, response: Response, timerId: string) {
+  public add(request: Request, response: Response, timerId: TimerId) {
     (clientId => {
       const ip = request.ip;
       const userAgent = request.header('User-Agent');
@@ -21,15 +23,13 @@ export default class ClientPool {
         ip,
         userAgent,
       };
-      console.log(
-        `Registered client: clientId=${clientId}, timerId=${timerId}`
-      );
+      log.info(`Registered client: clientId=${clientId}, timerId=${timerId}`);
       this.eventHistoryStore.add(
         EventFactory.clientRegistered(clientInfo, timerId)
       );
       request.on('close', () => {
         delete this.clients[clientId];
-        console.log(`Unregistered client: id=${clientId}, timerId=${timerId}`);
+        log.info(`Unregistered client: id=${clientId}, timerId=${timerId}`);
         this.eventHistoryStore.add(
           EventFactory.clientUnregistered(clientInfo, timerId)
         );
