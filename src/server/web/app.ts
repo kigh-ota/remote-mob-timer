@@ -37,11 +37,11 @@ async function main(app: Express) {
     ? await EventHistoryStoreFactory.createInMemory()
     : await EventHistoryStoreFactory.createMongoDb();
   const pool = new TimerPool();
-  UseCases.addTimer('1' as TimerId, pool, eventHistoryStore);
-  UseCases.addTimer('2' as TimerId, pool, eventHistoryStore);
-  UseCases.addTimer('3' as TimerId, pool, eventHistoryStore);
-  UseCases.addTimer('4' as TimerId, pool, eventHistoryStore);
-  UseCases.addTimer('5' as TimerId, pool, eventHistoryStore);
+  UseCases.addTimer('1' as TimerId, 'Timer1', pool, eventHistoryStore);
+  UseCases.addTimer('2' as TimerId, 'Timer2', pool, eventHistoryStore);
+  UseCases.addTimer('3' as TimerId, 'Timer3', pool, eventHistoryStore);
+  UseCases.addTimer('4' as TimerId, 'Timer4', pool, eventHistoryStore);
+  UseCases.addTimer('5' as TimerId, 'Timer5', pool, eventHistoryStore);
   setupEndpoints(app, pool, eventHistoryStore, TIMER_SEC);
 }
 

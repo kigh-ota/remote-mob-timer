@@ -7,13 +7,14 @@ export const TIMER_SEC = 25 * 60;
 const UseCases = {
   addTimer: (
     id: TimerId,
+    name: string,
     pool: TimerPool,
     eventHistoryStore: EventHistoryStore
   ) => {
-    const timer = new Timer(eventHistoryStore, id, TIMER_SEC);
+    const timer = new Timer(eventHistoryStore, id, name, TIMER_SEC);
     pool.add(timer);
   },
-  listTimerIds: (pool: TimerPool) => pool.listIds(),
+  listTimers: (pool: TimerPool) => pool.list(),
 };
 
 export default UseCases;

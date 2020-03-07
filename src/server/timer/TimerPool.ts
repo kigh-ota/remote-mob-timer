@@ -12,7 +12,11 @@ export default class TimerPool {
       throw new Error('Mamimum number of timers reached');
     }
     const id = remoteMobTimer.getId();
-    if (this.listIds().includes(id)) {
+    if (
+      this.list()
+        .map(t => t.id)
+        .includes(id)
+    ) {
       throw new Error(`id (${id}) already exists`);
     }
     this.pool[id] = remoteMobTimer;
@@ -26,7 +30,13 @@ export default class TimerPool {
     return this.pool[id];
   }
 
-  public listIds(): TimerId[] {
-    return Object.keys(this.pool) as TimerId[];
+  public list(): Array<{
+    id: TimerId;
+    name: string;
+  }> {
+    return Object.keys(this.pool).map(id => ({
+      id: id as TimerId,
+      name: this.pool[id].getName(),
+    }));
   }
 }

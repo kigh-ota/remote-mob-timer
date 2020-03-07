@@ -20,6 +20,7 @@ import { makeV1TimerUrl, makeTimerUrl } from './UrlUtil';
       .then((json: StatusJson) => {
         ReactDOM.render(
           <App
+            timerName={json.timer.name}
             reconnectingEventSource={reconnectingEventSource}
             notifier={notifier}
             initialSec={json.timer.time}

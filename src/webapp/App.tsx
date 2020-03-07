@@ -16,6 +16,7 @@ import StatusJson from '../common/StatusJson';
 import { makeV1TimerUrl } from './UrlUtil';
 
 interface Props {
+  timerName: string;
   reconnectingEventSource: ReconnectingEventSource;
   notifier: Notifier;
   initialSec: number;
@@ -112,7 +113,7 @@ export default function App(props: Props) {
 
   return (
     <React.Fragment>
-      <h1>Remote Mob Timer</h1>
+      <h1>{props.timerName}</h1>
       <TimeDisplay sec={sec} />
       <div>
         <span>START:</span>

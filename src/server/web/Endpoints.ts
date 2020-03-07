@@ -50,7 +50,12 @@ export default function setupEndpoints(
 
   app.put(`/v1/timer/${ID_PART}`, (req, res) => {
     const id = req.params.id;
-    UseCases.addTimer(id as TimerId, remoteMobTimerPool, eventHistoryStore);
+    UseCases.addTimer(
+      id as TimerId,
+      `Timer${id}`,
+      remoteMobTimerPool,
+      eventHistoryStore
+    );
     res.status(201).end();
   });
 
@@ -64,6 +69,7 @@ export default function setupEndpoints(
     );
     const statusJson: StatusJson = {
       timer: {
+        name: remoteMobTimer.getName(),
         time: remoteMobTimer.clock.getTime(),
         nClient: remoteMobTimer.clientPool.count(),
         isRunning: remoteMobTimer.clock.isRunning(),
@@ -121,8 +127,8 @@ export default function setupEndpoints(
     });
   });
 
-  app.get(`/v1/timer/ids`, (req, res) => {
-    res.json(UseCases.listTimerIds(remoteMobTimerPool));
+  app.get(`/v1/timers`, (req, res) => {
+    res.json(UseCases.listTimers(remoteMobTimerPool));
   });
 
   // catch 404 and forward to error handler
