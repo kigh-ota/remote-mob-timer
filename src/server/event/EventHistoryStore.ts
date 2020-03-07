@@ -1,4 +1,4 @@
-import IEvent from '../common/IEvent';
+import IEvent from '../../common/IEvent';
 
 export default interface EventHistoryStore {
   add(event: IEvent): void;

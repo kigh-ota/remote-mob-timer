@@ -1,17 +1,17 @@
 import { Express } from 'express';
-import EventHistoryStore from './EventHistoryStore';
-import StatusJson from '../common/StatusJson';
-import EventFactory from './EventFactory';
+import EventHistoryStore from '../event/EventHistoryStore';
+import StatusJson from '../../common/StatusJson';
+import EventFactory from '../event/EventFactory';
 import ServerEvent from './ServerEvent';
 import createError from 'http-errors';
 import express = require('express');
-import RemoteMobTimerPool from './RemoteMobTimerPool';
+import TimerPool from '../timer/TimerPool';
 
 const ID_PART = ':id(\\d+)';
 
 export default function setupEndpoints(
   app: Express,
-  remoteMobTimerPool: RemoteMobTimerPool,
+  remoteMobTimerPool: TimerPool,
   eventHistoryStore: EventHistoryStore,
   defaultTimerSec: number
 ) {
@@ -56,9 +56,9 @@ export default function setupEndpoints(
     );
     const statusJson: StatusJson = {
       timer: {
-        time: remoteMobTimer.timer.getTime(),
+        time: remoteMobTimer.clock.getTime(),
         nClient: remoteMobTimer.clientPool.count(),
-        isRunning: remoteMobTimer.timer.isRunning()
+        isRunning: remoteMobTimer.clock.isRunning()
       },
       clients: remoteMobTimer.clientInfoMap(),
       eventHistory
@@ -69,10 +69,10 @@ export default function setupEndpoints(
   app.post(`/${ID_PART}/reset`, (req, res) => {
     const id = req.params.id;
     const remoteMobTimer = remoteMobTimerPool.get(id);
-    remoteMobTimer.timer.stop();
+    remoteMobTimer.clock.stop();
     const sec = req.query.sec ? Number(req.query.sec) : defaultTimerSec;
-    remoteMobTimer.timer.setTime(sec);
-    remoteMobTimer.timer.start();
+    remoteMobTimer.clock.setTime(sec);
+    remoteMobTimer.clock.start();
     const event = EventFactory.start(
       sec,
       decodeURIComponent(req.query.name),
@@ -86,20 +86,20 @@ export default function setupEndpoints(
   app.post(`/${ID_PART}/toggle`, (req, res) => {
     const id = req.params.id;
     const remoteMobTimer = remoteMobTimerPool.get(id);
-    if (remoteMobTimer.timer.getTime() > 0) {
-      if (remoteMobTimer.timer.isRunning()) {
-        remoteMobTimer.timer.stop();
+    if (remoteMobTimer.clock.getTime() > 0) {
+      if (remoteMobTimer.clock.isRunning()) {
+        remoteMobTimer.clock.stop();
         const event = EventFactory.stop(
-          remoteMobTimer.timer.getTime(),
+          remoteMobTimer.clock.getTime(),
           decodeURIComponent(req.query.name),
           id
         );
         ServerEvent.send(event, remoteMobTimer.clientPool);
         eventHistoryStore.add(event);
       } else {
-        remoteMobTimer.timer.start();
+        remoteMobTimer.clock.start();
         const event = EventFactory.start(
-          remoteMobTimer.timer.getTime(),
+          remoteMobTimer.clock.getTime(),
           decodeURIComponent(req.query.name),
           id
         );
@@ -108,9 +108,27 @@ export default function setupEndpoints(
       }
     }
     res.send({
-      isRunning: remoteMobTimer.timer.isRunning(),
-      time: remoteMobTimer.timer.getTime()
+      isRunning: remoteMobTimer.clock.isRunning(),
+      time: remoteMobTimer.clock.getTime()
     });
+  });
+
+  app.post(`/v1/timerIds`, (req, res) => {
+    remoteMobTimerPool.listIds();
+    const id = req.params.id;
+    const remoteMobTimer = remoteMobTimerPool.get(id);
+    remoteMobTimer.clock.stop();
+    const sec = req.query.sec ? Number(req.query.sec) : defaultTimerSec;
+    remoteMobTimer.clock.setTime(sec);
+    remoteMobTimer.clock.start();
+    const event = EventFactory.start(
+      sec,
+      decodeURIComponent(req.query.name),
+      id
+    );
+    ServerEvent.send(event, remoteMobTimer.clientPool);
+    eventHistoryStore.add(event);
+    res.send('reset');
   });
 
   // catch 404 and forward to error handler

@@ -1,4 +1,4 @@
-import IEvent, { EventType } from '../common/IEvent';
+import IEvent, { EventType } from '../../common/IEvent';
 import EventHistoryStore from './EventHistoryStore';
 
 const MAX_HISTORY_LENGTH: number = 10000;

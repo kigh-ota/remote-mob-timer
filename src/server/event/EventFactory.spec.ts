@@ -1,6 +1,6 @@
 import EventFactory from './EventFactory';
 import assert = require('assert');
-import { EventType } from '../common/IEvent';
+import { EventType } from '../../common/IEvent';
 describe('EventFactory.start', () => {
   it('works', () => {
     const actual = EventFactory.start(127, 'HOGE', 'ID');

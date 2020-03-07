@@ -1,22 +1,26 @@
-import ClientPool from './ClientPool';
-import Timer from './Timer';
-import EventHistoryStore from './EventHistoryStore';
-import EventFactory from './EventFactory';
-import ServerEvent from './ServerEvent';
-import ClientInfo from '../common/ClientInfo';
+import ClientPool from '../web/ClientPool';
+import TimerClock from './clock/TimerClock';
+import EventHistoryStore from '../event/EventHistoryStore';
+import EventFactory from '../event/EventFactory';
+import ServerEvent from '../web/ServerEvent';
+import ClientInfo from '../../common/ClientInfo';
 import { interval } from 'rxjs';
+import { Brand } from '../Brand';
 
-export default class RemoteMobTimer {
+export type TimerId = Brand<string, 'TimerId'>;
+
+export default class Timer {
   public readonly clientPool: ClientPool;
-  public readonly timer: Timer;
+  public readonly clock: TimerClock;
+  private readonly id: TimerId;
 
   constructor(
     eventHistoryStore: EventHistoryStore,
-    id: string,
+    id: TimerId,
     defaultTimerSec: number
   ) {
     this.clientPool = new ClientPool(eventHistoryStore);
-    this.timer = new Timer(
+    this.clock = new TimerClock(
       (sec: number) =>
         ServerEvent.send(EventFactory.tick(sec, id), this.clientPool),
       () => {
@@ -25,7 +29,8 @@ export default class RemoteMobTimer {
         eventHistoryStore.add(event);
       }
     );
-    this.timer.setTime(defaultTimerSec);
+    this.clock.setTime(defaultTimerSec);
+    this.id = id;
 
     const SEND_ALIVE_INTERVAL_SEC = 5;
     interval(SEND_ALIVE_INTERVAL_SEC * 1000).subscribe(() =>
@@ -39,5 +44,9 @@ export default class RemoteMobTimer {
       ret[id] = { ip, userAgent };
     });
     return ret;
+  }
+
+  public getId(): TimerId {
+    return this.id;
   }
 }

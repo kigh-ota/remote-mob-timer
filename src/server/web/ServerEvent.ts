@@ -1,4 +1,4 @@
-import IEvent from '../common/IEvent';
+import IEvent from '../../common/IEvent';
 import ClientPool from './ClientPool';
 
 export default class ServerEvent {

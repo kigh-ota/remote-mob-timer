@@ -1,7 +1,7 @@
-import ClientInfo from '../common/ClientInfo';
-import EventHistoryStore from './EventHistoryStore';
+import ClientInfo from '../../common/ClientInfo';
+import EventHistoryStore from '../event/EventHistoryStore';
 import { Request, Response } from 'express';
-import EventFactory from './EventFactory';
+import EventFactory from '../event/EventFactory';
 
 export default class ClientPool {
   private id = 0;

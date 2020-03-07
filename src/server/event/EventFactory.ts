@@ -1,4 +1,4 @@
-import IEvent, { EventType } from '../common/IEvent';
+import IEvent, { EventType } from '../../common/IEvent';
 
 export default class EventFactory {
   public static start(sec: number, name: string, id: string): IEvent {

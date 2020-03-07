@@ -43,3 +43,4 @@ npm run start:dev
 | /{id}/status.json |  GET   | Get timer's status      |
 | /{id}/reset       |  POST  | Reset timer             |
 | /{id}/toggle      |  POST  | Toggle timer start/stop |
+| /v1/timerIds      |  GET   | Get list of timer ids   |

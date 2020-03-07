@@ -1,8 +1,8 @@
-import Timer from './Timer';
 import * as sinon from 'sinon';
 import assert = require('assert');
+import TimerClock from './TimerClock';
 
-describe('Timer', () => {
+describe('TimerClock', () => {
   let clock: sinon.SinonFakeTimers;
 
   beforeEach(() => {
@@ -15,7 +15,7 @@ describe('Timer', () => {
 
   it('does not tick unless started', () => {
     const onTickSpy = sinon.spy();
-    const timer = new Timer(onTickSpy);
+    const timer = new TimerClock(onTickSpy);
     timer.setTime(10);
     clock.tick(3000);
     assert.equal(onTickSpy.callCount, 0);
@@ -24,7 +24,7 @@ describe('Timer', () => {
 
   it('ticks after started', () => {
     const onTickSpy = sinon.spy();
-    const timer = new Timer(onTickSpy);
+    const timer = new TimerClock(onTickSpy);
     timer.setTime(10);
     timer.start();
     clock.tick(2000);
@@ -34,7 +34,7 @@ describe('Timer', () => {
 
   it('calls over() correctly', () => {
     const onOverSpy = sinon.spy();
-    const timer = new Timer(() => {}, onOverSpy);
+    const timer = new TimerClock(() => {}, onOverSpy);
     timer.setTime(5);
     timer.start();
     clock.tick(4999);

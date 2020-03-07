@@ -2,11 +2,11 @@ import express from 'express';
 import { Express } from 'express';
 import path from 'path';
 import logger from 'morgan';
-import Endpoints from './Endpoints';
-import Timer from './RemoteMobTimer';
-import EventHistoryStoreFactory from './EventHistoryStoreFactory';
-import RemoteMobTimerPool from './RemoteMobTimerPool';
+import Timer, { TimerId } from '../timer/Timer';
+import EventHistoryStoreFactory from '../event/EventHistoryStoreFactory';
+import TimerPool from '../timer/TimerPool';
 import setupEndpoints from './Endpoints';
+import UseCases, { TIMER_SEC } from '../UseCases';
 
 function initializeExpress(): Express {
   const app = express();
@@ -33,15 +33,13 @@ function useInMemoryStore(): boolean {
 }
 
 async function main(app: Express) {
-  const TIMER_SEC = 25 * 60;
-
   const eventHistoryStore = useInMemoryStore()
     ? await EventHistoryStoreFactory.createInMemory()
     : await EventHistoryStoreFactory.createMongoDb();
-  const pool = new RemoteMobTimerPool();
-  pool.add(new Timer(eventHistoryStore, '1', TIMER_SEC), '1');
-  pool.add(new Timer(eventHistoryStore, '2', TIMER_SEC), '2');
-  pool.add(new Timer(eventHistoryStore, '3', TIMER_SEC), '3');
+  const pool = new TimerPool();
+  UseCases.addTimer('1' as TimerId, pool, eventHistoryStore);
+  UseCases.addTimer('2' as TimerId, pool, eventHistoryStore);
+  UseCases.addTimer('3' as TimerId, pool, eventHistoryStore);
   setupEndpoints(app, pool, eventHistoryStore, TIMER_SEC);
 }
 

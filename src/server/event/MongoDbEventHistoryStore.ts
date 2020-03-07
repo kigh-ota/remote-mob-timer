@@ -1,4 +1,4 @@
-import IEvent, { EventType } from '../common/IEvent';
+import IEvent, { EventType } from '../../common/IEvent';
 import { Collection, MongoClient } from 'mongodb';
 import EventHistoryStore from './EventHistoryStore';
 

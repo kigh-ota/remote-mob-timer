@@ -1,6 +1,6 @@
 import { Subscription, interval } from 'rxjs';
 
-class Timer {
+class TimerClock {
   private timeout: Subscription | null;
   private remainingSec: number;
   private onTick: (sec: number) => void;
@@ -56,4 +56,4 @@ class Timer {
   }
 }
 
-export default Timer;
+export default TimerClock;
