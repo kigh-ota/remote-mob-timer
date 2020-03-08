@@ -9,7 +9,7 @@ export default class TimerPool implements TimerRepository {
   } = {};
 
   public add(timer: Timer): void {
-    if (Object.keys(this.pool).length === MAX_TIMER_COUNT) {
+    if (Object.keys(this.pool).length >= MAX_TIMER_COUNT) {
       throw new Error('Mamimum number of timers reached');
     }
     const id = timer.getId();
