@@ -1,14 +1,13 @@
-import ExpressClientPool from '../express/ExpressClientPool';
 import TimerClock from './clock/TimerClock';
 import EventHistoryStore from '../event/EventHistoryStore';
 import EventFactory from '../event/EventFactory';
-import ExpressServerEvent from '../express/ExpressServerEvent';
-import ClientInfo from '../../common/ClientInfo';
 import { interval } from 'rxjs';
 import { TimerId } from '../../common/TimerId';
+import ServerEventSender from '../sse/ServerEventSender';
+import SseClientPool from '../sse/SseClientPool';
 
 export default class Timer {
-  public readonly clientPool: ExpressClientPool;
+  public readonly clientPool: SseClientPool;
   public readonly clock: TimerClock;
   private readonly id: TimerId;
   private name: string;
@@ -17,15 +16,17 @@ export default class Timer {
     eventHistoryStore: EventHistoryStore,
     id: TimerId,
     name: string,
-    defaultTimerSec: number
+    defaultTimerSec: number,
+    serverEventSender: ServerEventSender,
+    ClientPoolImpl: new (eventHistoryStore: EventHistoryStore) => SseClientPool
   ) {
-    this.clientPool = new ExpressClientPool(eventHistoryStore);
+    this.clientPool = new ClientPoolImpl(eventHistoryStore);
     this.clock = new TimerClock(
       (sec: number) =>
-        ExpressServerEvent.send(EventFactory.tick(sec, id), this.clientPool),
+        serverEventSender.send(EventFactory.tick(sec, id), this.clientPool),
       () => {
         const event = EventFactory.over(id, this.getName());
-        ExpressServerEvent.send(event, this.clientPool);
+        serverEventSender.send(event, this.clientPool);
         eventHistoryStore.add(event);
       }
     );
@@ -35,17 +36,17 @@ export default class Timer {
 
     const SEND_ALIVE_INTERVAL_SEC = 5;
     interval(SEND_ALIVE_INTERVAL_SEC * 1000).subscribe(() =>
-      ExpressServerEvent.send(EventFactory.alive(id), this.clientPool)
+      serverEventSender.send(EventFactory.alive(id), this.clientPool)
     );
   }
 
-  public clientInfoMap(): { [clientId: number]: ClientInfo } {
-    const ret: { [clientId: number]: ClientInfo } = {};
-    this.clientPool.forEach((id, res, ip, userAgent) => {
-      ret[id] = { ip, userAgent };
-    });
-    return ret;
-  }
+  // public clientInfoMap(): { [clientId: number]: SseClient } {
+  //   const ret: { [clientId: number]: SseClient } = {};
+  //   this.clientPool.forEach((id, res, ip, userAgent) => {
+  //     ret[id] = { ip, userAgent };
+  //   });
+  //   return ret;
+  // }
 
   public getId(): TimerId {
     return this.id;

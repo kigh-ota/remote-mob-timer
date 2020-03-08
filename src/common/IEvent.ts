@@ -1,4 +1,4 @@
-import ClientInfo from './ClientInfo';
+import SseClient from './SseClient';
 import { TimerId } from './TimerId';
 // eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export default interface IEvent {
@@ -52,10 +52,10 @@ export interface AliveEvent extends IEvent {
 
 export interface ClientRegisteredEvent extends IEvent {
   type: EventType.CLIENT_REGISTERED;
-  data: ClientInfo;
+  data: SseClient;
 }
 
 export interface ClientUnregisteredEvent extends IEvent {
   type: EventType.CLIENT_UNREGISTERED;
-  data: ClientInfo;
+  data: SseClient;
 }

@@ -8,6 +8,8 @@ import UseCases, { TIMER_SEC } from '../UseCases';
 import log from '../Logger';
 import favicon from 'serve-favicon';
 import { TimerId } from '../../common/TimerId';
+import ExpressServerEventSender from './ExpressServerEventSender';
+import ExpressSseClientPool from './ExpressSseClientPool';
 
 function initializeExpress(): Express {
   const app = express();
@@ -41,16 +43,18 @@ function useInMemoryStore(): boolean {
 }
 
 async function main(app: Express) {
-  const eventHistoryStore = useInMemoryStore()
+  const historyStore = useInMemoryStore()
     ? await EventHistoryStoreFactory.createInMemory()
     : await EventHistoryStoreFactory.createMongoDb();
   const pool = new InMemoryTimerRepository();
-  UseCases.addTimer('1' as TimerId, 'Timer1', pool, eventHistoryStore);
-  UseCases.addTimer('2' as TimerId, 'Timer2', pool, eventHistoryStore);
-  UseCases.addTimer('3' as TimerId, 'Timer3', pool, eventHistoryStore);
-  UseCases.addTimer('4' as TimerId, 'Timer4', pool, eventHistoryStore);
-  UseCases.addTimer('5' as TimerId, 'Timer5', pool, eventHistoryStore);
-  setupEndpoints(app, pool, eventHistoryStore, TIMER_SEC);
+  const sender = new ExpressServerEventSender();
+  const Pool = ExpressSseClientPool;
+  UseCases.addTimer('1' as TimerId, 'Timer1', pool, historyStore, sender, Pool);
+  UseCases.addTimer('2' as TimerId, 'Timer2', pool, historyStore, sender, Pool);
+  UseCases.addTimer('3' as TimerId, 'Timer3', pool, historyStore, sender, Pool);
+  UseCases.addTimer('4' as TimerId, 'Timer4', pool, historyStore, sender, Pool);
+  UseCases.addTimer('5' as TimerId, 'Timer5', pool, historyStore, sender, Pool);
+  setupEndpoints(app, pool, historyStore, sender, TIMER_SEC, Pool);
 }
 
 const app = initializeExpress();

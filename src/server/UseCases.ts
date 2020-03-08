@@ -3,8 +3,9 @@ import Timer from './timer/Timer';
 import EventHistoryStore from './event/EventHistoryStore';
 import StatusJson from '../common/StatusJson';
 import EventFactory from './event/EventFactory';
-import ExpressServerEvent from './express/ExpressServerEvent';
 import { TimerId } from '../common/TimerId';
+import ServerEventSender from './sse/ServerEventSender';
+import SseClientPool from './sse/SseClientPool';
 
 export const TIMER_SEC = 25 * 60;
 
@@ -13,9 +14,18 @@ const UseCases = {
     id: TimerId,
     name: string,
     pool: InMemoryTimerRepository,
-    eventHistoryStore: EventHistoryStore
+    eventHistoryStore: EventHistoryStore,
+    serverEventSender: ServerEventSender,
+    ClientPoolImpl: new (eventHistoryStore: EventHistoryStore) => SseClientPool
   ) => {
-    const timer = new Timer(eventHistoryStore, id, name, TIMER_SEC);
+    const timer = new Timer(
+      eventHistoryStore,
+      id,
+      name,
+      TIMER_SEC,
+      serverEventSender,
+      ClientPoolImpl
+    );
     pool.add(timer);
   },
   getTimerStatus: async (
@@ -46,21 +56,23 @@ const UseCases = {
     sec: number,
     userName: string,
     pool: InMemoryTimerRepository,
-    eventHistoryStore: EventHistoryStore
+    eventHistoryStore: EventHistoryStore,
+    serverEventSender: ServerEventSender
   ) => {
     const timer = pool.get(id);
     timer.clock.stop();
     timer.clock.setTime(sec);
     timer.clock.start();
     const event = EventFactory.start(sec, userName, timer.getName(), id);
-    ExpressServerEvent.send(event, timer.clientPool);
+    serverEventSender.send(event, timer.clientPool);
     eventHistoryStore.add(event);
   },
   toggleTimer: (
     id: TimerId,
     userName: string,
     pool: InMemoryTimerRepository,
-    eventHistoryStore: EventHistoryStore
+    eventHistoryStore: EventHistoryStore,
+    serverEventSender: ServerEventSender
   ) => {
     const timer = pool.get(id);
     if (timer.clock.getTime() > 0) {
@@ -72,7 +84,7 @@ const UseCases = {
           timer.getName(),
           id
         );
-        ExpressServerEvent.send(event, timer.clientPool);
+        serverEventSender.send(event, timer.clientPool);
         eventHistoryStore.add(event);
       } else {
         timer.clock.start();
@@ -82,7 +94,7 @@ const UseCases = {
           timer.getName(),
           id
         );
-        ExpressServerEvent.send(event, timer.clientPool);
+        serverEventSender.send(event, timer.clientPool);
         eventHistoryStore.add(event);
       }
     }
@@ -103,11 +115,12 @@ const UseCases = {
     id: TimerId,
     userName: string,
     pool: InMemoryTimerRepository,
-    eventHistoryStore: EventHistoryStore
+    eventHistoryStore: EventHistoryStore,
+    serverEventSender: ServerEventSender
   ) => {
     const timer = pool.get(id);
     const event = EventFactory.good(id, userName, timer.getName());
-    ExpressServerEvent.send(event, timer.clientPool);
+    serverEventSender.send(event, timer.clientPool);
     eventHistoryStore.add(event);
   },
 };
