@@ -1,5 +1,4 @@
 import { EventType, StartEvent } from '../../common/IEvent';
-import { TimerId } from '../timer/Timer';
 import {
   StopEvent,
   TickEvent,
@@ -10,6 +9,7 @@ import {
   ClientUnregisteredEvent,
 } from '../../common/IEvent';
 import ClientInfo from '../../common/ClientInfo';
+import { TimerId } from '../../common/TimerId';
 
 export default class EventFactory {
   public static start(

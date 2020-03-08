@@ -1,7 +1,7 @@
 import IEvent, { EventType } from '../../common/IEvent';
 import { Collection, MongoClient } from 'mongodb';
 import EventHistoryStore from './EventHistoryStore';
-import { TimerId } from '../timer/Timer';
+import { TimerId } from '../../common/TimerId';
 
 const DB_NAME = 'remote-mob-timer';
 const COLLECTION_NAME = 'events';

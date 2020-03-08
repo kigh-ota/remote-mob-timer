@@ -1,4 +1,5 @@
-import Timer, { TimerId } from './Timer';
+import Timer from './Timer';
+import { TimerId } from '../../common/TimerId';
 
 export default interface TimerRepository {
   add(timer: Timer): void;

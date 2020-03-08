@@ -5,7 +5,7 @@ import createError from 'http-errors';
 import express = require('express');
 import TimerPool from '../timer/TimerPool';
 import UseCases from '../UseCases';
-import { TimerId } from '../timer/Timer';
+import { TimerId } from '../../common/TimerId';
 
 const ID_PART = ':id(\\d+)';
 

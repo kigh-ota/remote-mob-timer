@@ -2,13 +2,13 @@ import express from 'express';
 import { Express } from 'express';
 import path from 'path';
 import logger from 'morgan';
-import { TimerId } from '../timer/Timer';
 import EventHistoryStoreFactory from '../event/EventHistoryStoreFactory';
 import TimerPool from '../timer/TimerPool';
 import setupEndpoints from './Endpoints';
 import UseCases, { TIMER_SEC } from '../UseCases';
 import log from '../Logger';
 import favicon from 'serve-favicon';
+import { TimerId } from '../../common/TimerId';
 
 function initializeExpress(): Express {
   const app = express();

@@ -1,12 +1,12 @@
 // Karma configuration
 // Generated on Tue Jul 30 2019 00:06:50 GMT+0900 (GMT+09:00)
 
-const webpackConfig = require('./webpack.webapp.config.js');
+const webpackConfig = require('./webpack.static.config.js');
 
 module.exports = function(config) {
   config.set({
     // base path that will be used to resolve all patterns (eg. files, exclude)
-    basePath: 'src/webapp',
+    basePath: 'src/static',
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter

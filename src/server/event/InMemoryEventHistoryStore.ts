@@ -1,6 +1,6 @@
 import IEvent, { EventType } from '../../common/IEvent';
 import EventHistoryStore from './EventHistoryStore';
-import { TimerId } from '../timer/Timer';
+import { TimerId } from '../../common/TimerId';
 
 const MAX_HISTORY_LENGTH = 10000;
 

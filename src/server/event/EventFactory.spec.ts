@@ -1,7 +1,7 @@
 import EventFactory from './EventFactory';
 import assert = require('assert');
 import { EventType } from '../../common/IEvent';
-import { TimerId } from '../timer/Timer';
+import { TimerId } from '../../common/TimerId';
 
 describe('EventFactory.start', () => {
   it('works', () => {

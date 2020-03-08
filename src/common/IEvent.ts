@@ -1,5 +1,5 @@
-import { TimerId } from '../server/timer/Timer';
 import ClientInfo from './ClientInfo';
+import { TimerId } from './TimerId';
 // eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export default interface IEvent {
   type: EventType;

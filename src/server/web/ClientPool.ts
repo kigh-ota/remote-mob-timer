@@ -2,8 +2,8 @@ import ClientInfo from '../../common/ClientInfo';
 import EventHistoryStore from '../event/EventHistoryStore';
 import { Request, Response } from 'express';
 import EventFactory from '../event/EventFactory';
-import { TimerId } from '../timer/Timer';
 import log from '../Logger';
+import { TimerId } from '../../common/TimerId';
 
 export default class ClientPool {
   private id = 0;

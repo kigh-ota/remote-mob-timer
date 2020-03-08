@@ -1,5 +1,5 @@
 import IEvent from '../../common/IEvent';
-import { TimerId } from '../timer/Timer';
+import { TimerId } from '../../common/TimerId';
 
 export default interface EventHistoryStore {
   add(event: IEvent): void;

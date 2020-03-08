@@ -5,9 +5,7 @@ import EventFactory from '../event/EventFactory';
 import ServerEvent from '../web/ServerEvent';
 import ClientInfo from '../../common/ClientInfo';
 import { interval } from 'rxjs';
-import { Brand } from '../Brand';
-
-export type TimerId = Brand<string, 'TimerId'>;
+import { TimerId } from '../../common/TimerId';
 
 export default class Timer {
   public readonly clientPool: ClientPool;

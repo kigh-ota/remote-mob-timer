@@ -1,9 +1,10 @@
 import TimerPool from './timer/TimerPool';
-import Timer, { TimerId } from './timer/Timer';
+import Timer from './timer/Timer';
 import EventHistoryStore from './event/EventHistoryStore';
 import StatusJson from '../common/StatusJson';
 import EventFactory from './event/EventFactory';
 import ServerEvent from './web/ServerEvent';
+import { TimerId } from '../common/TimerId';
 
 export const TIMER_SEC = 25 * 60;
 

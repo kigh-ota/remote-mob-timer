@@ -1,5 +1,6 @@
-import Timer, { TimerId } from './Timer';
+import Timer from './Timer';
 import TimerRepository, { TimerMetadata } from './TimerRepository';
+import { TimerId } from '../../common/TimerId';
 
 const MAX_TIMER_COUNT = 20;
 

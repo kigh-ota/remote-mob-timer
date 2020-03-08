@@ -1,4 +1,4 @@
-import { TimerId } from '../server/timer/Timer';
+import { TimerId } from './TimerId';
 
 export default interface TimerJson {
   id: TimerId;
