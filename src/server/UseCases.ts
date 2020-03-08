@@ -1,9 +1,9 @@
-import TimerPool from './timer/TimerPool';
+import InMemoryTimerRepository from './timer/InMemoryTimerRepository';
 import Timer from './timer/Timer';
 import EventHistoryStore from './event/EventHistoryStore';
 import StatusJson from '../common/StatusJson';
 import EventFactory from './event/EventFactory';
-import ServerEvent from './web/ServerEvent';
+import ServerEvent from './sse/ServerEvent';
 import { TimerId } from '../common/TimerId';
 
 export const TIMER_SEC = 25 * 60;
@@ -12,7 +12,7 @@ const UseCases = {
   addTimer: (
     id: TimerId,
     name: string,
-    pool: TimerPool,
+    pool: InMemoryTimerRepository,
     eventHistoryStore: EventHistoryStore
   ) => {
     const timer = new Timer(eventHistoryStore, id, name, TIMER_SEC);
@@ -20,7 +20,7 @@ const UseCases = {
   },
   getTimerStatus: async (
     id: TimerId,
-    pool: TimerPool,
+    pool: InMemoryTimerRepository,
     eventHistoryStore: EventHistoryStore
   ) => {
     const timer = pool.get(id);
@@ -45,7 +45,7 @@ const UseCases = {
     id: TimerId,
     sec: number,
     userName: string,
-    pool: TimerPool,
+    pool: InMemoryTimerRepository,
     eventHistoryStore: EventHistoryStore
   ) => {
     const timer = pool.get(id);
@@ -59,7 +59,7 @@ const UseCases = {
   toggleTimer: (
     id: TimerId,
     userName: string,
-    pool: TimerPool,
+    pool: InMemoryTimerRepository,
     eventHistoryStore: EventHistoryStore
   ) => {
     const timer = pool.get(id);
@@ -91,14 +91,18 @@ const UseCases = {
       time: timer.clock.getTime(),
     };
   },
-  listTimers: (pool: TimerPool) => pool.listMetadata(),
-  changeTimerName: (id: TimerId, name: string, pool: TimerPool) => {
+  listTimers: (pool: InMemoryTimerRepository) => pool.listMetadata(),
+  changeTimerName: (
+    id: TimerId,
+    name: string,
+    pool: InMemoryTimerRepository
+  ) => {
     pool.get(id).setName(name);
   },
   sayGood: (
     id: TimerId,
     userName: string,
-    pool: TimerPool,
+    pool: InMemoryTimerRepository,
     eventHistoryStore: EventHistoryStore
   ) => {
     const timer = pool.get(id);

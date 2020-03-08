@@ -3,7 +3,7 @@ import EventHistoryStore from '../event/EventHistoryStore';
 import StatusJson from '../../common/StatusJson';
 import createError from 'http-errors';
 import express = require('express');
-import TimerPool from '../timer/TimerPool';
+import InMemoryTimerRepository from '../timer/InMemoryTimerRepository';
 import UseCases from '../UseCases';
 import { TimerId } from '../../common/TimerId';
 
@@ -11,7 +11,7 @@ const ID_PART = ':id(\\d+)';
 
 export default function setupEndpoints(
   app: Express,
-  timerPool: TimerPool,
+  timerPool: InMemoryTimerRepository,
   eventHistoryStore: EventHistoryStore,
   defaultTimerSec: number
 ) {

@@ -1,6 +1,8 @@
 // Karma configuration
 // Generated on Tue Jul 30 2019 00:06:50 GMT+0900 (GMT+09:00)
 
+/* eslint-disable @typescript-eslint/no-var-requires */
+
 const webpackConfig = require('./webpack.static.config.js');
 
 module.exports = function(config) {
@@ -21,20 +23,20 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      '**/*.spec.ts': ['webpack']
+      '**/*.spec.ts': ['webpack'],
     },
 
     webpack: {
       module: Object.assign(webpackConfig.module, {
         // Suppress warning from mocha: "Critical dependency: the request of a dependency is an expression"
-        exprContextCritical: false
+        exprContextCritical: false,
       }),
       resolve: webpackConfig.resolve,
       performance: { hints: false },
       mode: 'none',
       node: {
-        fs: 'empty' // https://github.com/webpack-contrib/css-loader/issues/447
-      }
+        fs: 'empty', // https://github.com/webpack-contrib/css-loader/issues/447
+      },
     },
 
     // test results reporter to use
@@ -65,6 +67,6 @@ module.exports = function(config) {
 
     // Concurrency level
     // how many browser should be started simultaneous
-    concurrency: Infinity
+    concurrency: Infinity,
   });
 };

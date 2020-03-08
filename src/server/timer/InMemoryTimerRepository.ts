@@ -4,7 +4,7 @@ import { TimerId } from '../../common/TimerId';
 
 const MAX_TIMER_COUNT = 20;
 
-export default class TimerPool implements TimerRepository {
+export default class InMemoryTimerRepository implements TimerRepository {
   private pool: {
     [id: string]: Timer;
   } = {};

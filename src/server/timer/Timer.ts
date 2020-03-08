@@ -1,8 +1,8 @@
-import ClientPool from '../web/ClientPool';
+import ClientPool from '../sse/ClientPool';
 import TimerClock from './clock/TimerClock';
 import EventHistoryStore from '../event/EventHistoryStore';
 import EventFactory from '../event/EventFactory';
-import ServerEvent from '../web/ServerEvent';
+import ServerEvent from '../sse/ServerEvent';
 import ClientInfo from '../../common/ClientInfo';
 import { interval } from 'rxjs';
 import { TimerId } from '../../common/TimerId';

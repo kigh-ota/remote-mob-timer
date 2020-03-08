@@ -1,9 +1,8 @@
-import express from 'express';
-import { Express } from 'express';
+import express, { Express } from 'express';
 import path from 'path';
 import logger from 'morgan';
 import EventHistoryStoreFactory from '../event/EventHistoryStoreFactory';
-import TimerPool from '../timer/TimerPool';
+import InMemoryTimerRepository from '../timer/InMemoryTimerRepository';
 import setupEndpoints from './Endpoints';
 import UseCases, { TIMER_SEC } from '../UseCases';
 import log from '../Logger';
@@ -45,7 +44,7 @@ async function main(app: Express) {
   const eventHistoryStore = useInMemoryStore()
     ? await EventHistoryStoreFactory.createInMemory()
     : await EventHistoryStoreFactory.createMongoDb();
-  const pool = new TimerPool();
+  const pool = new InMemoryTimerRepository();
   UseCases.addTimer('1' as TimerId, 'Timer1', pool, eventHistoryStore);
   UseCases.addTimer('2' as TimerId, 'Timer2', pool, eventHistoryStore);
   UseCases.addTimer('3' as TimerId, 'Timer3', pool, eventHistoryStore);
