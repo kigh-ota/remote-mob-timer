@@ -54,7 +54,7 @@ async function main(app: Express) {
   UseCases.addTimer('3' as TimerId, 'Timer3', pool, historyStore, sender, Pool);
   UseCases.addTimer('4' as TimerId, 'Timer4', pool, historyStore, sender, Pool);
   UseCases.addTimer('5' as TimerId, 'Timer5', pool, historyStore, sender, Pool);
-  setupEndpoints(app, pool, historyStore, sender, TIMER_SEC, Pool);
+  setupEndpoints(app, pool, historyStore, sender, TIMER_SEC);
 }
 
 const app = initializeExpress();

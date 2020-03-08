@@ -7,7 +7,7 @@ import InMemoryTimerRepository from '../timer/InMemoryTimerRepository';
 import UseCases from '../UseCases';
 import { TimerId } from '../../common/TimerId';
 import ServerEventSender from '../sse/ServerEventSender';
-import SseClientPool from '../sse/SseClientPool';
+import ExpressSseClientPool from './ExpressSseClientPool';
 
 const ID_PART = ':id(\\d+)';
 
@@ -16,8 +16,7 @@ export default function setupEndpoints(
   timerPool: InMemoryTimerRepository,
   eventHistoryStore: EventHistoryStore,
   serverEventSender: ServerEventSender,
-  defaultTimerSec: number,
-  ClientPoolImpl: new (eventHistoryStore: EventHistoryStore) => SseClientPool
+  defaultTimerSec: number
 ) {
   app.get('/', (req, res) => {
     res.render('index');
@@ -58,7 +57,7 @@ export default function setupEndpoints(
       timerPool,
       eventHistoryStore,
       serverEventSender,
-      ClientPoolImpl
+      ExpressSseClientPool
     );
     res.status(201).end();
   });
