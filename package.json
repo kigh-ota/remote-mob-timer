@@ -12,8 +12,8 @@
     "test": "npm run test:server && npm run test:static",
     "lint": "eslint 'src/**/*.ts{x,}'",
     "lint:fix": "eslint --fix 'src/**/*.ts{x,}'",
-    "start": "node ./bin/www",
-    "start:dev": "USE_IN_MEMORY_STORE=1 node ./bin/www"
+    "start": "node ./start.js",
+    "start:dev": "USE_IN_MEMORY_STORE=1 node ./start.js"
   },
   "directories": {
     "test": "src/"

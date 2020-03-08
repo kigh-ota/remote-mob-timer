@@ -5,7 +5,7 @@ module.exports = {
   },
   devtool: 'inline-source-map',
   output: {
-    path: __dirname + '/public/javascripts',
+    path: __dirname + '/public/javascripts/compiled',
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.json'], // without 'json', growl causes compile error
