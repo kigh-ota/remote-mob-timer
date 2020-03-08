@@ -5,7 +5,7 @@ import EventFactory from '../event/EventFactory';
 import log from '../Logger';
 import { TimerId } from '../../common/TimerId';
 
-export default class ClientPool {
+export default class ExpressClientPool {
   private id = 0;
   private clients: {
     [clientId: number]: ClientInfo & { response: Response };

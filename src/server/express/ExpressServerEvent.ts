@@ -1,9 +1,9 @@
 import IEvent from '../../common/IEvent';
-import ClientPool from './ClientPool';
+import ExpressClientPool from './ExpressClientPool';
 import log from '../Logger';
 
-export default class ServerEvent {
-  public static send(event: IEvent, clientPool: ClientPool) {
+export default class ExpressServerEvent {
+  public static send(event: IEvent, clientPool: ExpressClientPool) {
     const dataString = JSON.stringify(event.data);
     const payload = `event: ${event.type}\ndata: ${dataString}\n\n`;
     log.info(

@@ -3,7 +3,7 @@ import Timer from './timer/Timer';
 import EventHistoryStore from './event/EventHistoryStore';
 import StatusJson from '../common/StatusJson';
 import EventFactory from './event/EventFactory';
-import ServerEvent from './sse/ServerEvent';
+import ExpressServerEvent from './express/ExpressServerEvent';
 import { TimerId } from '../common/TimerId';
 
 export const TIMER_SEC = 25 * 60;
@@ -53,7 +53,7 @@ const UseCases = {
     timer.clock.setTime(sec);
     timer.clock.start();
     const event = EventFactory.start(sec, userName, timer.getName(), id);
-    ServerEvent.send(event, timer.clientPool);
+    ExpressServerEvent.send(event, timer.clientPool);
     eventHistoryStore.add(event);
   },
   toggleTimer: (
@@ -72,7 +72,7 @@ const UseCases = {
           timer.getName(),
           id
         );
-        ServerEvent.send(event, timer.clientPool);
+        ExpressServerEvent.send(event, timer.clientPool);
         eventHistoryStore.add(event);
       } else {
         timer.clock.start();
@@ -82,7 +82,7 @@ const UseCases = {
           timer.getName(),
           id
         );
-        ServerEvent.send(event, timer.clientPool);
+        ExpressServerEvent.send(event, timer.clientPool);
         eventHistoryStore.add(event);
       }
     }
@@ -107,7 +107,7 @@ const UseCases = {
   ) => {
     const timer = pool.get(id);
     const event = EventFactory.good(id, userName, timer.getName());
-    ServerEvent.send(event, timer.clientPool);
+    ExpressServerEvent.send(event, timer.clientPool);
     eventHistoryStore.add(event);
   },
 };
