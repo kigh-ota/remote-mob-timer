@@ -1,25 +1,26 @@
 import Timer, { TimerId } from './Timer';
+import TimerRepository, { TimerMetadata } from './TimerRepository';
 
 const MAX_TIMER_COUNT = 20;
 
-export default class TimerPool {
+export default class TimerPool implements TimerRepository {
   private pool: {
     [id: string]: Timer;
   } = {};
 
-  public add(remoteMobTimer: Timer): void {
+  public add(timer: Timer): void {
     if (Object.keys(this.pool).length === MAX_TIMER_COUNT) {
       throw new Error('Mamimum number of timers reached');
     }
-    const id = remoteMobTimer.getId();
+    const id = timer.getId();
     if (
-      this.list()
+      this.listMetadata()
         .map(t => t.id)
         .includes(id)
     ) {
       throw new Error(`id (${id}) already exists`);
     }
-    this.pool[id] = remoteMobTimer;
+    this.pool[id] = timer;
   }
 
   public exists(id: TimerId): boolean {
@@ -30,10 +31,7 @@ export default class TimerPool {
     return this.pool[id];
   }
 
-  public list(): Array<{
-    id: TimerId;
-    name: string;
-  }> {
+  public listMetadata(): TimerMetadata[] {
     return Object.keys(this.pool).map(id => ({
       id: id as TimerId,
       name: this.pool[id].getName(),

@@ -90,7 +90,7 @@ const UseCases = {
       time: timer.clock.getTime(),
     };
   },
-  listTimers: (pool: TimerPool) => pool.list(),
+  listTimers: (pool: TimerPool) => pool.listMetadata(),
   changeTimerName: (id: TimerId, name: string, pool: TimerPool) => {
     pool.get(id).setName(name);
   },
