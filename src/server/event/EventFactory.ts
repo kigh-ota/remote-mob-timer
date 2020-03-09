@@ -8,7 +8,7 @@ import {
   ClientRegisteredEvent,
   ClientUnregisteredEvent,
 } from '../../common/IEvent';
-import SseClient from '../../common/SseClient';
+import { SseClientInfo } from '../../common/SseClient';
 import { TimerId } from '../../common/TimerId';
 
 export default class EventFactory {
@@ -75,7 +75,7 @@ export default class EventFactory {
     };
   }
   public static clientRegistered(
-    clientInfo: SseClient,
+    clientInfo: SseClientInfo,
     id: TimerId
   ): ClientRegisteredEvent {
     return {
@@ -86,7 +86,7 @@ export default class EventFactory {
     };
   }
   public static clientUnregistered(
-    clientInfo: SseClient,
+    clientInfo: SseClientInfo,
     id: TimerId
   ): ClientUnregisteredEvent {
     return {

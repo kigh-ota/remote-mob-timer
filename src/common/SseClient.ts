@@ -1,9 +1,9 @@
-import { Brand } from './Brand';
-
-export type SseClientId = Brand<number, 'SseClientId'>;
-
-export default interface SseClient {
-  id: SseClientId;
+export interface SseClientInfo {
   ip: string;
   userAgent: string;
+}
+
+export default interface SseClient {
+  getInfo(): SseClientInfo;
+  send(payload: string): void;
 }

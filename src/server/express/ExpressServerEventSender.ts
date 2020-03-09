@@ -11,7 +11,7 @@ export default class ExpressServerEventSender implements ServerEventSender {
       `sendServerEvent(): ${payload.replace(/\n/g, ' ')} (id=${event.id})`
     );
     clientPool.forEach(client => {
-      client.response.write(payload);
+      client.send(payload);
     });
   }
 }

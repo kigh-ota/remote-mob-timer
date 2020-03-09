@@ -1,17 +1,19 @@
 import { Subscription, interval } from 'rxjs';
+import { EventEmitter } from 'events';
 
-class TimerClock {
+export enum TimerClockEvents {
+  TICK = 'TICK',
+  OVER = 'OVER',
+}
+
+class TimerClock extends EventEmitter {
   private timeout: Subscription | null;
   private remainingSec: number;
-  private onTick: (sec: number) => void;
-  private onOver: () => void;
 
-  constructor(onTick?: (sec: number) => void, onOver?: () => void) {
+  constructor() {
+    super();
     this.timeout = null;
     this.remainingSec = 0;
-
-    this.onTick = onTick || (() => {});
-    this.onOver = onOver || (() => {});
   }
 
   public isRunning(): boolean {
@@ -46,12 +48,12 @@ class TimerClock {
 
   private tick() {
     this.remainingSec--;
-    this.onTick(this.remainingSec);
+    this.emit(TimerClockEvents.TICK, this.remainingSec);
 
     if (this.remainingSec <= 0) {
       this.remainingSec = 0;
       this.stop();
-      this.onOver();
+      this.emit(TimerClockEvents.OVER);
     }
   }
 }

@@ -5,6 +5,7 @@ import { interval } from 'rxjs';
 import { TimerId } from '../../common/TimerId';
 import ServerEventSender from '../sse/ServerEventSender';
 import SseClientPool from '../sse/SseClientPool';
+import { TimerClockEvents } from './clock/TimerClock';
 
 export default class Timer {
   public readonly clientPool: SseClientPool;
@@ -21,15 +22,15 @@ export default class Timer {
     ClientPoolImpl: new (eventHistoryStore: EventHistoryStore) => SseClientPool
   ) {
     this.clientPool = new ClientPoolImpl(eventHistoryStore);
-    this.clock = new TimerClock(
-      (sec: number) =>
-        serverEventSender.send(EventFactory.tick(sec, id), this.clientPool),
-      () => {
+    this.clock = new TimerClock()
+      .on(TimerClockEvents.TICK, (sec: number) => {
+        serverEventSender.send(EventFactory.tick(sec, id), this.clientPool);
+      })
+      .on(TimerClockEvents.OVER, () => {
         const event = EventFactory.over(id, this.getName());
         serverEventSender.send(event, this.clientPool);
         eventHistoryStore.add(event);
-      }
-    );
+      });
     this.clock.setTime(defaultTimerSec);
     this.id = id;
     this.setName(name);
