@@ -6,19 +6,20 @@ const COLLECTION_NAME = 'timers';
 
 export default class FirebaseTimerMetadataRepository
   implements TimerMetadataRepository {
-  constructor(private readonly db: FirebaseFirestore.Firestore) {}
+  private readonly colRef: FirebaseFirestore.CollectionReference;
+
+  constructor(db: FirebaseFirestore.Firestore) {
+    this.colRef = db.collection(COLLECTION_NAME);
+  }
 
   public async put(metadata: TimerMetadata) {
-    await this.db
-      .collection(COLLECTION_NAME)
-      .doc(metadata.id)
-      .set({
-        name: metadata.name,
-      });
+    await this.colRef.doc(metadata.id).set({
+      name: metadata.name,
+    });
   }
 
   public async list() {
-    const allDocs = await this.db.collection(COLLECTION_NAME).get();
+    const allDocs = await this.colRef.get();
     const ret: TimerMetadata[] = [];
     allDocs.forEach(d => {
       ret.push({

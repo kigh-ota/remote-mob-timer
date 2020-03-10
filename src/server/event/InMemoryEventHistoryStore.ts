@@ -7,7 +7,7 @@ const MAX_HISTORY_LENGTH = 10000;
 export default class InMemoryEventHistoryStore implements EventHistoryStore {
   private history: IEvent[] = [];
 
-  public add(event: IEvent): void {
+  public async add(event: IEvent) {
     if (this.history.length === MAX_HISTORY_LENGTH) {
       this.history.shift();
     }

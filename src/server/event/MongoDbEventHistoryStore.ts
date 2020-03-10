@@ -13,8 +13,8 @@ export default class MongoDbEventHistoryStore implements EventHistoryStore {
     this.coll = mongoClient.db(DB_NAME).collection(COLLECTION_NAME);
   }
 
-  public add(event: IEvent): void {
-    this.coll.insertOne(event);
+  public async add(event: IEvent) {
+    await this.coll.insertOne(event);
   }
 
   public listExceptClient(id: TimerId, limit: number): Promise<IEvent[]> {

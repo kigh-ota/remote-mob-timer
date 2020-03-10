@@ -8,6 +8,7 @@ import InMemoryTimerMetadataRepository from '../timer/InMemoryTimerMetadataRepos
 import MongoDbTimerMetadataRepository from '../timer/MongoDbTimerMetadataRepository';
 import admin from 'firebase-admin';
 import FirebaseTimerMetadataRepository from '../timer/FirestoreTimerMetadataRepository';
+import FirestoreEventHistoryStore from './FirestoreEventHistoryStore';
 
 interface Ret {
   eventHistoryStore: EventHistoryStore;
@@ -47,15 +48,8 @@ async function createFireStore() {
     databaseURL,
   });
   const db = admin.firestore();
-  const docRef = db.collection('testCollection').doc('testDoc');
-  await docRef.set({ date: new Date().toISOString() });
-  const snapshot = await db.collection('testCollection').get();
-  snapshot.forEach(doc => {
-    console.log(doc.id, '=>', doc.data());
-  });
-  // FIXME
   return {
-    eventHistoryStore: new InMemoryEventHistoryStore(),
+    eventHistoryStore: new FirestoreEventHistoryStore(db),
     timerMetadataRepository: new FirebaseTimerMetadataRepository(db),
   };
 }
