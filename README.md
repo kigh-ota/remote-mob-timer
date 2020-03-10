@@ -32,19 +32,21 @@ npm run start:inmemory
 
 ## Environment variables
 
-| Name                           | Description                    |
-| ------------------------------ | ------------------------------ |
-| PORT                           | HTTP Port                      |
-| PERSISTENCE_TYPE               | `{INMEMORY|MONGODB|FIRESTORE}` |
-| FIRESTORE_DATABASE_URL         |                                |
-| FIRESTORE_SERVICE_ACCOUNT_JSON |                                |
+| Name                           | Description                             |
+| ------------------------------ | --------------------------------------- |
+| PORT                           | HTTP Port                               |
+| PERSISTENCE_TYPE               | `INMEMORY` or `MONGODB` or `FIRESTORE}` |
+| FIRESTORE_DATABASE_URL         |                                         |
+| FIRESTORE_SERVICE_ACCOUNT_JSON |                                         |
 
 ## Uses
 
 - [Chai](https://www.chaijs.com/)
+- [Cloud Firestore](https://firebase.google.com/docs/firestore)
 - [Docker](https://www.docker.com/)
 - [ESLint](https://eslint.org/)
 - [Express](https://expressjs.com/)
+- [Heroku](https://heroku.com)
 - [Mocha](https://mochajs.org/)
 - [MongoDB](https://www.mongodb.com/)
 - [Notification API](https://developer.mozilla.org/docs/Web/API/Notifications_API)
