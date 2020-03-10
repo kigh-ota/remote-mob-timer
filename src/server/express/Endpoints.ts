@@ -8,6 +8,7 @@ import UseCases from '../UseCases';
 import { TimerId } from '../../common/TimerId';
 import ServerEventSender from '../sse/ServerEventSender';
 import ExpressSseClientPool from './ExpressSseClientPool';
+import TimerMetadataRepository from '../timer/TimerMetadataRepository';
 
 const ID_PART = ':id(\\d+)';
 
@@ -16,7 +17,8 @@ export default function setupEndpoints(
   timerPool: InMemoryTimerRepository,
   eventHistoryStore: EventHistoryStore,
   serverEventSender: ServerEventSender,
-  defaultTimerSec: number
+  defaultTimerSec: number,
+  timerMetadataRepository: TimerMetadataRepository
 ) {
   app.get('/', (req, res) => {
     res.render('index');
@@ -57,7 +59,8 @@ export default function setupEndpoints(
       timerPool,
       eventHistoryStore,
       serverEventSender,
-      ExpressSseClientPool
+      ExpressSseClientPool,
+      timerMetadataRepository
     );
     res.status(201).end();
   });
@@ -113,7 +116,12 @@ export default function setupEndpoints(
       res.status(400).end();
       return;
     }
-    UseCases.changeTimerName(id, req.body.name, timerPool);
+    UseCases.changeTimerName(
+      id,
+      req.body.name,
+      timerPool,
+      timerMetadataRepository
+    );
     res.status(200).end();
   });
 

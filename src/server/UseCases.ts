@@ -6,17 +6,19 @@ import EventFactory from './event/EventFactory';
 import { TimerId } from '../common/TimerId';
 import ServerEventSender from './sse/ServerEventSender';
 import SseClientPool from './sse/SseClientPool';
+import TimerMetadataRepository from './timer/TimerMetadataRepository';
 
 export const TIMER_SEC = 25 * 60;
 
 const UseCases = {
-  addTimer: (
+  addTimer: async (
     id: TimerId,
     name: string,
     pool: InMemoryTimerRepository,
     eventHistoryStore: EventHistoryStore,
     serverEventSender: ServerEventSender,
-    ClientPoolImpl: new (eventHistoryStore: EventHistoryStore) => SseClientPool
+    ClientPoolImpl: new (eventHistoryStore: EventHistoryStore) => SseClientPool,
+    timerMetadataRepository: TimerMetadataRepository
   ) => {
     const timer = new Timer(
       eventHistoryStore,
@@ -27,6 +29,7 @@ const UseCases = {
       ClientPoolImpl
     );
     pool.add(timer);
+    await timerMetadataRepository.put({ id, name });
   },
   getTimerStatus: async (
     id: TimerId,
@@ -104,12 +107,14 @@ const UseCases = {
     };
   },
   listTimers: (pool: InMemoryTimerRepository) => pool.listMetadata(),
-  changeTimerName: (
+  changeTimerName: async (
     id: TimerId,
     name: string,
-    pool: InMemoryTimerRepository
+    pool: InMemoryTimerRepository,
+    timerMetadataRepository: TimerMetadataRepository
   ) => {
     pool.get(id).setName(name);
+    await timerMetadataRepository.put({ id, name });
   },
   sayGood: (
     id: TimerId,

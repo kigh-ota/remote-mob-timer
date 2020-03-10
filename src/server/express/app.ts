@@ -10,6 +10,7 @@ import favicon from 'serve-favicon';
 import { TimerId } from '../../common/TimerId';
 import ExpressServerEventSender from './ExpressServerEventSender';
 import ExpressSseClientPool from './ExpressSseClientPool';
+import InMemoryTimerMetadataRepository from '../timer/InMemoryTimerMetadataRepository';
 
 function initializeExpress(): Express {
   const app = express();
@@ -49,12 +50,60 @@ async function main(app: Express) {
   const pool = new InMemoryTimerRepository();
   const sender = new ExpressServerEventSender();
   const Pool = ExpressSseClientPool;
-  UseCases.addTimer('1' as TimerId, 'Timer1', pool, historyStore, sender, Pool);
-  UseCases.addTimer('2' as TimerId, 'Timer2', pool, historyStore, sender, Pool);
-  UseCases.addTimer('3' as TimerId, 'Timer3', pool, historyStore, sender, Pool);
-  UseCases.addTimer('4' as TimerId, 'Timer4', pool, historyStore, sender, Pool);
-  UseCases.addTimer('5' as TimerId, 'Timer5', pool, historyStore, sender, Pool);
-  setupEndpoints(app, pool, historyStore, sender, TIMER_SEC);
+  const timerMetadataRepository = new InMemoryTimerMetadataRepository();
+  UseCases.addTimer(
+    '1' as TimerId,
+    'Timer1',
+    pool,
+    historyStore,
+    sender,
+    Pool,
+    timerMetadataRepository
+  );
+  UseCases.addTimer(
+    '2' as TimerId,
+    'Timer2',
+    pool,
+    historyStore,
+    sender,
+    Pool,
+    timerMetadataRepository
+  );
+  UseCases.addTimer(
+    '3' as TimerId,
+    'Timer3',
+    pool,
+    historyStore,
+    sender,
+    Pool,
+    timerMetadataRepository
+  );
+  UseCases.addTimer(
+    '4' as TimerId,
+    'Timer4',
+    pool,
+    historyStore,
+    sender,
+    Pool,
+    timerMetadataRepository
+  );
+  UseCases.addTimer(
+    '5' as TimerId,
+    'Timer5',
+    pool,
+    historyStore,
+    sender,
+    Pool,
+    timerMetadataRepository
+  );
+  setupEndpoints(
+    app,
+    pool,
+    historyStore,
+    sender,
+    TIMER_SEC,
+    timerMetadataRepository
+  );
 }
 
 const app = initializeExpress();
