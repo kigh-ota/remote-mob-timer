@@ -12,8 +12,9 @@
     "test": "npm run test:server && npm run test:static",
     "lint": "eslint 'src/**/*.ts{x,}'",
     "lint:fix": "eslint --fix 'src/**/*.ts{x,}'",
-    "start": "node ./start.js",
-    "start:dev": "PERSISTENCE_TYPE=IN_MEMORY node ./start.js"
+    "start:mongodb": "PERSISTENCE_TYPE=MONGODB node ./start.js",
+    "start:firestore": "PERSISTENCE_TYPE=FIRESTORE node ./start.js",
+    "start:inmemory": "PERSISTENCE_TYPE=INMEMORY node ./start.js"
   },
   "directories": {
     "test": "src/"

@@ -5,5 +5,5 @@ RUN npm install
 COPY . .
 RUN npm run build
 EXPOSE 3000
-ENV PERSISTENCE_TYPE "IN_MEMORY"
+ENV PERSISTENCE_TYPE "FIRESTORE"
 CMD ["node", "./start.js"]
