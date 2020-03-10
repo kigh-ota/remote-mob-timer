@@ -7,10 +7,10 @@ import setupEndpoints from './Endpoints';
 import UseCases, { TIMER_SEC } from '../UseCases';
 import log from '../Logger';
 import favicon from 'serve-favicon';
-import { TimerId } from '../../common/TimerId';
 import ExpressServerEventSender from './ExpressServerEventSender';
 import ExpressSseClientPool from './ExpressSseClientPool';
 import InMemoryTimerMetadataRepository from '../timer/InMemoryTimerMetadataRepository';
+import TimerService from '../timer/TimerService';
 
 function initializeExpress(): Express {
   const app = express();
@@ -44,65 +44,29 @@ function useInMemoryStore(): boolean {
 }
 
 async function main(app: Express) {
-  const historyStore = useInMemoryStore()
+  const eventHistoryStore = useInMemoryStore()
     ? await EventHistoryStoreFactory.createInMemory()
     : await EventHistoryStoreFactory.createMongoDb();
-  const pool = new InMemoryTimerRepository();
-  const sender = new ExpressServerEventSender();
+  const timerRepository = new InMemoryTimerRepository();
+  const serverEventSender = new ExpressServerEventSender();
   const Pool = ExpressSseClientPool;
   const timerMetadataRepository = new InMemoryTimerMetadataRepository();
-  UseCases.addTimer(
-    '1' as TimerId,
-    'Timer1',
-    pool,
-    historyStore,
-    sender,
+  const timerService = new TimerService(
+    timerRepository,
+    eventHistoryStore,
+    serverEventSender,
     Pool,
     timerMetadataRepository
   );
-  UseCases.addTimer(
-    '2' as TimerId,
-    'Timer2',
-    pool,
-    historyStore,
-    sender,
-    Pool,
-    timerMetadataRepository
-  );
-  UseCases.addTimer(
-    '3' as TimerId,
-    'Timer3',
-    pool,
-    historyStore,
-    sender,
-    Pool,
-    timerMetadataRepository
-  );
-  UseCases.addTimer(
-    '4' as TimerId,
-    'Timer4',
-    pool,
-    historyStore,
-    sender,
-    Pool,
-    timerMetadataRepository
-  );
-  UseCases.addTimer(
-    '5' as TimerId,
-    'Timer5',
-    pool,
-    historyStore,
-    sender,
-    Pool,
-    timerMetadataRepository
-  );
+  await UseCases.initializeApp(timerService, timerMetadataRepository);
   setupEndpoints(
     app,
-    pool,
-    historyStore,
-    sender,
+    timerRepository,
+    eventHistoryStore,
+    serverEventSender,
     TIMER_SEC,
-    timerMetadataRepository
+    timerMetadataRepository,
+    timerService
   );
 }
 

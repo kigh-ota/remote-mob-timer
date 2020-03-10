@@ -1,39 +1,31 @@
 import InMemoryTimerRepository from './timer/InMemoryTimerRepository';
-import Timer from './timer/Timer';
 import EventHistoryStore from './event/EventHistoryStore';
 import StatusJson from '../common/StatusJson';
 import EventFactory from './event/EventFactory';
 import { TimerId } from '../common/TimerId';
 import ServerEventSender from './sse/ServerEventSender';
-import SseClientPool from './sse/SseClientPool';
 import TimerMetadataRepository from './timer/TimerMetadataRepository';
+import TimerRepository from './timer/TimerRepository';
+import TimerService from './timer/TimerService';
 
 export const TIMER_SEC = 25 * 60;
 
 const UseCases = {
-  addTimer: async (
-    id: TimerId,
-    name: string,
-    pool: InMemoryTimerRepository,
-    eventHistoryStore: EventHistoryStore,
-    serverEventSender: ServerEventSender,
-    ClientPoolImpl: new (eventHistoryStore: EventHistoryStore) => SseClientPool,
+  initializeApp: async (
+    timerService: TimerService,
     timerMetadataRepository: TimerMetadataRepository
   ) => {
-    const timer = new Timer(
-      eventHistoryStore,
-      id,
-      name,
-      TIMER_SEC,
-      serverEventSender,
-      ClientPoolImpl
-    );
-    pool.add(timer);
-    await timerMetadataRepository.put({ id, name });
+    const metadatas = await timerMetadataRepository.list();
+    for (const metadata of metadatas) {
+      await timerService.add(metadata.id, metadata.name, TIMER_SEC);
+    }
+  },
+  addTimer: async (id: TimerId, name: string, timerService: TimerService) => {
+    await timerService.add(id, name, TIMER_SEC);
   },
   getTimerStatus: async (
     id: TimerId,
-    pool: InMemoryTimerRepository,
+    pool: TimerRepository,
     eventHistoryStore: EventHistoryStore
   ) => {
     const timer = pool.get(id);
