@@ -7,6 +7,7 @@ import TimerMetadataRepository from '../timer/TimerMetadataRepository';
 import InMemoryTimerMetadataRepository from '../timer/InMemoryTimerMetadataRepository';
 import MongoDbTimerMetadataRepository from '../timer/MongoDbTimerMetadataRepository';
 import admin from 'firebase-admin';
+import FirebaseTimerMetadataRepository from '../timer/FirestoreTimerMetadataRepository';
 
 interface Ret {
   eventHistoryStore: EventHistoryStore;
@@ -53,7 +54,10 @@ async function createFireStore() {
     console.log(doc.id, '=>', doc.data());
   });
   // FIXME
-  return createInMemory();
+  return {
+    eventHistoryStore: new InMemoryEventHistoryStore(),
+    timerMetadataRepository: new FirebaseTimerMetadataRepository(db),
+  };
 }
 
 type PersistenceType = 'INMEMORY' | 'MONGODB' | 'FIRESTORE';
