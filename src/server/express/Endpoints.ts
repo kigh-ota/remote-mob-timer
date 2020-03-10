@@ -9,6 +9,7 @@ import { TimerId } from '../../common/TimerId';
 import ServerEventSender from '../sse/ServerEventSender';
 import TimerMetadataRepository from '../timer/TimerMetadataRepository';
 import TimerService from '../timer/TimerService';
+import Errors from '../Errors';
 
 const ID_PART = ':id(\\d+)';
 
@@ -28,7 +29,8 @@ export default function setupEndpoints(
   // Main Endpoint
   app.get(`/timer/${ID_PART}`, (req, res) => {
     if (!timerPool.exists(req.params.id)) {
-      throw new Error(`Timer with id=${req.params.id} does not exist!`);
+      res.status(404).end();
+      return;
     }
 
     if (req.path.slice(-1) !== '/') {
@@ -42,19 +44,33 @@ export default function setupEndpoints(
   // Ref. https://qiita.com/akameco/items/c54af5af35ef9b500b54
   app.get(`/timer/${ID_PART}/events`, (req, res) => {
     const id = req.params.id;
-    const remoteMobTimer = timerPool.get(id);
+    if (!timerPool.exists(id)) {
+      res.status(404).end();
+      return;
+    }
+    const timer = timerPool.get(id);
     req.socket.setTimeout(43200);
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-store',
     });
     res.write('\n');
-    remoteMobTimer.clientPool.add({ req, res }, id);
+    timer.clientPool.add({ req, res }, id);
   });
 
-  app.put(`/v1/timer/${ID_PART}`, (req, res) => {
+  app.put(`/v1/timer/${ID_PART}`, async (req, res) => {
     const id = req.params.id;
-    UseCases.addTimer(id as TimerId, `Timer${id}`, timerService);
+    try {
+      await UseCases.addTimer(id as TimerId, `Timer${id}`, timerService);
+    } catch (err) {
+      if (err.message === Errors.TimerIdAlreadyExists) {
+        res.status(409).end();
+        return;
+      } else if (err.message === Errors.MaximumNumberOfTimersReached) {
+        res.status(500).end();
+        return;
+      }
+    }
     res.status(201).end();
   });
 

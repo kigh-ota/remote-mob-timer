@@ -1,6 +1,7 @@
 import Timer from './Timer';
 import TimerRepository, { TimerMetadata } from './TimerRepository';
 import { TimerId } from '../../common/TimerId';
+import Errors from '../Errors';
 
 const MAX_TIMER_COUNT = 20;
 
@@ -11,7 +12,7 @@ export default class InMemoryTimerRepository implements TimerRepository {
 
   public add(timer: Timer): void {
     if (Object.keys(this.pool).length >= MAX_TIMER_COUNT) {
-      throw new Error('Mamimum number of timers reached');
+      throw new Error(Errors.MaximumNumberOfTimersReached);
     }
     const id = timer.getId();
     if (
@@ -19,7 +20,7 @@ export default class InMemoryTimerRepository implements TimerRepository {
         .map(t => t.id)
         .includes(id)
     ) {
-      throw new Error(`id (${id}) already exists`);
+      throw new Error(Errors.TimerIdAlreadyExists);
     }
     this.pool[id] = timer;
   }

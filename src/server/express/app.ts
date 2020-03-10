@@ -1,7 +1,7 @@
 import express, { Express } from 'express';
 import path from 'path';
 import logger from 'morgan';
-import EventHistoryStoreFactory from '../event/EventHistoryStoreFactory';
+import RepositoryFactory from '../event/EventHistoryStoreFactory';
 import InMemoryTimerRepository from '../timer/InMemoryTimerRepository';
 import setupEndpoints from './Endpoints';
 import UseCases, { TIMER_SEC } from '../UseCases';
@@ -9,7 +9,6 @@ import log from '../Logger';
 import favicon from 'serve-favicon';
 import ExpressServerEventSender from './ExpressServerEventSender';
 import ExpressSseClientPool from './ExpressSseClientPool';
-import InMemoryTimerMetadataRepository from '../timer/InMemoryTimerMetadataRepository';
 import TimerService from '../timer/TimerService';
 
 function initializeExpress(): Express {
@@ -44,13 +43,13 @@ function useInMemoryStore(): boolean {
 }
 
 async function main(app: Express) {
-  const eventHistoryStore = useInMemoryStore()
-    ? await EventHistoryStoreFactory.createInMemory()
-    : await EventHistoryStoreFactory.createMongoDb();
+  const {
+    eventHistoryStore,
+    timerMetadataRepository,
+  } = await RepositoryFactory.create(useInMemoryStore());
   const timerRepository = new InMemoryTimerRepository();
   const serverEventSender = new ExpressServerEventSender();
   const Pool = ExpressSseClientPool;
-  const timerMetadataRepository = new InMemoryTimerMetadataRepository();
   const timerService = new TimerService(
     timerRepository,
     eventHistoryStore,
