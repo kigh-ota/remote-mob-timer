@@ -13,7 +13,7 @@
     "lint": "eslint 'src/**/*.ts{x,}'",
     "lint:fix": "eslint --fix 'src/**/*.ts{x,}'",
     "start": "node ./start.js",
-    "start:dev": "USE_IN_MEMORY_STORE=1 node ./start.js"
+    "start:dev": "PERSISTENCE_TYPE=IN_MEMORY node ./start.js"
   },
   "directories": {
     "test": "src/"
@@ -33,6 +33,7 @@
     "debug": "4.1.1",
     "event-target-shim": "5.0.1",
     "express": "4.17.1",
+    "firebase-admin": "^8.9.2",
     "http-errors": "1.7.3",
     "log4js": "6.1.2",
     "mongodb": "3.5.4",

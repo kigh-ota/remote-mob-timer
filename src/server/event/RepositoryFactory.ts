@@ -36,12 +36,23 @@ async function createInMemory() {
   };
 }
 
+type PersistenceType = 'IN_MEMORY' | 'MONGO_DB' | 'FIRE_STORE';
+
 export default class RepositoryFactory {
-  public static async create(useInMemory: boolean): Promise<Ret> {
-    if (useInMemory) {
-      return createInMemory();
-    } else {
-      return createMongoDb();
+  public static async create(): Promise<Ret> {
+    const type = process.env.PERSISTENCE_TYPE;
+    switch (type) {
+      case 'IN_MEMORY':
+        log.info('Using in-memory stores');
+        return createInMemory();
+      case 'MONGO_DB':
+        log.info('Using MongoDB stores');
+        return createMongoDb();
+      case 'FIRE_STORE':
+        log.info('Using FireStore stores');
+        throw new Error('to be implemented');
+      default:
+        throw new Error(`Invalid PERSISTENCE_TYPE: ${type}`);
     }
   }
 }

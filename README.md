@@ -32,10 +32,10 @@ npm run start:dev
 
 ## Environment variables
 
-| Name                | Description                       |
-| ------------------- | --------------------------------- |
-| PORT                | HTTP Port                         |
-| USE_IN_MEMORY_STORE | Use in-memory store if set to `1` |
+| Name             | Description                       |
+| ---------------- | --------------------------------- |
+| PORT             | HTTP Port                         |
+| PERSISTENCE_TYPE | `{IN_MEMORY|MONGO_DB|FIRE_STORE}` |
 
 ## Uses
 

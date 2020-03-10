@@ -5,5 +5,5 @@ RUN npm install
 COPY . .
 RUN npm run build
 EXPOSE 3000
-ENV USE_IN_MEMORY_STORE 1
+ENV PERSISTENCE_TYPE "IN_MEMORY"
 CMD ["node", "./start.js"]
