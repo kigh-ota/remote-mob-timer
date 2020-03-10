@@ -7,7 +7,7 @@
 ```sh
 docker-compose up -d
 npm install && npm run build
-npm run start
+npm run start:mongodb
 ```
 
 or
@@ -15,7 +15,7 @@ or
 ```sh
 # Use in-memory DB for dev
 npm install && npm run build
-npm run start:dev
+npm run start:inmemory
 ```
 
 ## API
@@ -32,10 +32,12 @@ npm run start:dev
 
 ## Environment variables
 
-| Name                | Description                       |
-| ------------------- | --------------------------------- |
-| PORT                | HTTP Port                         |
-| USE_IN_MEMORY_STORE | Use in-memory store if set to `1` |
+| Name                           | Description                    |
+| ------------------------------ | ------------------------------ |
+| PORT                           | HTTP Port                      |
+| PERSISTENCE_TYPE               | `{INMEMORY|MONGODB|FIRESTORE}` |
+| FIRESTORE_DATABASE_URL         |                                |
+| FIRESTORE_SERVICE_ACCOUNT_JSON |                                |
 
 ## Uses
 

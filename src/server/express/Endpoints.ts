@@ -10,6 +10,7 @@ import ServerEventSender from '../sse/ServerEventSender';
 import TimerMetadataRepository from '../timer/TimerMetadataRepository';
 import TimerService from '../timer/TimerService';
 import Errors from '../Errors';
+import log from '../Logger';
 
 const ID_PART = ':id(\\d+)';
 
@@ -83,7 +84,8 @@ export default function setupEndpoints(
         eventHistoryStore
       );
       res.json(statusJson);
-    } catch {
+    } catch (err) {
+      log.error(err);
       res.status(500).end();
     }
   });

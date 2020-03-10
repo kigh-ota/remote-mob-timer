@@ -1,11 +1,10 @@
 import express, { Express } from 'express';
 import path from 'path';
 import logger from 'morgan';
-import RepositoryFactory from '../event/EventHistoryStoreFactory';
+import RepositoryFactory from '../event/RepositoryFactory';
 import InMemoryTimerRepository from '../timer/InMemoryTimerRepository';
 import setupEndpoints from './Endpoints';
 import UseCases, { TIMER_SEC } from '../UseCases';
-import log from '../Logger';
 import favicon from 'serve-favicon';
 import ExpressServerEventSender from './ExpressServerEventSender';
 import ExpressSseClientPool from './ExpressSseClientPool';
@@ -34,19 +33,11 @@ function initializeExpress(): Express {
   return app;
 }
 
-function useInMemoryStore(): boolean {
-  const ret = process.env.USE_IN_MEMORY_STORE === '1';
-  if (ret) {
-    log.info('Using in-memory store...');
-  }
-  return ret;
-}
-
 async function main(app: Express) {
   const {
     eventHistoryStore,
     timerMetadataRepository,
-  } = await RepositoryFactory.create(useInMemoryStore());
+  } = await RepositoryFactory.create();
   const timerRepository = new InMemoryTimerRepository();
   const serverEventSender = new ExpressServerEventSender();
   const Pool = ExpressSseClientPool;

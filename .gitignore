@@ -4,6 +4,7 @@ public/javascripts/compiled/**/*
 db/
 configdb/
 .DS_Store
+.envrc
 
 # Created by https://www.gitignore.io/api/node
 # Edit at https://www.gitignore.io/?templates=node
