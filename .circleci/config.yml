@@ -27,18 +27,20 @@ jobs:
     steps:
       - checkout:
           path: ~/repo-kotlin
-      # - restore_cache:
-      #     keys:
-      #       - kotlin-v1-deps-{{ checksum "pom.xml" }}
-      #       - kotlin-v1-deps-
+      - restore_cache:
+          keys:
+            - kotlin-v1-deps-{{ checksum "pom.xml" }}
+            - kotlin-v1-deps-
       - run: ./mvnw dependency:go-offline
-      # - save_cache:
-      #     paths:
-      #       - ~/.m2
-      #     key: kotlin-v1-deps-{{ checksum "pom.xml" }}
-      - run: ./mvnw -X -e package
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: kotlin-v1-deps-{{ checksum "pom.xml" }}
+      - run: ./mvnw package
       - store_test_results:
           path: target/surefire-reports
+      - store_artifacts:
+          path: target/remote-mob-timer-*.jar
 
 workflows:
   version: 2
