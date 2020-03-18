@@ -1,21 +1,50 @@
 version: 2
 jobs:
-  build:
+  build-nodejs:
     docker:
       - image: circleci/node:10-browsers
-    working_directory: ~/repo
+    working_directory: ~/repo-nodejs
     steps:
       - checkout
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "package-lock.json" }}
+            - nodejs-v1-deps-{{ checksum "package-lock.json" }}
             # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
+            - nodejs-v1-deps-
       - run: npm install
       - save_cache:
           paths:
             - node_modules
-          key: v1-dependencies-{{ checksum "package-lock.json" }}
+          key: nodejs-v1-deps-{{ checksum "package-lock.json" }}
       - run: npm run lint
       - run: npm run build
       - run: npm test
+
+  build-kotlin:
+    docker:
+      - image: circleci/openjdk:11-jdk-stretch
+    working_directory: ~/repo-kotlin/src-kotlin
+    steps:
+      - checkout:
+          path: ~/repo-kotlin
+      - restore_cache:
+          keys:
+            - kotlin-v1-deps-{{ checksum "pom.xml" }}
+            - kotlin-v1-deps-
+      - run: ./mvnw dependency:go-offline
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: kotlin-v1-deps-{{ checksum "pom.xml" }}
+      - run: ./mvnw package
+      - store_test_results:
+          path: target/surefire-reports
+
+workflows:
+  version: 2
+  nodejs:
+    jobs:
+      - build-nodejs
+  kotlin:
+    jobs:
+      - build-kotlin
