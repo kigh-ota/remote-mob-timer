@@ -1,6 +1,7 @@
 package kigh.rmt.timer
 
 import org.springframework.stereotype.Component
+import java.lang.IllegalArgumentException
 import java.util.*
 
 @Component
@@ -19,7 +20,7 @@ class InMemoryTimerRepository : TimerRepository {
     }
 
     override fun get(id: TimerId): Timer {
-        TODO()
+        return map.get(id) ?: throw IllegalArgumentException()
     }
 
     override fun listMetadata(): Collection<TimerMetadata> {
