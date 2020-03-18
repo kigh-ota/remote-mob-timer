@@ -23,6 +23,6 @@ class InMemoryTimerRepository : TimerRepository {
     }
 
     override fun listMetadata(): Collection<TimerMetadata> {
-        TODO()
+        return map.values.map { TimerMetadata(it.id, it.name)}
     }
 }

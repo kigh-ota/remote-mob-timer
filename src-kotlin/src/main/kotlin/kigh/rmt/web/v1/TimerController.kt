@@ -1,12 +1,9 @@
-package kigh.rmt.v1
+package kigh.rmt.web.v1
 
 import kigh.rmt.timer.TimerId
 import kigh.rmt.timer.TimerMetadata
 import kigh.rmt.timer.TimerRepository
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 class TimerController(private val timerRepository: TimerRepository) {
@@ -17,4 +14,8 @@ class TimerController(private val timerRepository: TimerRepository) {
         timerRepository.add(metadata)
     }
 
+    @GetMapping(path = ["/v1/timers"])
+    fun getTimers(): Collection<TimerMetadata> {
+        return timerRepository.listMetadata()
+    }
 }
