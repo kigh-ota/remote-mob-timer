@@ -15,7 +15,10 @@ class TimerController(private val timerRepository: TimerRepository) {
     }
 
     @GetMapping(path = ["/v1/timers"])
-    fun getTimers(): Collection<TimerMetadata> {
-        return timerRepository.listMetadata()
+    fun getTimers(): GetTimersResponse {
+        return timerRepository.listMetadata().map { GetTimersResponse1(it.id.value(), it.name) }
     }
 }
+
+data class GetTimersResponse1(val id: String, val name: String)
+private typealias GetTimersResponse = Collection<GetTimersResponse1>

@@ -4,7 +4,8 @@ import java.util.*
 
 class TimerId(id: String) {
     private val id: String
-        get() = field
+
+    fun value() = id
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

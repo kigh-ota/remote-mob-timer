@@ -1,3 +1,3 @@
 package kigh.rmt.timer
 
-class TimerMetadata(val id: TimerId, val name: String)
+data class TimerMetadata(val id: TimerId, val name: String)
