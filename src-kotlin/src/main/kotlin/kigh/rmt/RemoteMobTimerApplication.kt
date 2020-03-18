@@ -16,8 +16,11 @@ import javax.annotation.PostConstruct
 
 
 // TODO
-// - Serve static contents
-// -
+// - POST /v1/timer/{id}/toggle
+// - POST /v1/timer/{id}/reset
+// - POST /v1/timer/{id}/good
+// - PUT /v1/timer/{id}/name
+// - PUT /v1/timer/{id}
 @SpringBootApplication
 @RestController
 @EnableScheduling
