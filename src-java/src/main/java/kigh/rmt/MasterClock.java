@@ -11,12 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class TimerClock {
-    private static final Logger log = LoggerFactory.getLogger(TimerClock.class);
+public class MasterClock {
+    private static final Logger log = LoggerFactory.getLogger(MasterClock.class);
 
     private final SseEmitterPool sseEmitterPool;
 
-    public TimerClock(SseEmitterPool sseEmitterPool) {
+    public MasterClock(SseEmitterPool sseEmitterPool) {
         this.sseEmitterPool = sseEmitterPool;
     }
 
