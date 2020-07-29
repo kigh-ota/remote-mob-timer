@@ -3,6 +3,7 @@ import EventHistoryStore from './EventHistoryStore';
 import { TimerId } from '../../common/TimerId';
 
 const COLLECTION_NAME = 'events';
+const CLIENT_COLLECTION_NAME = 'clientEvents';
 
 const eventTypesExceptClient = Object.entries(EventType)
   .map(a => a[1])
@@ -13,13 +14,19 @@ const eventTypesExceptClient = Object.entries(EventType)
 
 export default class FirestoreEventHistoryStore implements EventHistoryStore {
   private readonly colRef: FirebaseFirestore.CollectionReference;
+  private readonly clientColRef: FirebaseFirestore.CollectionReference;
 
   constructor(private readonly db: FirebaseFirestore.Firestore) {
     this.colRef = db.collection(COLLECTION_NAME);
+    this.clientColRef = db.collection(CLIENT_COLLECTION_NAME);
   }
 
   public async add(event: IEvent) {
-    await this.colRef.doc().set(event);
+    if (eventTypesExceptClient.includes(event.type)) {
+      await this.colRef.doc().set(event);
+    } else {
+      await this.clientColRef.doc().set(event);
+    }
   }
 
   // Not guaranteed to return `limit` events, since Firestore doesn't support OR nor NOT filters.
