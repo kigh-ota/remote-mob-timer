@@ -1,6 +1,8 @@
 body {
   padding: 50px;
-  font: 14px 'Lucida Grande', Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  font-family: 'Noto Sans JP, sans-serif';
+  letter-spacing: 0.05em;
 }
 
 h2 {

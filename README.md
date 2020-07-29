@@ -46,6 +46,7 @@ npm run start:inmemory
 - [Docker](https://www.docker.com/)
 - [ESLint](https://eslint.org/)
 - [Express](https://expressjs.com/)
+- [Google Fonts + Japanese](https://googlefonts.github.io/japanese/)
 - [Heroku](https://heroku.com)
 - [Mocha](https://mochajs.org/)
 - [MongoDB](https://www.mongodb.com/)
